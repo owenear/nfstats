@@ -1,0 +1,49 @@
+{% extends 'mainapp/base_settings.html' %}
+
+
+{% block content %}
+<div class="container">
+<div class="row mt-3 justify-content-center">
+		<div class="card col-10">
+			<div class="card-body">
+				<h5 class="card-title text-center mb-0">Настройки системы</h5>
+					<div class="row mt-5">
+						<div class="col"><b>Log Dir:</b></div>
+						<div class="col"><input  id="log_dir" type="text" class="form-control" value=""></div>
+					</div>
+					<div class="row mt-2">
+						<div class="col"><b>Log File Size:</b></div>
+						<div class="col"><input  id="log_size" type="text" class="form-control" value=""></div>
+					</div>
+					<div class="row mt-2">
+						<div class="col"><b>FlowTools Bin Dir:</b></div>
+						<div class="col"><input  id="flowtools_bin" type="text" class="form-control" value=""></div>
+					</div>
+					<div class="row mt-2">
+						<div class="col"><b>SNMP tools Bin Dir:</b></div>
+						<div class="col"><input  id="snmp_bin" type="text" class="form-control" value=""></div>
+					</div>
+					<div class="row mt-2">
+						<div class="col"><b>SNMP Version:</b></div>
+						<div class="col"><input  id="snmp_ver" type="text" class="form-control" value=""></div>
+					</div>
+					<div class="row mt-2">
+						<div class="col"><b>SNMP Community:</b></div>
+						<div class="col"><input  id="snmp_com" type="text" class="form-control" value=""></div>
+					</div>
+					<div class="row mt-4">
+						<div class="col-12 text-right">
+							<button type="button" class="btn btn btn-outline-success " onclick=""> Apply </button>
+						</div>
+					</div>
+			</div>
+		</div>
+</div>
+
+
+<script>
+
+
+
+</script>
+{% endblock %}

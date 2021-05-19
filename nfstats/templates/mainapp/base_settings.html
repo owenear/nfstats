@@ -1,0 +1,21 @@
+{% extends 'mainapp/base.html' %}
+
+{% block menu %}
+	<ul class="left-menu list-unstyled ml-2">
+		<!--<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_system' %}active-white{% endif %}" href="{% url 'settings_system' %}"><span class="menu-icons" data-feather="list"></span>System</a></li>-->
+		<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_hosts' %}active-white{% endif %}" href="{% url 'settings_hosts' %}"><span class="menu-icons" data-feather="hard-drive"></span>Hosts</a></li>
+		<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_interfaces' %}active-white{% endif %}" href="{% url 'settings_interfaces' %}"><span class="menu-icons" data-feather="link-2"></span>Interfaces</a></li>
+	</ul>
+{% endblock %}
+
+{% block navbar %}
+	<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top justify-content-end fixed-height-54">
+		<div id="loader" class="mr-3"></div>
+	</nav>
+{% endblock %}
+
+{% block content %}
+
+
+{% endblock %}
+

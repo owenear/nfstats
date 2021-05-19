@@ -1,0 +1,198 @@
+{% extends 'mainapp/base_settings.html' %}
+
+
+{% block content %}
+<div class="container">
+<div class="row mt-3 justify-content-center">
+		<div class="card col-10">
+			<div class="card-body text-center">
+				<h5 class="card-title text-center mb-0">Host list</h5>
+				
+				<table class="table mt-4">
+				  <thead class="thead-dark">
+					<tr>
+					  <th id="" class="" scope="col">#</th>
+					  <th id="" class="" scope="col">Name</th>
+					  <th id="" class="" scope="col">Host</span></th>
+					  <th id="" class="" scope="col">Description</span></th>
+					  <th id="" class="" scope="col">Path to flow data</span></th>
+					  <th scope="col"></th>
+					  <th scope="col"></th>
+					</tr>
+				  </thead>
+				  <tbody id="table_hosts">
+					{% for host in hosts %}
+					<tr id="{{ host.id }}">
+					    <td class=''>{{ forloop.counter }}</td> 
+						<td class=''>{{ host.name }}</td>
+						<td class=''>{{ host.host }}</td>
+						<td class=''>{{ host.description }}</td>
+						<td class=''>{{ host.flow_path }}</td>
+						<td class=''><span class='edit'></span></td>
+						<td class=''><span class='trash'></span></td>
+					</tr>
+					{% endfor %}
+				  </tbody>
+				</table>
+				
+				<div class="row mt-3">
+					<div class="col-12 text-right">
+						<button id="add_host_btn" type="button" class="btn btn-outline-dark" ><span class="add" data-feather="plus-circle"></span> Add</button>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+</div>
+
+<div class="modal fade" id="host_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		  <div class="input-group mb-3">
+ 				<div class="input-group-prepend">
+    			<span class="input-group-text">Name</span>
+  				</div>
+  				<input id="name" type="text" class="form-control" value="" >
+		  </div>
+		  
+		  <div class="input-group mb-3">
+ 				<div class="input-group-prepend">
+    			<span class="input-group-text">Host</span>
+  				</div>
+  				<input  id="host" type="text" class="form-control" value="" >
+		  </div>
+		  
+		  <div class="input-group mb-3">
+ 				<div class="input-group-prepend">
+    			<span class="input-group-text">Description</span>
+  				</div>
+  				<input  id="description" type="text" class="form-control" value="">
+		  </div>
+		  
+		   <div class="input-group mb-3">
+ 				<div class="input-group-prepend">
+    			<span class="input-group-text">Path to flow data</span>
+  				</div>
+  				<input  id="flow_path" type="text" class="form-control" value="" >
+		  </div>
+		</form>    
+      </div>
+      <div class="modal-footer">
+        <button id="modal_add_edit_btn" type="button" class="btn btn-success">OK</button>
+        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+      </div>
+     </div>
+  </div>
+</div>
+<div id="dynamic-alert-danger" class="alert alert-danger mt-2" role="alert"></div>
+<script>
+$(function(e){
+	$('body').click(function(e){
+		if ($('#dynamic-alert-danger').css('display') == 'block') $('#dynamic-alert-danger').hide(100); 
+	})
+});
+
+
+
+function validateForm() {
+	var filled = true;
+	if (!($('#name').val())) { $('#name').addClass('is-invalid'); filled = false; }
+	else $('#name').removeClass('is-invalid');
+	if (!($('#host').val())) { $('#host').addClass('is-invalid'); filled = false; }
+	else $('#host').removeClass('is-invalid');
+	if (!($('#flow_path').val())) { $('#flow_path').addClass('is-invalid'); filled = false; }
+	else $('#flow_path').removeClass('is-invalid');
+	return filled;
+}
+
+function addEditHost(url, host_id){
+	if (validateForm()) {
+	$('#host_modal').modal('hide');
+	$.ajax({
+		  type: 'post',
+		  url: url,
+		  dataType: "json",
+		  data: {
+			'host_id' : host_id,
+			'name' : $('#name').val(),
+			'host' : $('#host').val(),
+			'description' : $('#description').val(),
+			'flow_path' : $('#flow_path').val(),
+		  },
+			statusCode: { 
+				500 :
+					function(e) {
+						$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
+						$('#dynamic-alert-danger').show();
+					},
+				200 : 
+					function(e) {
+						location.reload();
+					}
+			},
+		  async: true
+	})
+	}
+}
+
+$('.edit').click(function(){
+	$('#modalLabel').html('Edit host');
+	$('#name').val(this.parentElement.parentElement.cells[1].innerHTML);
+	$('#host').val(this.parentElement.parentElement.cells[2].innerHTML);
+	$('#description').val(this.parentElement.parentElement.cells[3].innerHTML);	
+	$('#flow_path').val(this.parentElement.parentElement.cells[4].innerHTML);
+	var host_id = this.parentElement.parentElement.id;
+	$('#modal_add_edit_btn').attr('onclick', "addEditHost('update_host','"+ host_id + "')")
+	$('#host_modal').modal('show');
+})
+
+
+$('.trash').click(function(){
+	var host_id = this.parentElement.parentElement.id;
+	if (confirm("Are you sure to delete this host from database? It will delete all relevant interfaces")) {
+		$.ajax({
+			  type: 'post',
+			  url: 'delete_host',
+			  dataType: "json",
+			  data: {
+				'host_id' : host_id
+			  },
+				statusCode: { 
+					500 :
+						function(e) {
+							$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
+							$('#dynamic-alert-danger').show();
+						},
+					200 : 
+						function(e) {
+							location.reload();
+						}
+				},
+			async: true
+		})
+	}
+})
+
+
+$('#add_host_btn').click(function(){
+	$('#modalLabel').html('Add host');
+	$('#name').val("");
+	$('#host').val("");
+	$('#description').val("");	
+	$('#flow_path').val("");
+	$('#modal_add_edit_btn').attr('onclick', "addEditHost('add_host')")
+	$('#host_modal').modal('show');
+})
+
+
+
+
+</script>
+{% endblock %}

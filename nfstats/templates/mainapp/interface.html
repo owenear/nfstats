@@ -1,0 +1,89 @@
+{% extends 'mainapp/base_charts.html' %}
+
+{% block page-controls %}
+<div class="input-group text-input-group ml-2">
+	<div class="input-group-prepend">
+		<label class="input-group-text" for="interface-input">Interface:</label>
+	</div>
+	<input type="text" class="form-control" id="interface-input" name="interface" value="" placeholder="SNMPid" required>
+</div>
+<button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid mb-3">
+<div class="row mt-3 justify-content-center">
+		<div class="card">
+			<div class="card-body text-center">
+				<div class="col text-center mt-2" id='chart'>Type not sampling interface SNMP ID and press 'Show' button</div>
+			</div>
+			<div class="card-footer text-muted text-center charts-title">{{ direction }} traffic</div>
+		</div>
+</div>
+<div id="dynamic-alert-danger" class="alert alert-danger mt-2" role="alert"></div>
+<script>
+chartOptions = { 'width': 1000, 'height': 500 }
+google.charts.load('current', {'packages':['corechart', 'sankey']});
+
+$(function(e){
+	$('body').click(function(e){
+		if ($('#dynamic-alert-danger').css('display') == 'block') $('#dynamic-alert-danger').hide(100); 
+	})
+});
+
+
+
+
+function getChartsData() {
+	var host = $('#host-select').val();
+	var date = $('#date-select').val();
+	var direction = $('#direction-select').val();
+	var intrf = $('#interface-input').val();
+	$('.charts-title').text(direction + " traffic")
+	$.ajax({
+			  type: 'post',
+			  url: 'get_interface_chart_data',
+			  dataType: "json",
+			  data: {
+				'host' : host,
+				'date' : date,
+				'direction' : direction,
+				'interface' : intrf
+			  },
+			  success: function(data){
+				  drawCharts(data);
+			  },
+			  statusCode: { 500 :
+				function(e) {
+				  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
+				  $('#dynamic-alert-danger').show();
+				}
+			  },
+			  async: true
+	})
+}
+
+
+function drawCharts(chartsData) {
+	var data = google.visualization.arrayToDataTable(chartsData);
+	var chart = new google.visualization.Sankey(document.getElementById('chart'));
+	var rowsCount = data.getNumberOfRows();
+	chartOptions.height = rowsCount*15;
+	if (chartOptions.height < 500) chartOptions.height = 500;
+	chart.draw(data, chartOptions);
+}
+
+
+$('#host-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
+})
+
+$('#direction-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
+})
+
+</script>
+
+{% endblock %}

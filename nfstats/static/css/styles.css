@@ -1,0 +1,153 @@
+.wrapper {
+    display: flex;
+    align-items: stretch;
+	padding: 0 0 0 0;
+}
+
+#sidebar {
+	padding-left: 20px;
+	padding-top: 20px;
+	background-color: #313A46;
+    min-width: 250px;
+    max-width: 250px;
+    min-height: 100vh;
+	font-family: "Arial", sans-serif;
+	color: #E9EEF2;
+}
+
+.navbar-brand{
+	float: left;
+	padding: 5px;
+    width: 70px;
+}
+
+.left-menu {
+	margin: 15vh 0 0 0;	
+	font-size: 1em;
+}
+
+
+li{
+	cursor: pointer;	
+}
+
+.left-menu > li > a:hover, .left-menu > li > a:visited, .left-menu > li > a:link, .left-menu > li > a:active
+{
+    text-decoration: none;
+	color: #8391a2;
+}
+
+.left-menu > li > a:hover, .left-menu > li > a:active {
+	color: #E9EEF2;	
+}
+
+.active-white {
+color: #E9EEF2!important;	
+}
+
+.active-blue {
+color: blue!important;	
+}
+
+#content {
+	background-color: #E6E8EC;
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;	
+}
+
+.nodecorate .nodecorate:hover, .nodecorate:visited, .nodecorate:link , .nodecorate:active {
+	text-decoration: none;
+	color: black;
+}
+
+
+.fixed-width-250{
+    width: 250px;
+}
+
+.fixed-width-200{
+    width: 200px;
+}
+
+.fixed-height-54{
+    height: 54px;
+}
+
+.fl{
+	float:left;
+}
+
+
+
+.trash, .edit, .settings {
+cursor: pointer;
+-moz-user-select: none; /* Mozilla Firefox */
+-ms-user-select: none; /* Internet Explorer (не поддерживается) */
+-o-user-select: none; /* Opera Presto (не поддерживается) */
+-webkit-user-select: none; /* Google Chrome, Opera Next, Safari */
+}
+
+.trash {
+padding-left:16px;
+background:url(/static/img/trash.svg) top left;
+background-repeat     : no-repeat;
+background-size       : cover;
+display: inline-block;
+height: 16px;
+width: 16x;
+}
+
+.edit {
+padding-left:16px;
+background:url(/static/img/edit.svg) top left;
+background-repeat     : no-repeat;
+background-size       : cover;
+display: inline-block;
+height: 16px;
+width: 16x;
+}
+
+.add {
+height: 16px;
+width: 16x;
+}
+
+.menu-icons {
+height: 16px;
+width: 16x;
+margin-bottom: 3px;
+margin-right: 3px;
+}
+
+.settings {
+height: 32px;
+width: 32x;
+color: #8391a2;
+}
+
+.pie-chart {
+height: 24px;
+width: 24x;
+color: #8391a2;
+}
+
+#loader {
+    display: none;
+    width: 32px;
+    height: 32px;
+    background-image: url(/static/img/loading.gif);
+    background: url(/static/img/loading.gif) no-repeat;
+    z-index: 999;
+}
+
+.alert{
+  display: none;
+  position: fixed;
+  top: 80px;
+  left: 40%;
+}
+
+.fixed-height-600 {
+	max-height: 600px;
+	overflow-y: scroll;	
+}

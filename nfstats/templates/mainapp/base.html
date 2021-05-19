@@ -1,0 +1,71 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" >
+	<link rel="stylesheet" href="{% static 'css/styles.css' %}" >
+	<link rel="stylesheet" href="{% static 'css/datepicker.min.css' %}" >
+
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+	<script src="{% static 'js/bootstrap.min.js' %}"></script>
+	<script src="{% static 'js/popper.min.js' %}"></script>
+	<script src="{% static 'js/datepicker.min.js' %}"></script>
+	<script src="{% static 'js/sidebar.js' %}"></script>
+
+
+    <title>NfStat</title>
+  </head>
+  <body>
+	<div class="wrapper">
+		<!-- Sidebar -->
+		<nav id="sidebar">
+			<img alt="nfstat" class="navbar-brand" src="{% static 'img/logo.png' %}" />
+			<a class="nodecorate active-white" href="{% url 'common' %}" target="">
+				<div class="">
+					<h2>Netflow	</h2>
+					<h6>Traffic statistic</h6>
+				</div>
+			</a>
+			{% block menu %}
+
+			{% endblock %}
+		</nav>
+
+		<!-- Page Content -->
+		<div id="content" class="container-fluid">
+			{% block navbar %}
+
+			{% endblock %}
+			
+			{% block content %}
+			
+			{% endblock %}
+		</div>
+
+	</div>
+  </body>
+
+	<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace()
+	  jQuery.ajaxSetup({
+		  beforeSend: function() {
+			 $('#loader').show();
+		  },
+		  complete: function(){
+			 $('#loader').hide();
+		  },
+		  success: function() {}
+		});
+		$(".key-active").keyup(function(e){ 
+			if(e.key==="Enter") getChartsData();
+		})
+    </script>
+</html>
+

@@ -1,0 +1,263 @@
+{% extends 'mainapp/base_charts.html' %}
+
+{% block page-controls %}
+<div class="input-group ml-2">
+	<div class="input-group-prepend">
+		<label class="input-group-text" for="direction-select">List</label>
+	</div>
+	<select class="custom-select" id="ip-type-select">
+		<option value="ip-destination-address" {% if ip_type == 'ip-destination-address' %} selected {% endif %} >Destination IP</input>
+		<option value="ip-source-address" {% if ip_type == 'ip-source-address' %} selected {% endif %} >Source IP</input>
+	</select>
+</div>
+<div class="input-group ml-2 text-input-group">
+	<div class="input-group-prepend">
+		<label class="input-group-text" for="interface-input">Count:</label>
+	</div>
+	<input type="text" class="form-control" id="count-input" name="count" value="15" required>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid mb-3">
+<div class="row mt-3 justify-content-center">
+		<div class="card">
+			<div class="card-body text-center">
+				<div class="key-active form-inline">
+					<div class="input-group ml-2 text-input-group">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="interface-input">Interface:</label>
+						</div>
+						<input type="text" class="form-control" id="interface-input" name="interface" value="" placeholder="SNMPid" required>
+					</div>
+					<div class="input-group ml-2 text-input-group">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="srcas-input">sAS:</label>
+						</div>
+						<input type="text" class="form-control" id="srcas-input" name="src-as" value="" placeholder="AS number" required>
+					</div>
+					<div class="input-group ml-2 text-input-group">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="dstas-input">dAS:</label>
+						</div>
+						<input type="text" class="form-control" id="dstas-input" name="dst-as" value="" placeholder="AS number" required>
+					</div>
+					<div class="input-group ml-2 text-input-group">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="srcport-input">sPort:</label>
+						</div>
+						<input type="text" class="form-control" id="srcport-input" name="sport" value="" placeholder="Port number" required>
+					</div>
+					<div class="input-group ml-2 text-input-group">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="dstport-input">dPort:</label>
+						</div>
+						<input type="text" class="form-control" id="dstport-input" name="dport" value="" placeholder="Port number" required>
+					</div>
+					<button type="button" class="btn btn-outline-success ml-2 mr-2" onclick="getChartsData()">Show</button>
+				</div>
+							
+				<h5 class="card-title text-center mb-0"></h5>
+				<!-- <div class="text-muted text-center mt-0">{{ interface.description }}</div> -->
+				<div class="col text-center mt-5" id='chart'></div>
+			
+			</div>
+			<div class="card-footer text-muted text-center charts-title">{{ direction }} traffic</div>
+		</div>
+</div>
+<div id="dynamic-alert-success" class="alert alert-success mt-2" role="alert"></div>
+<div id="dynamic-alert-danger" class="alert alert-danger mt-2" role="alert"></div>
+
+<div class="modal fade" id="ip_traffic_modal" tabindex="-1" role="dialog" aria-labelledby="ip_traffic_modal_label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ip_traffic_modal_label">Sampling Traffic Flows</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+			<table class="table">
+				  <thead class="thead-dark">
+					<tr>
+					  <th scope="col">Start</th>
+					  <th scope="col">End</th>
+					  <th scope="col">sIF</th>
+					  <th scope="col">sIP</th>
+					  <th scope="col">sPort</th>
+					  <th scope="col">dIF</th>
+					  <th scope="col">dIP</th>
+					  <th scope="col">dPort</th>
+					  <th scope="col">Protocol</th>
+					  <th scope="col">Flows</th>
+					  <th scope="col">Packets</th>
+					  <th scope="col">Octets</th>
+					</tr>
+				  </thead>
+				  <tbody id="ip_traffic_modal_content">
+				
+				  </tbody>
+				</table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+      </div>
+     </div>
+  </div>
+</div>
+
+
+<script>
+chartOptions = { tooltip: {trigger: 'none' },
+				'height': 600,
+				'fontSize': 14,
+				bar: { groupWidth: "70%" },
+				chartArea: { height: '95%', top: '0%', width: '70%'},
+				'sliceVisibilityThreshold': 0.02                
+			   };
+
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(getChartsData);
+
+// Всплывающее окошко
+
+
+$(function(e){
+	$('body').click(function(e){
+	if ($('#dynamic-alert-danger').css('display') == 'block') $('#dynamic-alert-danger').hide(100); 
+	if ($('#dynamic-alert-success').css('display') == 'block') $('#dynamic-alert-success').hide(100); 
+	else {
+		var x = e.clientX + 50 + 'px';
+		var y = e.clientY - 80 + 'px';
+		$('#dynamic-alert-success').css('top', y);
+		$('#dynamic-alert-success').css('left', x);
+	}
+	});
+});
+
+
+function getChartsData() {
+	var host = $('#host-select').val();
+	var date = $('#date-select').val();
+	var src_as = $('#srcas-input').val();
+	var dst_as = $('#dstas-input').val();
+	var src_port = $('#srcport-input').val();
+	var dst_port = $('#dstport-input').val();
+	var direction = $('#direction-select').val();
+	var ip_type = $('#ip-type-select').val();
+	var intrf = $('#interface-input').val();
+	var count = $('#count-input').val();
+	$('.charts-title').text(direction + " traffic")
+	$.ajax({
+		  type: 'post',
+		  url: 'get_ip_chart_data',
+		  dataType: "json",
+		  data: {
+			'host' : host,
+			'date' : date,
+			'direction' : direction,
+			'ip_type' : ip_type,
+			'src_as' : src_as,
+			'dst_as' : dst_as,
+			'src_port':src_port,
+			'dst_port':dst_port,
+			'interface' : intrf,
+			'count': count
+		  },
+		  success: function(data){
+			  drawCharts(data);
+		  },
+		  statusCode: { 500 :
+			function(e) {
+			  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
+			  $('#dynamic-alert-danger').show();
+			}
+		  },
+		  async: true
+	})
+}
+
+
+function showIpTraffic(ip){
+	var host = $('#host-select').val();
+	var date = $('#date-select').val();
+	var ip_type = $('#ip-type-select').val();
+	$.ajax({
+		  type: 'post',
+		  url: 'get_ip_traffic_data',
+		  dataType: "json",
+		  data: {
+			'host' : host,
+			'date' : date,
+			'ip_type' : ip_type,
+			'ip_addr' : ip
+		  },
+		  async: true,
+		  success: function(data) {
+				$('#ip_traffic_modal_content').html("");
+				data.forEach(row => {
+					$('#ip_traffic_modal_content').append('<tr>')
+					row.forEach(element => $('#ip_traffic_modal_content').append('<td>' + element + '</td>'))
+					$('#ip_traffic_modal_content').append('</tr>')
+				})
+				$('#ip_traffic_modal').modal('show');
+		  },
+		  statusCode: { 500 :
+			function(e) {
+			  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
+			  $('#dynamic-alert-danger').show();
+			}
+		  },
+	})
+	$('#ip_traffic_modal').modal('show');
+}
+
+
+function drawCharts(chartsData) {
+	var data = google.visualization.arrayToDataTable(chartsData);
+	var chart = new google.visualization.BarChart(document.getElementById('chart'));
+	var rowsCount = data.getNumberOfRows();
+	chartOptions.height = rowsCount*40;
+	chart.draw(data, chartOptions);
+	google.visualization.events.addListener(chart, 'select', selectaction);
+	function selectaction(e) {
+			if (chart.getSelection()[0]) {
+				var ip = data.getValue(chart.getSelection()[0].row, 0);
+				var mbps = data.getValue(chart.getSelection()[0].row, 1);
+				var msg = ip + ' <b>(' + mbps + ' Mbps)</b>'
+				
+				$('#dynamic-alert-success').html('<button type="button" class="btn btn-secondary btn-sm mb-2" onclick="showIpTraffic(\''+ ip +'\')">Show Traffic</button><br>');
+				$('#dynamic-alert-success').append(msg);
+				$('#dynamic-alert-success').show();
+				$.ajax({
+					type: "get",
+					url: "https://stat.ripe.net/data/whois/data.json",
+					data:  {'resource': ip },
+							dataType: "json",
+					success: function(ripeData){
+							   var netname = ripeData.data.records[0][1]['value'] + ' ' + ripeData.data.records[0][2]['value'];
+							   $('#dynamic-alert-success').append('<br>NetName: ' + netname);
+				}});
+				
+			}
+	};
+}
+
+$('#host-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&ip_type=" + $('#ip-type-select').val();
+})
+
+$('#direction-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&ip_type=" + $('#ip-type-select').val();
+})
+
+$('#ip-type-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&ip_type=" + $('#ip-type-select').val();
+})
+
+</script>
+
+{% endblock %}

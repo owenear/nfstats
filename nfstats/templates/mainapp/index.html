@@ -1,0 +1,176 @@
+{% extends 'mainapp/base_charts.html' %}
+
+
+{% block page-controls %}
+	<button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
+	
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mb-3">
+{% for interface in interfaces %}
+<div class="row mt-3 justify-content-center">
+	<div class="mr-2 ml-2">
+		<div class="card">
+			<div class="card-body text-center">
+				<h5 class="card-title text-center mb-0">{{ interface.description }}</h5>
+				<small class="charts-title">{{ interface.name }}</small>
+				<!-- <div class="text-muted text-center mt-0">{{ interface.description }}</div> -->
+				<div class="col text-center mt-2" id='{{ interface.snmpid }}_src'>{{ interface.name }}</div>
+			</div>
+			<div class="card-footer text-muted text-center">Source AS</div>
+		</div>
+	</div>
+	<div class="ml-2 mr-2">
+		<div class="card">
+			<div class="card-body text-center">
+				<h5 class="card-title text-center mb-0">{{ interface.description }}</h5>
+				<small class="charts-title">{{ interface.name }}</small>
+				<!-- <div class="text-muted text-center mt-0">{{ interface.description }}</div> -->
+				<div class="col text-center mt-2" id='{{ interface.snmpid }}_dst'>{{ interface.name }}</div>
+			</div>
+			<div class="card-footer text-muted text-center">Destination AS</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+</div>
+<div id="dynamic-alert-success" class="alert alert-success mt-2" role="alert"></div>
+<div id="dynamic-alert-danger" class="alert alert-danger mt-2" role="alert"></div>
+<script>
+pieChartOptionsSource = {	tooltip: {trigger: 'none'},
+						'width': 590,
+						'colors' : ['#5f937d'],
+						'height': 350,
+						chartArea: { height: '200%', top: '0%', left:'10%', width: '200%'},
+						'sliceVisibilityThreshold': 0.005,
+						'legendColor' : ['222']
+						}
+
+pieChartOptionsSourceDest = { tooltip: {trigger: 'none'},
+							'width': 590,
+							'colors' : ['#5f89a9'],
+							'height': 350,
+							chartArea: { height: '200%', top: '0%', left:'10%', width: '200%'},
+							'sliceVisibilityThreshold': 0.005,
+							'legendColor' : ['222']
+							}
+
+
+google.charts.load('current', {'packages':['corechart', 'sankey']});
+google.charts.setOnLoadCallback(getChartsData);
+
+
+$(function(e){
+	$('body').click(function(e){
+	if ($('#dynamic-alert-danger').css('display') == 'block') { $('#dynamic-alert-danger').hide(100); $('#dynamic-alert-danger').html(''); }
+	if ($('#dynamic-alert-success').css('display') == 'block') { $('#dynamic-alert-success').hide(100); $('#dynamic-alert-success').html(''); }
+	else {
+		var x = e.clientX + 50 + 'px';
+		var y = e.clientY - 80 + 'px';
+		$('#dynamic-alert-success').css('top', y);
+		$('#dynamic-alert-success').css('left', x);
+	}
+	});
+});
+
+function getChartsData() {
+	var host = $('#host-select').val();
+	var date = $('#date-select').val();
+	var direction = $('#direction-select').val();
+	$.ajax({
+			  type: 'post',
+			  url: 'get_pie_chart_data',
+			  dataType: "json",
+			  data: {
+				'host' : host,
+				'date' : date,
+				'direction' : direction,
+			  },
+			  success: function(data){		
+				  drawCharts(data);
+			  },
+			  statusCode: { 500 :
+				function(e) {
+				  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
+				  $('#dynamic-alert-danger').show();
+				}
+			  },
+			  async: true
+	})
+}
+
+function addRipeData(as) {
+	$.ajax({
+		type: "get",
+		url: "https://stat.ripe.net/data/whois/data.json",
+		data:  {'resource': as },
+				dataType: "json",
+		success: function(ripeData){
+				   var netname = ripeData.data.records[0][1]['value'] + ' ' + ripeData.data.records[0][2]['value'];
+				   $('#dynamic-alert-success').append('<br>ASName: ' + netname);
+	}});
+};
+
+
+
+{% for interface in interfaces %}
+function chart{{interface.snmpid}}Source(chartsData){
+	var data = google.visualization.arrayToDataTable(chartsData['{{interface.snmpid}}']['source']);
+	var chart = new google.visualization.PieChart(document.getElementById('{{ interface.snmpid }}_src'));
+	chart.draw(data, pieChartOptionsSource);
+	google.visualization.events.addListener(chart, 'select', selectaction);
+	function selectaction(e) { 
+		if (chart.getSelection()[0]) {
+				var as = data.getValue(chart.getSelection()[0].row, 0);
+				var mbps = data.getValue(chart.getSelection()[0].row, 1);
+				var msg = 'AS' + as + ' <b>(' + mbps + ' Mbps)</b>'
+				$('#dynamic-alert-success').html(msg);
+				$('#dynamic-alert-success').show();
+				addRipeData(as);
+		}
+	}
+}
+function chart{{interface.snmpid}}Dest(chartsData){
+	var data = google.visualization.arrayToDataTable(chartsData['{{interface.snmpid}}']['destination']);
+	var chart = new google.visualization.PieChart(document.getElementById('{{ interface.snmpid }}_dst'));
+	chart.draw(data, pieChartOptionsSourceDest);
+	google.visualization.events.addListener(chart, 'select', selectaction);
+	function selectaction(e) { 
+		if (chart.getSelection()[0]) {
+			var as = data.getValue(chart.getSelection()[0].row, 0);
+			var mbps = data.getValue(chart.getSelection()[0].row, 1);
+			var msg = 'AS' + as + ' <b>(' + mbps + ' Mbps)</b>'
+			$('#dynamic-alert-success').html(msg);
+			$('#dynamic-alert-success').show();
+			addRipeData(as);
+		}
+	}
+}
+{% endfor %}
+
+function drawCharts(chartsData) {
+	{% for interface in interfaces %}
+		if (!chartsData['{{interface.snmpid}}']['error']){ 
+			chart{{interface.snmpid}}Source(chartsData)
+			chart{{interface.snmpid}}Dest(chartsData)
+		} else {
+			console.log(chartsData['{{interface.snmpid}}']['error'])
+			$('#dynamic-alert-danger').append(chartsData['{{interface.snmpid}}']['error'] + "<br>");
+			$('#dynamic-alert-danger').show();
+		}
+	{% endfor %}
+}
+
+$('#host-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
+})
+
+$('#direction-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
+})
+
+</script>
+
+{% endblock %}

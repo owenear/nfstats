@@ -1,0 +1,84 @@
+{% extends 'mainapp/base.html' %}
+
+{% block page-controls %}
+<div class="input-group interface-input-group ml-2">
+	<div class="input-group-prepend">
+		<label class="input-group-text" for="srcas-input">Source AS:</label>
+	</div>
+	<input type="text" class="form-control" id="srcas-input" name="src_as" value="" placeholder="AS number" required>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid mb-3">
+<div class="row mt-3 justify-content-center">
+		<div class="card">
+			<div class="card-body text-center">
+				<h5 class="card-title text-center mb-0"></h5>
+				<!-- <div class="text-muted text-center mt-0">{{ interface.description }}</div> -->
+				<div class="col text-center mt-2" id='chart_srsas'></div>
+			</div>
+			<div class="card-footer text-muted text-center charts-title">input traffic</div>
+		</div>
+</div>
+
+<script>
+var host = $('#host-select').val();
+var date = $('#date-select').val();
+var direction = $('#direction-select').val();
+var src_as = $('#srcas-input').val();
+
+chartOptions = { 'width': 1000, 'height': 1000 }
+
+google.charts.load('current', {'packages':['corechart', 'sankey']});
+
+var chartsData;
+
+function getChartsData(host, date, direction, src_as) {
+	chartsData = $.ajax({
+			  type: 'post',
+			  url: 'get_srcas_chart_data',
+			  dataType: "json",
+			  data: {
+				'host' : host,
+				'date' : date,
+				'direction' : direction,
+				'src_as' : src_as
+			  },
+			  async: false
+	}).responseJSON;
+}
+
+
+function chartInt(){
+	var data = google.visualization.arrayToDataTable(chartsData);
+	var chart = new google.visualization.Sankey(document.getElementById('chart_srsas'));
+	var rowsCount = data.getNumberOfRows();
+	chartOptions.height = rowsCount*15;
+	chart.draw(data, chartOptions);
+}
+
+
+function drawCharts() {
+	host = $('#host-select').val();
+	date = $('#date-select').val();
+	direction = $('#direction-select').val();
+	src_as = $('#srcas-input').val();
+	$('.charts-title').text(direction + " traffic")
+	getChartsData(host, date, direction, src_as);
+	if (!chartsData) alert('Error: empty data')
+	else chartInt();
+}
+
+
+
+$('#host-select').change(function(){
+	document.location.href = "?host=" + $('#host-select').val() + ";src_as=" + $('#srcas-input').val();
+})
+
+
+</script>
+
+{% endblock %}

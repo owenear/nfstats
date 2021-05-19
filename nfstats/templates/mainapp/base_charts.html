@@ -1,0 +1,62 @@
+{% extends 'mainapp/base.html' %}
+
+
+{% block menu %}
+	<ul class="left-menu list-unstyled ml-2">
+		<li><a class="nav-link {% if request.resolver_match.url_name == 'common' %}active-white{% endif %}" href="{% url 'common' %}"><span class="menu-icons" data-feather="pie-chart"></span>Common stats</a></li>
+		<li><a class="nav-link {% if request.resolver_match.url_name == 'bgp-as' %}active-white{% endif %}" href="{% url 'bgp-as' %}" href="#"><span class="menu-icons" data-feather="globe"></span>BGP AS</a></li>
+		<li><a class="nav-link {% if request.resolver_match.url_name == 'interface' %}active-white{% endif %}" href="{% url 'interface' %}"><span class="menu-icons" data-feather="link-2"></span>Interface</a></li>
+		<li><a class="nav-link {% if request.resolver_match.url_name == 'ip' %}active-white{% endif %}" href="{% url 'ip' %}"><span class="menu-icons" data-feather="bar-chart-2"></span>IP address</a></li>
+		<!-- <li><a class="nav-link" href="#">IP адреса</a></li> -->
+	</ul>
+{% endblock %}
+
+{% block navbar %}
+	<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top justify-content-between">
+		<div class="key-active form-inline justify-content-start">
+			<div class="input-group host-input-group ml-2">
+			  <div class="input-group-prepend">
+				<label class="input-group-text" for="host-select">Host</label>
+			  </div>
+			  <select class="custom-select" id="host-select">
+				{% for host in hosts %}
+					<option value="{{ host.host }}" {% if host == host_selected %} selected {% endif %}>{{ host.name }}</option>
+				{% endfor %}
+			  </select>
+			</div>
+			<div class="input-group ml-2">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="direction-select">Direction:</label>
+				</div>
+				<select class="custom-select" id="direction-select">
+					<option value="input" {% if direction == 'input' %} selected {% endif %}>Input</input>
+					<option value="output" {% if direction == 'output' %} selected {% endif %}>Output</input>
+				</select>
+			</div>			
+			<div class="input-group date-input-group ml-2">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="date-select">Date:</label>
+				</div>
+				<input type="text" class="datepicker-here form-control" id="date-select" name="date" value="{{ date }}"
+				data-position="bottom left"
+				data-timepicker="true"
+				data-startdate="{{ date }}"
+				>
+			</div>
+			{% block page-controls %}
+			
+			
+			{% endblock %}
+			
+		</div>
+		<div class="row">
+		  <div id="loader" class="mr-3"></div>
+		  <a class="nodecorate mr-3" href="{% url 'settings_hosts' %}" target="_blank"><span class="settings" data-feather="settings"></span></a>	
+		</div>
+	</nav>
+{% endblock %}
+
+{% block content %}
+
+
+{% endblock %}
