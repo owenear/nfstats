@@ -24,12 +24,16 @@ SNMP_WALK = os.path.join(config['FILES']['SnmpToolsBinDir'], 'snmpwalk')
 def get_snmp_interfaces(request):
     host = request.POST['host']
 
-    command = f"{SNMP_WALK} -v{SNMP_VER} -Oseq -c {SNMP_COM} {host} interfaces.ifTable.ifEntry.ifDescr"
+    command = f"{SNMP_WALK} -v{SNMP_VER} -Oseqn -c {SNMP_COM} {host} .1.3.6.1.2.1.2.2.1.2"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    if_names = re.findall(r'\w+.(\d+)\s(.*)', command_res.stdout.decode('utf-8'))
-    command = f"{SNMP_WALK} -v{SNMP_VER} -Oseq -c {SNMP_COM} {host} ifMIB.ifMIBObjects.ifXTable.ifXEntry.ifAlias"
+    if command_res.stderr:
+        raise Exception(f"Error in shell: {command_res.stderr}")
+    if_names = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
+    command = f"{SNMP_WALK} -v{SNMP_VER} -Oseqn -c {SNMP_COM} {host} .1.3.6.1.2.1.31.1.1.1.18"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    if_descriptions = re.findall(r'\w+.(\d+)\s(.*)', command_res.stdout.decode('utf-8'))
+    if command_res.stderr:
+        raise Exception(f"Error in shell: {command_res.stderr}")
+    if_descriptions = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
     result = []
     for if_name_index, if_name in if_names:
         for if_descr_index, if_description in if_descriptions:
