@@ -1,7 +1,8 @@
-import os
+import sys, os
 import django
 import logging.handlers
-os.environ["DJANGO_SETTINGS_MODULE"] = 'nfstat.settings'
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ["DJANGO_SETTINGS_MODULE"] = 'nfstats.settings'
 django.setup()
 from mainapp.models import *
 from configparser import ConfigParser
@@ -11,7 +12,8 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 config = ConfigParser(allow_no_value=True)
 config.read(os.path.join(BASE_DIR, 'config.ini'))
 

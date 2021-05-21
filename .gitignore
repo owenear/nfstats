@@ -14,3 +14,4 @@ venv/
 
 # Project Temp
 nfstats/flow-tools
+nfstats/speed
