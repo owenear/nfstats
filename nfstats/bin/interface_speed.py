@@ -12,6 +12,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 config = ConfigParser(allow_no_value=True)
@@ -47,6 +48,7 @@ def log(msg = '', level = 6):
 
 cur_time = int(time.time())
 
+
 for host in hosts:
     interfaces = Interface.objects.filter(host = host, sampling = True).all()
     for interface in interfaces:
@@ -70,11 +72,11 @@ for host in hosts:
             if os.path.exists(OCTETS_OLD_FILE):
                 os.remove(OCTETS_OLD_FILE)
                 log(f"Host: {host}; Interface: {interface}; SNMP Error", level=3)
-            obj = Speed(in_bps = 0, out_bps = 0, date = datetime.now().strftime('%Y-%m-%d %H:%M'), interface = interface)
+            obj = Speed(in_bps = 0, out_bps = 0, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
             obj.save()
         else:
             if not os.path.exists(OCTETS_OLD_FILE):
-                obj = Speed(in_bps = 0, out_bps = 0, date = datetime.now().strftime('%Y-%m-%d %H:%M'), interface = interface)
+                obj = Speed(in_bps = 0, out_bps = 0, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
                 obj.save()
                 with open(OCTETS_OLD_FILE, "w") as file:
                     file.write(f"{cur_time}:{in_octets}:{out_octets}")
@@ -88,7 +90,7 @@ for host in hosts:
                     if (int(in_octets) >= int(old_in_octets) and int(out_octets) >= int(old_out_octets) and int(cur_time) - int(old_time) < 1000):         
                         in_bps = round((int(in_octets) - int(old_in_octets))*8/(int(cur_time) - int(old_time)), 0)
                         out_bps = round((int(out_octets) - int(old_out_octets))*8/(int(cur_time) - int(old_time)), 0)
-                        obj = Speed(in_bps = in_bps, out_bps = out_bps, date = datetime.now().strftime('%Y-%m-%d %H:%M'), interface = interface)
+                        obj = Speed(in_bps = in_bps, out_bps = out_bps, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
                         obj.save()
                         log(f"Host: {host}; Interface: {interface}; Rec to DB")
                 with open(OCTETS_OLD_FILE, "w") as file:
