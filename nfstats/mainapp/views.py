@@ -22,10 +22,10 @@ def common(request):
         direction = request.GET['direction'] if request.GET.get('direction') else 'input'
         interfaces = Interface.objects.filter(host=host_selected, sampling=True).order_by('snmpid')
         date = (datetime.now() - timedelta(minutes=2)).strftime("%d.%m.%Y %H:%M")
-        return render(request, "mainapp/index.html", {'date' : date, 'hosts' : hosts, 'host_selected' : host_selected,
+        return render(request, "mainapp/common.html", {'date' : date, 'hosts' : hosts, 'host_selected' : host_selected,
                                                       'interfaces' : interfaces, 'direction' : direction} )
     else:
-        return render(request, "mainapp/settings_hosts.html", {'hosts' : hosts} )    
+        return render(request, "mainapp/settings/settings_hosts.html", {'hosts' : hosts} )    
 
 
 @csrf_exempt
@@ -60,13 +60,13 @@ def ip(request):
 @csrf_exempt
 def settings_hosts(request):
     hosts = Host.objects.all()
-    return render(request, "mainapp/settings_hosts.html", {'hosts' : hosts} )
+    return render(request, "mainapp/settings/settings_hosts.html", {'hosts' : hosts} )
 
 
 @csrf_exempt
 def settings_system(request):
     #settings = Settings.objects.all()
-    return render(request, "mainapp/settings_system.html")
+    return render(request, "mainapp/settings/settings_system.html")
 
 @csrf_exempt
 def settings_interfaces(request):
@@ -74,7 +74,7 @@ def settings_interfaces(request):
     if hosts:
         host_selected = Host.objects.filter(host=request.GET['host']).first() if request.GET.get('host') else hosts[0]
         interfaces = Interface.objects.filter(host=host_selected).order_by('snmpid')
-        return render(request, "mainapp/settings_interfaces.html", {'hosts' : hosts, 'host_selected' : host_selected,
+        return render(request, "mainapp/settings/settings_interfaces.html", {'hosts' : hosts, 'host_selected' : host_selected,
                                                                     'interfaces' : interfaces} )
     else:
-        return render(request, "mainapp/settings_hosts.html", {'hosts' : hosts} )
+        return render(request, "mainapp/settings/settings_hosts.html", {'hosts' : hosts} )
