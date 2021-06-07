@@ -60,13 +60,14 @@ def ip(request):
 @csrf_exempt
 def settings_hosts(request):
     hosts = Host.objects.all()
-    return render(request, "mainapp/settings/settings_hosts.html", {'hosts' : hosts} )
+    return render(request, "mainapp/settings/settings_hosts.html", {'hosts' : hosts } )
 
 
 @csrf_exempt
 def settings_system(request):
-    #settings = Settings.objects.all()
-    return render(request, "mainapp/settings/settings_system.html")
+    settings_list = Settings.objects.values()
+    settings_dict = { item['name']:item for item in settings_list }
+    return render(request, "mainapp/settings/settings_system.html",  {'settings' : settings_dict })
 
 @csrf_exempt
 def settings_interfaces(request):

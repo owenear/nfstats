@@ -4,8 +4,8 @@ import logging.handlers
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ["DJANGO_SETTINGS_MODULE"] = 'nfstats.settings'
 django.setup()
-from mainapp.models import *
-from configparser import ConfigParser
+from mainapp.models import Settings, Host, Interface, Speed
+from mainapp.settings_sys import SYS_SETTINGS
 import subprocess
 import re
 import time
@@ -15,18 +15,16 @@ from pathlib import Path
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-config = ConfigParser(allow_no_value=True)
-config.read(os.path.join(BASE_DIR, 'config.ini'))
 
 OCTETS_OLD_FILE_PREFIX = os.path.join(BASE_DIR, 'speed')
 Path(OCTETS_OLD_FILE_PREFIX).mkdir(parents=True, exist_ok=True)
 
-LOG_FILE = os.path.join(config['SYSTEM']['LogDir'], 'nfstat-interface-speed.log')
-LOG_FILE_SIZE = int(config['SYSTEM']['LogFileSize'])
+LOG_FILE = os.path.join(SYS_SETTINGS['log_dir'], 'nfstat-interface-speed.log')
+LOG_FILE_SIZE = int(SYS_SETTINGS['log_size'])
 
-SNMP_COM = config['SNMP']['Community']
-SNMP_VER = config['SNMP']['Version']
-SNMP_GET = os.path.join(config['FILES']['SnmpToolsBinDir'], 'snmpget')
+SNMP_COM = SYS_SETTINGS['snmp_com']
+SNMP_VER = SYS_SETTINGS['snmp_ver']
+SNMP_GET = os.path.join(SYS_SETTINGS['snmp_bin'], 'snmpget')
 
 Speed.objects.filter(date__lte = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d %H:%M')).delete()
 hosts = Host.objects.all()

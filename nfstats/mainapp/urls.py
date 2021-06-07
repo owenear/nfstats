@@ -25,6 +25,7 @@ urlpatterns = [
     path('update_interface_sampling', ajax_db.update_interface_sampling),
     path('update_interface', ajax_db.update_interface),
     path('delete_interface', ajax_db.delete_interface),
+    path('update_settings', ajax_db.update_settings),
     
     path('get_hosts', ajax_db.get_hosts),
     path('add_host', ajax_db.add_host),

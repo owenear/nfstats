@@ -3,22 +3,20 @@ from django.http import JsonResponse
 from django.core import serializers
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
-from .models import *
+from .models import Settings, Host, Interface, Speed
+from .settings_sys import SYS_SETTINGS
 import json
 
 import os
-from configparser import ConfigParser
 from pathlib import Path
 import re
 import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-config = ConfigParser(allow_no_value=True)
-config.read(os.path.join(BASE_DIR, 'config.ini'))
 
-SNMP_COM = config['SNMP']['Community']
-SNMP_VER = config['SNMP']['Version']
-SNMP_WALK = os.path.join(config['FILES']['SnmpToolsBinDir'], 'snmpwalk')
+SNMP_COM = SYS_SETTINGS['snmp_com']
+SNMP_VER = SYS_SETTINGS['snmp_ver']
+SNMP_WALK = os.path.join(SYS_SETTINGS['snmp_bin'], 'snmpwalk')
 
 @csrf_exempt
 def get_snmp_interfaces(request):
@@ -150,7 +148,7 @@ def update_host(request):
     name = request.POST['name']
     description = request.POST['description']
     flow_path = request.POST['flow_path']
-    host_id = request.POST['host_id'];
+    host_id = request.POST['host_id']
     try:
         obj = Host.objects.get(id = host_id)
     except Host.DoesNotExist:
@@ -175,3 +173,25 @@ def delete_host(request):
         raise Exception(f"Error: Host does not exist ({host} name: {name})")
     else:
         return HttpResponse("OK")
+
+
+@csrf_exempt  
+def update_settings(request):
+    vars = { 
+        'log_dir' :  request.POST['log_dir'], 
+        'flowtools_bin' : request.POST['flowtools_bin'],
+        'snmp_bin' : request.POST['snmp_bin'],
+        'snmp_com' : request.POST['snmp_com'],
+    }
+    for name, value in vars.items():
+        try:
+            obj = Settings.objects.get(name = name)
+        except Settings.DoesNotExist:
+            obj = Settings(name = name, value = value)
+            obj.save()
+        except Exception as err:
+            raise Exception(f"Error: {err}")
+        else:
+            setattr(obj, 'value', value)
+            obj.save()
+    return HttpResponse("OK")

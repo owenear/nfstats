@@ -131,6 +131,10 @@ width: 24x;
 color: #8391a2;
 }
 
+.text-gray {
+	color: #8391a2;
+}
+
 #loader {
     display: none;
     width: 32px;

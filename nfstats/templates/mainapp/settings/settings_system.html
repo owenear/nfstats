@@ -6,34 +6,34 @@
 <div class="row mt-3 justify-content-center">
 		<div class="card col-10">
 			<div class="card-body">
-				<h5 class="card-title text-center mb-0">Настройки системы</h5>
+				<h5 class="card-title text-center mb-0">System Settings</h5>
 					<div class="row mt-5">
-						<div class="col"><b>Log Dir:</b></div>
-						<div class="col"><input  id="log_dir" type="text" class="form-control" value=""></div>
+						<div class="col ">Log Dir:</div>
+						<div class="col"><input  id="log_dir" type="text" class="form-control" 
+							value="{% if settings.log_dir %}{{ settings.log_dir.value }}{% else %}/var/log{% endif %}">
+						</div>
 					</div>
 					<div class="row mt-2">
-						<div class="col"><b>Log File Size:</b></div>
-						<div class="col"><input  id="log_size" type="text" class="form-control" value=""></div>
+						<div class="col">Flow Tools Bin Dir:</div>
+						<div class="col"><input  id="flowtools_bin" type="text" class="form-control" 
+							value="{% if settings.flowtools_bin %}{{ settings.flowtools_bin.value }}{% else %}/usr/local/flow-tools/bin{% endif %}">
+						</div>
 					</div>
 					<div class="row mt-2">
-						<div class="col"><b>FlowTools Bin Dir:</b></div>
-						<div class="col"><input  id="flowtools_bin" type="text" class="form-control" value=""></div>
+						<div class="col">SNMP Tools Bin Dir:</div>
+						<div class="col"><input  id="snmp_bin" type="text" class="form-control" 
+							value="{% if settings.snmp_bin %}{{ settings.snmp_bin.value }}{% else %}/usr/bin{% endif %}">
+						</div>
 					</div>
 					<div class="row mt-2">
-						<div class="col"><b>SNMP tools Bin Dir:</b></div>
-						<div class="col"><input  id="snmp_bin" type="text" class="form-control" value=""></div>
-					</div>
-					<div class="row mt-2">
-						<div class="col"><b>SNMP Version:</b></div>
-						<div class="col"><input  id="snmp_ver" type="text" class="form-control" value=""></div>
-					</div>
-					<div class="row mt-2">
-						<div class="col"><b>SNMP Community:</b></div>
-						<div class="col"><input  id="snmp_com" type="text" class="form-control" value=""></div>
+						<div class="col">SNMP Community:</div>
+						<div class="col"><input  id="snmp_com" type="text" class="form-control" 
+							value="{% if settings.snmp_com %}{{ settings.snmp_com.value }}{% else %}public{% endif %}">
+						</div>
 					</div>
 					<div class="row mt-4">
 						<div class="col-12 text-right">
-							<button type="button" class="btn btn btn-outline-success " onclick=""> Apply </button>
+							<button type="button" class="btn btn btn-outline-success " onclick="updateSettingsVar()">Apply</button>
 						</div>
 					</div>
 			</div>
@@ -43,6 +43,51 @@
 
 <script>
 
+
+function validateForm() {
+	var filled = true;
+	$("input").each(function(){
+		if (!$(this).val()){ 
+			$(this).addClass('is-invalid');
+			filled = false;
+		} else $(this).removeClass('is-invalid');
+	})
+	return filled;
+}
+
+
+function updateSettingsVar() {
+
+	if (validateForm()) {
+
+		$.ajax({
+				type: 'post',
+				url: '/update_settings',
+				dataType: "json",
+				data: {
+					'log_dir' : $('#log_dir').val(),
+					'flowtools_bin' : $('#flowtools_bin').val(),
+					'snmp_bin' : $('#snmp_bin').val(),
+					'snmp_com' : $('#snmp_com').val(),
+				},
+				statusCode: { 
+					500 :
+						function(e) {
+							$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
+							$('#dynamic-alert-danger').show();
+						},
+					200 : 
+						function(e) {
+							location.reload();
+						}
+				},
+				async: true,
+		})
+		
+	}
+
+
+}
 
 
 </script>

@@ -2,9 +2,9 @@
 
 {% block menu %}
 	<ul class="left-menu list-unstyled ml-2">
-		<!--<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_system' %}active-white{% endif %}" href="{% url 'settings_system' %}"><span class="menu-icons" data-feather="list"></span>System</a></li>-->
 		<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_hosts' %}active-white{% endif %}" href="{% url 'settings_hosts' %}"><span class="menu-icons" data-feather="hard-drive"></span>Hosts</a></li>
 		<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_interfaces' %}active-white{% endif %}" href="{% url 'settings_interfaces' %}"><span class="menu-icons" data-feather="link-2"></span>Interfaces</a></li>
+		<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_system' %}active-white{% endif %}" href="{% url 'settings_system' %}"><span class="menu-icons" data-feather="list"></span>System</a></li>
 	</ul>
 {% endblock %}
 
