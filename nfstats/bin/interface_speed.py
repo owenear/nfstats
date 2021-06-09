@@ -1,11 +1,10 @@
 import sys, os
 import django
-import logging.handlers
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ["DJANGO_SETTINGS_MODULE"] = 'nfstats.settings'
 django.setup()
 from mainapp.models import Settings, Host, Interface, Speed
-from mainapp.settings_sys import SYS_SETTINGS
+from mainapp.settings_sys import BASE_DIR, SYS_SETTINGS, set_sys_settings, logger
 import subprocess
 import re
 import time
@@ -13,36 +12,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
+set_sys_settings()
 OCTETS_OLD_FILE_PREFIX = os.path.join(BASE_DIR, 'speed')
 Path(OCTETS_OLD_FILE_PREFIX).mkdir(parents=True, exist_ok=True)
-
-LOG_FILE = os.path.join(SYS_SETTINGS['log_dir'], 'nfstat-interface-speed.log')
-LOG_FILE_SIZE = int(SYS_SETTINGS['log_size'])
-
-SNMP_COM = SYS_SETTINGS['snmp_com']
-SNMP_VER = SYS_SETTINGS['snmp_ver']
 SNMP_GET = os.path.join(SYS_SETTINGS['snmp_bin'], 'snmpget')
-
 Speed.objects.filter(date__lte = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d %H:%M')).delete()
 hosts = Host.objects.all()
-
-# Logging configuration
-logger = logging.getLogger("mainlog")
-logger.setLevel(logging.INFO)
-fh = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=LOG_FILE_SIZE, backupCount=5)
-fh.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
-logger.addHandler(fh)
-
-def log(msg = '', level = 6):
-    if os.path.getsize(LOG_FILE) == 0:
-        logger.info("LogFile created")
-    if level == 3:
-        logger.error(f"ERROR: {msg}")
-    else:
-        logger.info(f"{msg}")
 
 cur_time = int(time.time())
 
@@ -52,24 +27,24 @@ for host in hosts:
     for interface in interfaces:
         snmp_err = 0
         OCTETS_OLD_FILE = os.path.join(OCTETS_OLD_FILE_PREFIX, host.host + "_" + str(interface.snmpid) + ".old")
-        command = f"{SNMP_GET} -v{SNMP_VER} -Oseq -c {SNMP_COM} {host.host} .1.3.6.1.2.1.31.1.1.1.6.{interface.snmpid}"
+        command = f"{SNMP_GET} -v{SYS_SETTINGS['snmp_ver']} -Oseq -c {SYS_SETTINGS['snmp_com']} {host.host} .1.3.6.1.2.1.31.1.1.1.6.{interface.snmpid}"
         result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         if result.stderr:
-            log(f"Host: {host}; Interface: {interface}; Return: {result.stderr} Command: '{command}'", level=3)
+            logger.error(f"Host: {host}; Interface: {interface}; Return: {result.stderr} Command: '{command}'")
             snmp_err = 1
         else:
             in_octets = re.search(r'.* (\d+)', result.stdout.decode('utf-8')).group(1)    
-        command = f"{SNMP_GET} -v{SNMP_VER} -Oseq -c {SNMP_COM} {host.host} .1.3.6.1.2.1.31.1.1.1.10.{interface.snmpid}"
+        command = f"{SNMP_GET} -v{SYS_SETTINGS['snmp_ver']} -Oseq -c {SYS_SETTINGS['snmp_com']} {host.host} .1.3.6.1.2.1.31.1.1.1.10.{interface.snmpid}"
         result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         if result.stderr:
-            log(f"Host: {host}; Interface: {interface}; Return: {result.stderr} Command: '{command}'", level=3)
+            logger.error(f"Host: {host}; Interface: {interface}; Return: {result.stderr} Command: '{command}'")
             snmp_err = 1
         else:        
             out_octets = re.search(r'.* (\d+)', result.stdout.decode('utf-8')).group(1)
         if snmp_err == 1:
             if os.path.exists(OCTETS_OLD_FILE):
                 os.remove(OCTETS_OLD_FILE)
-                log(f"Host: {host}; Interface: {interface}; SNMP Error", level=3)
+                logger.error(f"Host: {host}; Interface: {interface}; SNMP Error")
             obj = Speed(in_bps = 0, out_bps = 0, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
             obj.save()
         else:
@@ -78,8 +53,8 @@ for host in hosts:
                 obj.save()
                 with open(OCTETS_OLD_FILE, "w") as file:
                     file.write(f"{cur_time}:{in_octets}:{out_octets}")
-                    log(f"Host: {host}; Interface: {interface}; Created Octets File")
-                    log(f"Host: {host}; Interface: {interface}; Rec to Octets File")
+                    logger.info(f"Host: {host}; Interface: {interface}; Created Octets File")
+                    logger.info(f"Host: {host}; Interface: {interface}; Rec to Octets File")
             else:
                 with open(OCTETS_OLD_FILE, "r") as file:
                     speed_data = file.read().split(':')
@@ -90,8 +65,8 @@ for host in hosts:
                         out_bps = round((int(out_octets) - int(old_out_octets))*8/(int(cur_time) - int(old_time)), 0)
                         obj = Speed(in_bps = in_bps, out_bps = out_bps, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
                         obj.save()
-                        log(f"Host: {host}; Interface: {interface}; Rec to DB")
+                        logger.info(f"Host: {host}; Interface: {interface}; Rec to DB")
                 with open(OCTETS_OLD_FILE, "w") as file:
                     file.write(f"{cur_time}:{in_octets}:{out_octets}")
-                    log(f"Host: {host}; Interface: {interface}; Rec to Octets File")
+                    logger.info(f"Host: {host}; Interface: {interface}; Rec to Octets File")
                         

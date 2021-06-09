@@ -1,18 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import *
+from .models import Settings, Host, Interface, Speed
 from datetime import datetime
 from datetime import timedelta
 from django.views.decorators.csrf import csrf_exempt
+from .settings_sys import SYS_SETTINGS, set_sys_settings
 
 
-# Create your views here.
-
-
-def date_tranform(date):
-    date_re = re.match(r'(\d+).(\d+).(\d+)\s(\d+):(\d+)', date)
-    return f"{date_re.group(3)}-{date_re.group(2)}-{date_re.group(1)}.{date_re.group(4)}{date_re.group(5)}"
-
+set_sys_settings()
 
 @csrf_exempt
 def common(request):
@@ -65,9 +60,8 @@ def settings_hosts(request):
 
 @csrf_exempt
 def settings_system(request):
-    settings_list = Settings.objects.values()
-    settings_dict = { item['name']:item for item in settings_list }
-    return render(request, "mainapp/settings/settings_system.html",  {'settings' : settings_dict })
+    set_sys_settings()
+    return render(request, "mainapp/settings/settings_system.html",  {'settings' : SYS_SETTINGS })
 
 @csrf_exempt
 def settings_interfaces(request):

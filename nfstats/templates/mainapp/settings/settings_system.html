@@ -10,25 +10,25 @@
 					<div class="row mt-5">
 						<div class="col ">Log Dir:</div>
 						<div class="col"><input  id="log_dir" type="text" class="form-control" 
-							value="{% if settings.log_dir %}{{ settings.log_dir.value }}{% else %}/var/log{% endif %}">
+							value="{{ settings.log_dir }}">
 						</div>
 					</div>
 					<div class="row mt-2">
 						<div class="col">Flow Tools Bin Dir:</div>
 						<div class="col"><input  id="flowtools_bin" type="text" class="form-control" 
-							value="{% if settings.flowtools_bin %}{{ settings.flowtools_bin.value }}{% else %}/usr/local/flow-tools/bin{% endif %}">
+							value="{{ settings.flowtools_bin }}">
 						</div>
 					</div>
 					<div class="row mt-2">
 						<div class="col">SNMP Tools Bin Dir:</div>
 						<div class="col"><input  id="snmp_bin" type="text" class="form-control" 
-							value="{% if settings.snmp_bin %}{{ settings.snmp_bin.value }}{% else %}/usr/bin{% endif %}">
+							value="{{ settings.snmp_bin }}">
 						</div>
 					</div>
 					<div class="row mt-2">
 						<div class="col">SNMP Community:</div>
 						<div class="col"><input  id="snmp_com" type="text" class="form-control" 
-							value="{% if settings.snmp_com %}{{ settings.snmp_com.value }}{% else %}public{% endif %}">
+							value="{{ settings.snmp_com }}">
 						</div>
 					</div>
 					<div class="row mt-4">

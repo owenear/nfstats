@@ -2,24 +2,21 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
-from .models import *
+from .models import Settings, Host, Interface, Speed
+from .settings_sys import BASE_DIR, SYS_SETTINGS, set_sys_settings, logger
 import json
-from datetime import datetime, timedelta
 import os
-from configparser import ConfigParser
 from pathlib import Path
 import re
 import subprocess
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-config = ConfigParser(allow_no_value=True)
-config.read(os.path.join(BASE_DIR, 'config.ini'))
 
-FLOW_CAT = os.path.join(config['FILES']['FlowToolsBinDir'], 'flow-cat')
-FLOW_NFILTER = os.path.join(config['FILES']['FlowToolsBinDir'], 'flow-nfilter')
-FLOW_FILTER = os.path.join(config['FILES']['FlowToolsBinDir'], 'flow-filter')
-FLOW_REPORT = os.path.join(config['FILES']['FlowToolsBinDir'], 'flow-report')
-FLOW_PRINT = os.path.join(config['FILES']['FlowToolsBinDir'], 'flow-print')
+set_sys_settings()
+FLOW_CAT = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-cat')
+FLOW_NFILTER = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-nfilter')
+FLOW_FILTER = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-filter')
+FLOW_REPORT = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-report')
+FLOW_PRINT = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-print')
 FLOW_FILTERS_DIR =  os.path.join(BASE_DIR, 'flow-tools/')
 
 Path(FLOW_FILTERS_DIR).mkdir(parents=True, exist_ok=True)

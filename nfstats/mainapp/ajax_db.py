@@ -4,30 +4,26 @@ from django.core import serializers
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from .models import Settings, Host, Interface, Speed
-from .settings_sys import SYS_SETTINGS
+from .settings_sys import BASE_DIR, SYS_SETTINGS, set_sys_settings
 import json
-
 import os
 from pathlib import Path
 import re
 import subprocess
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SNMP_COM = SYS_SETTINGS['snmp_com']
-SNMP_VER = SYS_SETTINGS['snmp_ver']
+set_sys_settings()
 SNMP_WALK = os.path.join(SYS_SETTINGS['snmp_bin'], 'snmpwalk')
 
 @csrf_exempt
 def get_snmp_interfaces(request):
     host = request.POST['host']
-
-    command = f"{SNMP_WALK} -v{SNMP_VER} -Oseqn -c {SNMP_COM} {host} .1.3.6.1.2.1.2.2.1.2"
+    command = f"{SNMP_WALK} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.2.2.1.2"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if command_res.stderr:
         raise Exception(f"Error in shell: {command_res.stderr}")
     if_names = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
-    command = f"{SNMP_WALK} -v{SNMP_VER} -Oseqn -c {SNMP_COM} {host} .1.3.6.1.2.1.31.1.1.1.18"
+    command = f"{SNMP_WALK} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.31.1.1.1.18"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if command_res.stderr:
         raise Exception(f"Error in shell: {command_res.stderr}")
