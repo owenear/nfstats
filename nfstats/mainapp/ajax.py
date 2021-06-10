@@ -3,23 +3,13 @@ from django.http import JsonResponse
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from .models import Settings, Host, Interface, Speed
-from .settings_sys import BASE_DIR, SYS_SETTINGS, set_sys_settings, logger
+from .settings_sys import SYS_SETTINGS, VARS, logger
 import json
 import os
 from pathlib import Path
 import re
 import subprocess
 
-
-set_sys_settings()
-FLOW_CAT = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-cat')
-FLOW_NFILTER = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-nfilter')
-FLOW_FILTER = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-filter')
-FLOW_REPORT = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-report')
-FLOW_PRINT = os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-print')
-FLOW_FILTERS_DIR =  os.path.join(BASE_DIR, 'flow-tools/')
-
-Path(FLOW_FILTERS_DIR).mkdir(parents=True, exist_ok=True)
 
 def date_tranform(date):
     date_re = re.match(r'(\d+).(\d+).(\d+)\s(\d+):(\d+)', date)
@@ -54,8 +44,10 @@ def put_interface_names(host, snmpid):
 
         
 def generate_as_flows_data(direction, date, host):
-    report_file = os.path.join(FLOW_FILTERS_DIR, 'report_as.cfg')
-    filter_file = os.path.join(FLOW_FILTERS_DIR, 'filter_as.cfg')
+    logger.info(VARS['flow_cat'])
+
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_as.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_as.cfg')
     filter_name = 'sum-if-filter'
     report_name = 'as-if-report'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
@@ -78,18 +70,19 @@ stat-definition {report_name}
     try:
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
+        logger.error(f"Flow files for the date: {date} not found!")
         raise Exception(f"Error: Flow files for the date: {date} not found!")
-    command = (f"{FLOW_CAT}  {flows_file}* | "
-               f"{FLOW_NFILTER} -f {filter_file} -F {filter_name} | "   
-               f"{FLOW_REPORT} -s {report_file} -S {report_name} ")
+    command = (f"{VARS['flow_cat']}  {flows_file}* | "
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "   
+               f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = re.findall(r'(\d+),(\d+),(\d+),(\d+),(\d+)', command_res.stdout.decode('utf-8'))
     return result
 
 
 def generate_interface_flows_sum(direction, date, host):
-    filter_file = os.path.join(FLOW_FILTERS_DIR, 'filter_sum.cfg')
-    report_file = os.path.join(FLOW_FILTERS_DIR, 'report_sum.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_sum.cfg')
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_sum.cfg')
     filter_name = 'sum-if-filter'
     report_name = 'sum-if-report'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
@@ -111,11 +104,11 @@ stat-definition {report_name}
     try:
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
+        logger.error(f"Flow files for the date: {date} not found!")
         raise Exception(f"Error: Flow files for the date: {date} not found!")
-        
-    command = (f"{FLOW_CAT}  {flows_file}* | "
-               f"{FLOW_NFILTER} -f {filter_file} -F {filter_name} | "    
-               f"{FLOW_REPORT} -s {report_file} -S {report_name}")            
+    command = (f"{VARS['flow_cat']}  {flows_file}* | "
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "    
+               f"{VARS['flow_report']} -s {report_file} -S {report_name}")            
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = re.findall(r'(\d+),(\d+)', command_res.stdout.decode('utf-8'))
     return result
@@ -129,6 +122,7 @@ def get_interface_speed_factor(direction, date, host):
         try:
             speed_data = Speed.objects.get(date = date_db, interface = interface)
         except Speed.DoesNotExist:
+            logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
             raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
         factor = speed_data.in_bps/(int(octets)*1000000) if direction == 'input' else  speed_data.out_bps/(int(octets)*1000000)
         speed_factor[intrf] = factor
@@ -136,10 +130,10 @@ def get_interface_speed_factor(direction, date, host):
 
 
 def generate_interface_flows_data(filter_direction, report_direction, date, host, snmpid, as_type):
-    report_file = os.path.join(FLOW_FILTERS_DIR, 'report_pie.cfg')
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_pie.cfg')
     direction_key = 'i' if filter_direction == 'input' else 'I' 
     report_name = f"{snmpid}-if-report"
-    filter_file = os.path.join(FLOW_FILTERS_DIR, 'filter_interface.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_interface.cfg')
     filter_name = 'sum-if-filter'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
     flow_path = Host.objects.get(host = host).flow_path
@@ -161,22 +155,22 @@ stat-definition {report_name}
     try:
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
+        logger.error(f"Flow files for the date: {date} not found!")
         raise Exception(f"Error: Flow files for the date: {date} not found!")
-    
-    command = (f"{FLOW_CAT}  {flows_file}* | " 
-               f"{FLOW_NFILTER} -f {filter_file} -F {filter_name} | "
-               f"{FLOW_FILTER} -{direction_key} {snmpid} | "
-               f"{FLOW_REPORT} -s {report_file} -S {report_name} ")            
+    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
+               f"{VARS['flow_filter']} -{direction_key} {snmpid} | "
+               f"{VARS['flow_report']} -s {report_file} -S {report_name} ")            
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = re.findall(r'(\d+),(\d+),(\d+)', command_res.stdout.decode('utf-8'))
     return result
     
 
 def generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type):
-    report_file = os.path.join(FLOW_FILTERS_DIR, 'report_ip.cfg')
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_ip.cfg')
     report_name = "ip-if-report"  
     
-    filter_file = os.path.join(FLOW_FILTERS_DIR, 'filter_ip.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_ip.cfg')
     filter_name = 'sum-if-filter'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
     flow_path = Host.objects.get(host = host).flow_path
@@ -195,7 +189,7 @@ def generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_po
     if dst_port:
         filter_keys += f" -P {dst_port}"
     if filter_keys:
-       filter_com =  f"{FLOW_FILTER} {filter_keys} | "
+       filter_com =  f"{VARS['flow_filter']} {filter_keys} | "
     
     with open(report_file, 'w', encoding='utf8') as f: 
         report = f'''stat-report {report_name}
@@ -213,12 +207,13 @@ stat-definition {report_name}
     try:
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
+        logger.error(f"Flow files for the date: {date} not found!")
         raise Exception(f"Error: Flow files for the date: {date} not found!")
     
-    command = (f"{FLOW_CAT}  {flows_file}* | " 
-               f"{FLOW_NFILTER} -f {filter_file} -F {filter_name} | " 
+    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | " 
                f"{filter_com}"
-               f"{FLOW_REPORT} -s {report_file} -S {report_name} ")               
+               f"{VARS['flow_report']} -s {report_file} -S {report_name} ")               
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = re.findall(r'(\d+.\d+.\d+.\d+),(\d+),(\d+)', command_res.stdout.decode('utf-8'))
     return result
@@ -242,9 +237,9 @@ def get_pie_chart_data(request):
             try:
                 speed_data = Speed.objects.get(date = date_db, interface = interface)
             except Speed.DoesNotExist:
+                logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
                 data[snmpid]['error'] = f"Error: Speed data for interface {interface} and date: {date_db} does not exist"
                 continue
-                #raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
             for as_type in ['source', 'destination']:    
                 data[snmpid][as_type] = [[as_type + 'AS', 'Mbps']]
                 flows_data = generate_interface_flows_data(direction, direction, date, host, snmpid, as_type)
@@ -276,6 +271,7 @@ def get_interface_chart_data(request):
         try:
             speed_data = Speed.objects.get(date = date_db, interface = interface)
         except Speed.DoesNotExist:
+            logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
             raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
         factor = speed_data.in_bps/(int(octets)*1000000) if filter_direction == 'output' else  speed_data.out_bps/(int(octets)*1000000)
         speed_factor[intrf] = factor
@@ -305,6 +301,7 @@ def get_as_chart_data(request):
             try:
                 speed_data = Speed.objects.get(date = date_db, interface = interface)
             except Speed.DoesNotExist:
+                logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
                 raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
             factor = speed_data.in_bps/(int(octets)*1000000) if direction == 'input' else  speed_data.out_bps/(int(octets)*1000000)
             speed_factor[intrf] = factor
@@ -355,6 +352,7 @@ def get_ip_chart_data(request):
         try:
             speed_data = Speed.objects.get(date = date_db, interface = interface)
         except Speed.DoesNotExist:
+            logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
             raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
         factor = speed_data.in_bps/(int(octets)*1000000) if direction == 'input' else  speed_data.out_bps/(int(octets)*1000000)
         speed_factor[intrf] = factor
@@ -391,11 +389,12 @@ filter-definition {filter_name}
     try:
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
+        logger.error(f"Flow files for the date: {date} not found!")
         raise Exception(f"Error: Flow files for the date: {date} not found!")
     
-    command = (f"{FLOW_CAT}  {flows_file}* | " 
-               f"{FLOW_NFILTER} -f {filter_file} -F {filter_name} | "
-               f"{FLOW_PRINT} -f5")               
+    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
+               f"{VARS['flow_print']} -f5")               
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = re.findall(r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)', command_res.stdout.decode('utf-8'))
     return HttpResponse(json.dumps(result))   

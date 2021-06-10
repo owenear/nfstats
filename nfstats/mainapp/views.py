@@ -4,10 +4,8 @@ from .models import Settings, Host, Interface, Speed
 from datetime import datetime
 from datetime import timedelta
 from django.views.decorators.csrf import csrf_exempt
-from .settings_sys import SYS_SETTINGS, set_sys_settings
+from .settings_sys import SYS_SETTINGS
 
-
-set_sys_settings()
 
 @csrf_exempt
 def common(request):
@@ -57,10 +55,8 @@ def settings_hosts(request):
     hosts = Host.objects.all()
     return render(request, "mainapp/settings/settings_hosts.html", {'hosts' : hosts } )
 
-
 @csrf_exempt
 def settings_system(request):
-    set_sys_settings()
     return render(request, "mainapp/settings/settings_system.html",  {'settings' : SYS_SETTINGS })
 
 @csrf_exempt

@@ -4,7 +4,7 @@ from django.core import serializers
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from .models import Settings, Host, Interface, Speed
-from .settings_sys import BASE_DIR, SYS_SETTINGS, set_sys_settings
+from .settings_sys import SYS_SETTINGS, VARS, update_globals, logger
 import json
 import os
 from pathlib import Path
@@ -12,18 +12,16 @@ import re
 import subprocess
 
 
-set_sys_settings()
-SNMP_WALK = os.path.join(SYS_SETTINGS['snmp_bin'], 'snmpwalk')
-
 @csrf_exempt
 def get_snmp_interfaces(request):
     host = request.POST['host']
-    command = f"{SNMP_WALK} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.2.2.1.2"
+    command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.2.2.1.2"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if command_res.stderr:
+        logger.error(f"(SH): {command_res.stderr}")
         raise Exception(f"Error in shell: {command_res.stderr}")
     if_names = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
-    command = f"{SNMP_WALK} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.31.1.1.1.18"
+    command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.31.1.1.1.18"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if command_res.stderr:
         raise Exception(f"Error in shell: {command_res.stderr}")
@@ -65,8 +63,10 @@ def add_interface(request):
         obj.save()
         return HttpResponse("OK")
     except Exception as err:
+        logger.error(f"(DB): {err}")
         raise Exception(f"Error: {err}")
     else:
+        logger.error(f"(DB): Interface already exist ({host} snmpid: {snmpid})")
         raise Exception(f"Error: Interface already exist ({host} snmpid: {snmpid})")
                 
 
@@ -79,8 +79,10 @@ def update_interface(request):
     try:
         obj = Interface.objects.get(id=int(interface_id))
     except Interface.DoesNotExist:
+        logger.error(f"(DB): Interface does not exist ({host} snmpid: {snmpid})")
         raise Exception(f"Error: Interface does not exist ({host} snmpid: {snmpid})")
     except Exception as err:
+        logger.error(f"(DB): {err}")
         raise Exception(f"Error: {err}")
     else:
         setattr(obj, 'snmpid', int(snmpid))
@@ -97,6 +99,7 @@ def update_interface_sampling(request):
     try:
         obj = Interface.objects.get(id=int(interface_id))
     except Interface.DoesNotExist:
+        logger.error(f"(DB): Interface does not exist ({host} snmpid: {snmpid})")
         raise Exception(f"Error: Interface does not exist ({host} snmpid: {snmpid})")
     else:
         if sampling == 'true':
@@ -134,9 +137,12 @@ def add_host(request):
         obj.save()
         return HttpResponse("OK")
     except Exception as err:
+        logger.error(f"(DB): {err}")
         raise Exception(f"Error: {err}")
     else:
+        logger.error(f"(DB): Host already exist ({host} name: {name})")
         raise Exception(f"Error: Host already exist ({host} name: {name})")
+
 
 @csrf_exempt  
 def update_host(request):
@@ -148,8 +154,10 @@ def update_host(request):
     try:
         obj = Host.objects.get(id = host_id)
     except Host.DoesNotExist:
+        logger.error(f"(DB): Host does not exist ({host} name: {name})")
         raise Exception(f"Error: Host does not exist ({host} name: {name})")
     except Exception as err:
+        logger.error(f"(DB): {err}")
         raise Exception(f"Error: {err}")
     else:
         setattr(obj, 'host', host)
@@ -166,6 +174,7 @@ def delete_host(request):
     try:
         Host.objects.get(id=int(host_id)).delete()
     except Host.DoesNotExist:
+        logger.error(f"(DB): Host does not exist ({host} name: {name})")
         raise Exception(f"Error: Host does not exist ({host} name: {name})")
     else:
         return HttpResponse("OK")
@@ -186,8 +195,10 @@ def update_settings(request):
             obj = Settings(name = name, value = value)
             obj.save()
         except Exception as err:
+            logger.error(f"(DB): {err}")
             raise Exception(f"Error: {err}")
         else:
             setattr(obj, 'value', value)
             obj.save()
+    update_globals()
     return HttpResponse("OK")

@@ -7,7 +7,6 @@
 		<li><a class="nav-link {% if request.resolver_match.url_name == 'bgp-as' %}active-white{% endif %}" href="{% url 'bgp-as' %}" href="#"><span class="menu-icons" data-feather="globe"></span>BGP AS</a></li>
 		<li><a class="nav-link {% if request.resolver_match.url_name == 'interface' %}active-white{% endif %}" href="{% url 'interface' %}"><span class="menu-icons" data-feather="link-2"></span>Interface</a></li>
 		<li><a class="nav-link {% if request.resolver_match.url_name == 'ip' %}active-white{% endif %}" href="{% url 'ip' %}"><span class="menu-icons" data-feather="bar-chart-2"></span>IP address</a></li>
-		<!-- <li><a class="nav-link" href="#">IP адреса</a></li> -->
 	</ul>
 {% endblock %}
 
