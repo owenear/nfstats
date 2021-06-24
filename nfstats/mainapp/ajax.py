@@ -9,43 +9,10 @@ import os
 from pathlib import Path
 import re
 import subprocess
-
-
-def date_tranform(date):
-    date_re = re.match(r'(\d+).(\d+).(\d+)\s(\d+):(\d+)', date)
-    return f"{date_re.group(3)}-{date_re.group(2)}-{date_re.group(1)}.{date_re.group(4)}{date_re.group(5)}"
+from .functions import date_tranform, date_tranform_db, create_flow_filter, put_interface_names, get_flows_file, get_shell_data
 
     
-def date_tranform_db(date):
-    date_re = re.match(r'(\d+).(\d+).(\d+)\s(\d+):(\d+)', date)
-    return f"{date_re.group(3)}-{date_re.group(2)}-{date_re.group(1)} {date_re.group(4)}:{date_re.group(5)}"
- 
-
-def create_flow_filter(direction, interfaces, filter_file, filter_name):
-    filter_str = f'''filter-primitive {filter_name}
-  type ifindex
-'''
-    for interface in interfaces:
-        filter_str += f"  permit {interface.snmpid}\n"
-    with open(filter_file, 'w', encoding='utf8') as f: 
-        filter = f'''{filter_str}
-filter-definition {filter_name}
-  match {direction}-interface {filter_name}
-'''
-        f.write(filter)
-
-
-def put_interface_names(host, snmpid):
-    interface = Interface.objects.filter(host__host = host, snmpid = int(snmpid)).first()
-    if interface:
-        return interface.description
-    else:
-        return snmpid
-
-        
 def generate_as_flows_data(direction, date, host):
-    logger.info(VARS['flow_cat'])
-
     report_file = os.path.join(VARS['flow_filters_dir'], 'report_as.cfg')
     filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_as.cfg')
     filter_name = 'sum-if-filter'
@@ -71,7 +38,10 @@ stat-definition {report_name}
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
         logger.error(f"Flow files for the date: {date} not found!")
-        raise Exception(f"Error: Flow files for the date: {date} not found!")
+        result = JsonResponse({"error": f"Flow files for the date: {date} not found!"})
+        result.status_code = 500
+        return result
+        #raise Exception(f"Error: Flow files for the date: {date} not found!")
     command = (f"{VARS['flow_cat']}  {flows_file}* | "
                f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "   
                f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
@@ -105,7 +75,10 @@ stat-definition {report_name}
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
         logger.error(f"Flow files for the date: {date} not found!")
-        raise Exception(f"Error: Flow files for the date: {date} not found!")
+        #raise Exception(f"Error: Flow files for the date: {date} not found!")
+        result = JsonResponse({"error": f"Flow files for the date: {date} not found!"})
+        result.status_code = 500
+        return result
     command = (f"{VARS['flow_cat']}  {flows_file}* | "
                f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "    
                f"{VARS['flow_report']} -s {report_file} -S {report_name}")            
@@ -136,9 +109,7 @@ def generate_interface_flows_data(filter_direction, report_direction, date, host
     filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_interface.cfg')
     filter_name = 'sum-if-filter'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
-    flow_path = Host.objects.get(host = host).flow_path
-    create_flow_filter(report_direction, interfaces, filter_file, filter_name)
-    
+    create_flow_filter(report_direction, interfaces, filter_file, filter_name) 
     with open(report_file, 'w', encoding='utf8') as f: 
         report = f'''stat-report {report_name}
   type {report_direction}-interface/{as_type}-as
@@ -152,17 +123,8 @@ stat-definition {report_name}
   report {report_name}
 '''
         f.write(report)        
-    try:
-        flows_file = next(Path(flow_path).rglob(f'*{date}*'))
-    except StopIteration:
-        logger.error(f"Flow files for the date: {date} not found!")
-        raise Exception(f"Error: Flow files for the date: {date} not found!")
-    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
-               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
-               f"{VARS['flow_filter']} -{direction_key} {snmpid} | "
-               f"{VARS['flow_report']} -s {report_file} -S {report_name} ")            
-    command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    result = re.findall(r'(\d+),(\d+),(\d+)', command_res.stdout.decode('utf-8'))
+    flows_file = get_flows_file(host, date)
+    result = get_shell_data(command, r'(\d+),(\d+),(\d+)')
     return result
     
 
@@ -242,7 +204,11 @@ def get_pie_chart_data(request):
                 continue
             for as_type in ['source', 'destination']:    
                 data[snmpid][as_type] = [[as_type + 'AS', 'Mbps']]
-                flows_data = generate_interface_flows_data(direction, direction, date, host, snmpid, as_type)
+                try:
+                    flows_data = generate_interface_flows_data(direction, direction, date, host, snmpid, as_type)
+                except Exception as e:
+                    data[snmpid]['error'] = str(e)
+                    continue
                 octets_sum = sum([ int(octets) for _,_,octets in flows_data ])
                 for _,as_bgp,octets in flows_data:
                     percent = 100*int(octets)/octets_sum
@@ -294,7 +260,11 @@ def get_as_chart_data(request):
         dst_as = request.POST['dst-as']
         direction = request.POST['direction']  
         flows_data = generate_as_flows_data(direction, date, host)
+        if flows_data.status_code == 500:
+            return flows_data
         flows_sum = generate_interface_flows_sum(direction, date, host)
+        if flows_sum.status_code == 500:
+            return flows_sum
         speed_factor = {}
         for intrf, octets in flows_sum:
             interface = Interface.objects.get(snmpid = int(intrf), host__host = host)

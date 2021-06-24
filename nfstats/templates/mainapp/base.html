@@ -61,7 +61,11 @@
 		  complete: function(){
 			 $('#loader').hide();
 		  },
-		  success: function() {}
+		  success: function() {},
+		  error: function(e) {
+				  $('#dynamic-alert-danger').html(e.responseJSON.error);
+				  $('#dynamic-alert-danger').show();
+			}
 		});
 		$(".key-active").keyup(function(e){ 
 			if(e.key==="Enter") getChartsData();

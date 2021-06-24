@@ -91,12 +91,6 @@ function getChartsData() {
 			  success: function(data){		
 				  drawCharts(data);
 			  },
-			  statusCode: { 500 :
-				function(e) {
-				  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-				  $('#dynamic-alert-danger').show();
-				}
-			  },
 			  async: true
 	})
 }
@@ -156,7 +150,6 @@ function drawCharts(chartsData) {
 			chart{{interface.snmpid}}Source(chartsData)
 			chart{{interface.snmpid}}Dest(chartsData)
 		} else {
-			console.log(chartsData['{{interface.snmpid}}']['error'])
 			$('#dynamic-alert-danger').append(chartsData['{{interface.snmpid}}']['error'] + "<br>");
 			$('#dynamic-alert-danger').show();
 		}
