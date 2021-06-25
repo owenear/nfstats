@@ -1,3 +1,4 @@
+import os
 from .models import Settings, Host, Interface, Speed
 from .settings_sys import SYS_SETTINGS, VARS, logger
 from pathlib import Path
@@ -56,3 +57,86 @@ def get_shell_data(command, regexp):
 
 
 
+def generate_interface_flows_data(filter_direction, report_direction, date, host, snmpid, as_type):
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_pie.cfg')
+    direction_key = 'i' if filter_direction == 'input' else 'I' 
+    report_name = f"{snmpid}-if-report"
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_interface.cfg')
+    filter_name = 'sum-if-filter'
+    interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
+    create_flow_filter(report_direction, interfaces, filter_file, filter_name) 
+    with open(report_file, 'w', encoding='utf8') as f: 
+        report = f'''stat-report {report_name}
+  type {report_direction}-interface/{as_type}-as
+  output
+  format ascii
+  options -header,-xheader,-totals,-names
+  fields -flows,+octets,-packets,-duration
+  sort +octets
+  
+stat-definition {report_name}
+  report {report_name}
+'''
+        f.write(report)        
+    flows_file = get_flows_file(host, date)
+    result = get_shell_data(command, r'(\d+),(\d+),(\d+)')
+    return result
+
+
+def generate_interface_flows_sum(direction, date, host):
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_sum.cfg')
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_sum.cfg')
+    filter_name = 'sum-if-filter'
+    report_name = 'sum-if-report'
+    interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
+    create_flow_filter(direction, interfaces, filter_file, filter_name)
+    with open(report_file, 'w', encoding='utf8') as f: 
+        report = f'''stat-report {report_name}
+  type {direction}-interface
+  output
+  format ascii
+  options -header,-xheader,-totals,-names
+  fields -flows,+octets,-packets,-duration
+  sort +octets
+  
+stat-definition {report_name}
+  report {report_name}
+'''
+        f.write(report)        
+    flows_file = get_flows_file(host, date)
+    command = (f"{VARS['flow_cat']}  {flows_file}* | "
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "    
+               f"{VARS['flow_report']} -s {report_file} -S {report_name}")            
+    result = get_shell_data(command, r'(\d+),(\d+)')
+    return result
+
+
+def generate_as_flows_data(direction, date, host):
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_as.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_as.cfg')
+    filter_name = 'sum-if-filter'
+    report_name = 'as-if-report'
+    interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
+    flow_path = Host.objects.get(host = host).flow_path
+    create_flow_filter(direction, interfaces, filter_file, filter_name)
+    
+    with open(report_file, 'w', encoding='utf8') as f: 
+        report = f'''stat-report {report_name}
+  type input/output-interface/source/destination-as
+  output
+  format ascii
+  options -header,-xheader,-totals,-names
+  fields -flows,+octets,-packets,-duration
+  sort +octets
+  
+stat-definition {report_name}
+  report {report_name}
+'''
+        f.write(report)
+        
+    flows_file = get_flows_file(host, date)
+    command = (f"{VARS['flow_cat']}  {flows_file}* | "
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "   
+               f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
+    result = get_shell_data(command, r'(\d+),(\d+),(\d+),(\d+),(\d+)')
+    return result

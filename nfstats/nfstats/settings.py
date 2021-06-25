@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'y1x*a+kow!ft79w9s-oypu%^$^q8p-ievta1te=hv8w&fbpngy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [ 'nfstats.example.com' ]
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
