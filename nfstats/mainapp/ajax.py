@@ -12,76 +12,6 @@ import subprocess
 from .functions import *
 
     
-
-def get_interface_speed_factor(direction, date, host):
-    flows_sum = generate_interface_flows_sum(direction, date, host)
-    speed_factor = {}
-    for intrf, octets in flows_sum:
-        interface = Interface.objects.get(snmpid = int(intrf), host__host = host)
-        try:
-            speed_data = Speed.objects.get(date = date_db, interface = interface)
-        except Speed.DoesNotExist:
-            logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
-            raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
-        factor = speed_data.in_bps/(int(octets)*1000000) if direction == 'input' else  speed_data.out_bps/(int(octets)*1000000)
-        speed_factor[intrf] = factor
-    return speed_factor
-
-
-def generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type):
-    report_file = os.path.join(VARS['flow_filters_dir'], 'report_ip.cfg')
-    report_name = "ip-if-report"  
-    
-    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_ip.cfg')
-    filter_name = 'sum-if-filter'
-    interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
-    flow_path = Host.objects.get(host = host).flow_path
-    create_flow_filter(direction, interfaces, filter_file, filter_name)   
-    filter_com = ""
-    filter_keys = ""
-    if snmpid:
-        direction_key = 'i' if direction == 'output' else 'I'
-        filter_keys += f" -{direction_key} {snmpid}"
-    if src_as:
-        filter_keys += f" -a {src_as}"
-    if dst_as:
-        filter_keys += f" -A {dst_as}"
-    if src_port:
-        filter_keys += f" -p {src_port}"
-    if dst_port:
-        filter_keys += f" -P {dst_port}"
-    if filter_keys:
-       filter_com =  f"{VARS['flow_filter']} {filter_keys} | "
-    
-    with open(report_file, 'w', encoding='utf8') as f: 
-        report = f'''stat-report {report_name}
-  type {ip_type}/{direction}-interface
-  output
-  format ascii
-  options -header,-xheader,-totals,-names
-  fields -flows,+octets,-packets,-duration
-  sort +octets
-  
-stat-definition {report_name}
-  report {report_name}
-'''
-        f.write(report)        
-    try:
-        flows_file = next(Path(flow_path).rglob(f'*{date}*'))
-    except StopIteration:
-        logger.error(f"Flow files for the date: {date} not found!")
-        raise Exception(f"Error: Flow files for the date: {date} not found!")
-    
-    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
-               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | " 
-               f"{filter_com}"
-               f"{VARS['flow_report']} -s {report_file} -S {report_name} ")               
-    command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    result = re.findall(r'(\d+.\d+.\d+.\d+),(\d+),(\d+)', command_res.stdout.decode('utf-8'))
-    return result
-
-
-
 @csrf_exempt
 def get_pie_chart_data(request):
     if request.POST:
@@ -129,8 +59,12 @@ def get_interface_chart_data(request):
     snmpid = request.POST['interface']
     report_direction = 'output' if filter_direction == 'input' else 'input'
     data = [[{'label':'Point 1', 'type' : 'string'},{'label':'Point 2', 'type' : 'string'},{'label':'Mbps', 'type' : 'number'}]]
-    
-    flows_sum = generate_interface_flows_sum(report_direction, date, host)
+    try:
+        flows_sum = generate_interface_flows_sum(report_direction, date, host)
+    except Exception as e:
+        result = JsonResponse({"error": str(e)})
+        result.status_code = 500
+        return result
     speed_factor = {}
     for intrf, octets in flows_sum:
         interface = Interface.objects.get(snmpid = int(intrf), host__host = host)
@@ -138,11 +72,18 @@ def get_interface_chart_data(request):
             speed_data = Speed.objects.get(date = date_db, interface = interface)
         except Speed.DoesNotExist:
             logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
-            raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
+            result = JsonResponse({"error": f"Error: Speed data for interface {interface} and date: {date_db} does not exist"})
+            result.status_code = 500
+            return result
         factor = speed_data.in_bps/(int(octets)*1000000) if filter_direction == 'output' else  speed_data.out_bps/(int(octets)*1000000)
         speed_factor[intrf] = factor
     for as_type in [ 'source', 'destination' ]:
-        flows_data = generate_interface_flows_data(filter_direction, report_direction, date, host, snmpid, as_type)
+        try:
+            flows_data = generate_interface_flows_data(filter_direction, report_direction, date, host, snmpid, as_type)
+        except Exception as e:
+            result = JsonResponse({"error": str(e)})
+            result.status_code = 500
+            return result
         for intrf, as_bgp,octets in flows_data:
             speed = round(speed_factor[intrf]*int(octets),2)
             intrf = put_interface_names(host, intrf)
@@ -222,8 +163,18 @@ def get_ip_chart_data(request):
     count = int(request.POST['count'])
     data = [[{'label':'IP', 'type' : 'string'},{'label':'Mbps', 'type' : 'number'}]]
     data_agr = {}
-    flows_sum = generate_interface_flows_sum(direction, date, host)
-    flows_data = generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type)
+    try:
+        flows_sum = generate_interface_flows_sum(direction, date, host)
+    except Exception as e:
+        result = JsonResponse({"error": str(e)})
+        result.status_code = 500
+        return result
+    try:
+        flows_data = generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type)
+    except Exception as e:
+        result = JsonResponse({"error": str(e)})
+        result.status_code = 500
+        return result
     speed_factor = {}
     for intrf, octets in flows_sum:
         interface = Interface.objects.get(snmpid = int(intrf), host__host = host)
@@ -231,7 +182,9 @@ def get_ip_chart_data(request):
             speed_data = Speed.objects.get(date = date_db, interface = interface)
         except Speed.DoesNotExist:
             logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
-            raise Exception(f"Error: Speed data for interface {interface} and date: {date_db} does not exist")
+            result = JsonResponse({"error": f"Error: Speed data for interface {interface} and date: {date_db} does not exist"})
+            result.status_code = 500
+            return result
         factor = speed_data.in_bps/(int(octets)*1000000) if direction == 'input' else  speed_data.out_bps/(int(octets)*1000000)
         speed_factor[intrf] = factor
     for address, intrf, octets in flows_data:
@@ -268,11 +221,12 @@ filter-definition {filter_name}
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
         logger.error(f"Flow files for the date: {date} not found!")
-        raise Exception(f"Error: Flow files for the date: {date} not found!")
+        result = JsonResponse({"error": f"Error: Flow files for the date: {date} not found!"})
+        result.status_code = 500
+        return result
     
     command = (f"{VARS['flow_cat']}  {flows_file}* | " 
                f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
-               f"{VARS['flow_print']} -f5")               
-    command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    result = re.findall(r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)', command_res.stdout.decode('utf-8'))
+               f"{VARS['flow_print']} -f5")
+    result = get_shell_data(command, r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)')
     return HttpResponse(json.dumps(result))   

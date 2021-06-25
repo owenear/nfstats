@@ -170,12 +170,6 @@ function getChartsData() {
 		  success: function(data){
 			  drawCharts(data);
 		  },
-		  statusCode: { 500 :
-			function(e) {
-			  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-			  $('#dynamic-alert-danger').show();
-			}
-		  },
 		  async: true
 	})
 }
@@ -204,12 +198,6 @@ function showIpTraffic(ip){
 					$('#ip_traffic_modal_content').append('</tr>')
 				})
 				$('#ip_traffic_modal').modal('show');
-		  },
-		  statusCode: { 500 :
-			function(e) {
-			  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-			  $('#dynamic-alert-danger').show();
-			}
 		  },
 	})
 	$('#ip_traffic_modal').modal('show');
@@ -240,8 +228,8 @@ function drawCharts(chartsData) {
 					success: function(ripeData){
 							   var netname = ripeData.data.records[0][1]['value'] + ' ' + ripeData.data.records[0][2]['value'];
 							   $('#dynamic-alert-success').append('<br>NetName: ' + netname);
-				}});
-				
+					}
+				});
 			}
 	};
 }

@@ -55,12 +55,6 @@ function getChartsData() {
 			  success: function(data){
 				  drawCharts(data);
 			  },
-			  statusCode: { 500 :
-				function(e) {
-				  $('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-				  $('#dynamic-alert-danger').show();
-				}
-			  },
 			  async: true
 	})
 }

@@ -79,6 +79,10 @@ stat-definition {report_name}
 '''
         f.write(report)        
     flows_file = get_flows_file(host, date)
+    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+            f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
+            f"{VARS['flow_filter']} -{direction_key} {snmpid} | "
+            f"{VARS['flow_report']} -s {report_file} -S {report_name} ") 
     result = get_shell_data(command, r'(\d+),(\d+),(\d+)')
     return result
 
@@ -117,7 +121,6 @@ def generate_as_flows_data(direction, date, host):
     filter_name = 'sum-if-filter'
     report_name = 'as-if-report'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
-    flow_path = Host.objects.get(host = host).flow_path
     create_flow_filter(direction, interfaces, filter_file, filter_name)
     
     with open(report_file, 'w', encoding='utf8') as f: 
@@ -139,4 +142,51 @@ stat-definition {report_name}
                f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "   
                f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
     result = get_shell_data(command, r'(\d+),(\d+),(\d+),(\d+),(\d+)')
+    return result
+
+
+def generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type):
+    report_file = os.path.join(VARS['flow_filters_dir'], 'report_ip.cfg')
+    report_name = "ip-if-report"  
+    
+    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_ip.cfg')
+    filter_name = 'sum-if-filter'
+    interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
+    create_flow_filter(direction, interfaces, filter_file, filter_name)   
+    filter_com = ""
+    filter_keys = ""
+    if snmpid:
+        direction_key = 'i' if direction == 'output' else 'I'
+        filter_keys += f" -{direction_key} {snmpid}"
+    if src_as:
+        filter_keys += f" -a {src_as}"
+    if dst_as:
+        filter_keys += f" -A {dst_as}"
+    if src_port:
+        filter_keys += f" -p {src_port}"
+    if dst_port:
+        filter_keys += f" -P {dst_port}"
+    if filter_keys:
+       filter_com =  f"{VARS['flow_filter']} {filter_keys} | "
+    
+    with open(report_file, 'w', encoding='utf8') as f: 
+        report = f'''stat-report {report_name}
+  type {ip_type}/{direction}-interface
+  output
+  format ascii
+  options -header,-xheader,-totals,-names
+  fields -flows,+octets,-packets,-duration
+  sort +octets
+  
+stat-definition {report_name}
+  report {report_name}
+'''
+        f.write(report)        
+
+    flows_file = get_flows_file(host, date)
+    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | " 
+               f"{filter_com}"
+               f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
+    result = get_shell_data(command, r'(\d+.\d+.\d+.\d+),(\d+),(\d+)')
     return result
