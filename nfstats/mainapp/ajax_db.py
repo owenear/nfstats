@@ -187,6 +187,7 @@ def update_settings(request):
         'flowtools_bin' : request.POST['flowtools_bin'],
         'snmp_bin' : request.POST['snmp_bin'],
         'snmp_com' : request.POST['snmp_com'],
+        'history_days' : request.POST['history_days'],
     }
     for name, value in vars.items():
         try:
