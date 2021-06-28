@@ -46,7 +46,9 @@ def add_snmp_interfaces(request):
             except Interface.DoesNotExist:
                 obj = Interface(snmpid = int(snmpid), name=name, description=description, host = host_obj)
                 obj.save()
-    return HttpResponse("OK")
+    result = JsonResponse({"result": "Interfaces added"})
+    result.status_code = 200
+    return result
             
             
 @csrf_exempt
@@ -61,7 +63,9 @@ def add_interface(request):
     except Interface.DoesNotExist:
         obj = Interface(snmpid = int(snmpid), name=name, description=description, host = host_obj)
         obj.save()
-        return HttpResponse("OK")
+        result = JsonResponse({"result": "Interface added"})
+        result.status_code = 200
+        return result
     except Exception as err:
         logger.error(f"(DB): {err}")
         raise Exception(f"Error: {err}")
@@ -89,7 +93,9 @@ def update_interface(request):
         setattr(obj, 'name', name)
         setattr(obj, 'description', description)
         obj.save()
-        return HttpResponse("OK")
+        result = JsonResponse({"result": "Interface updated"})
+        result.status_code = 200
+        return result
 
     
 @csrf_exempt    
@@ -107,14 +113,18 @@ def update_interface_sampling(request):
         else:
             setattr(obj, 'sampling', False)
         obj.save()
-        return HttpResponse("OK")
+        result = JsonResponse({"result": "Interface updated"})
+        result.status_code = 200
+        return result
     
     
 @csrf_exempt  
 def delete_interface(request):
     interface_id = request.POST['id']
     Interface.objects.get(id=int(interface_id)).delete()
-    return HttpResponse("OK")
+    result = JsonResponse({"result": "Interface deleted"})
+    result.status_code = 200
+    return result
     
     
 @csrf_exempt   
@@ -135,7 +145,9 @@ def add_host(request):
     except Host.DoesNotExist:
         obj = Host(name = name, host = host, description = description, flow_path = flow_path)
         obj.save()
-        return HttpResponse("OK")
+        result = JsonResponse({"result": "Host added"})
+        result.status_code = 200
+        return result
     except Exception as err:
         logger.error(f"(DB): {err}")
         raise Exception(f"Error: {err}")
@@ -165,7 +177,10 @@ def update_host(request):
         setattr(obj, 'description', description)
         setattr(obj, 'flow_path', flow_path)
         obj.save()
-        return HttpResponse("OK")
+        result = JsonResponse({"result": "Host updated"})
+        result.status_code = 200
+        return result
+
 
            
 @csrf_exempt  
@@ -177,7 +192,9 @@ def delete_host(request):
         logger.error(f"(DB): Host does not exist ({host} name: {name})")
         raise Exception(f"Error: Host does not exist ({host} name: {name})")
     else:
-        return HttpResponse("OK")
+        result = JsonResponse({"result": "Host deleted"})
+        result.status_code = 200
+        return result
 
 
 @csrf_exempt  

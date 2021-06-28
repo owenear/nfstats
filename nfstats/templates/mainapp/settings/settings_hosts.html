@@ -59,14 +59,14 @@
  				<div class="input-group-prepend">
     			<span class="input-group-text">Name</span>
   				</div>
-  				<input id="name" type="text" class="form-control" value="" >
+  				<input id="name" type="text" class="form-control need-validate" value="" >
 		  </div>
 		  
 		  <div class="input-group mb-3">
  				<div class="input-group-prepend">
     			<span class="input-group-text">Host</span>
   				</div>
-  				<input  id="host" type="text" class="form-control" value="" >
+  				<input  id="host" type="text" class="form-control need-validate" value="" >
 		  </div>
 		  
 		  <div class="input-group mb-3">
@@ -80,7 +80,7 @@
  				<div class="input-group-prepend">
     			<span class="input-group-text">Path to flow data</span>
   				</div>
-  				<input  id="flow_path" type="text" class="form-control" value="" >
+  				<input  id="flow_path" type="text" class="form-control need-validate" value="" >
 		  </div>
 		</form>    
       </div>
@@ -92,27 +92,9 @@
   </div>
 </div>
 <script>
-$(function(e){
-	$('body').click(function(e){
-		if ($('#dynamic-alert-danger').css('display') == 'block') $('#dynamic-alert-danger').hide(100); 
-	})
-});
-
-
-
-function validateForm() {
-	var filled = true;
-	if (!($('#name').val())) { $('#name').addClass('is-invalid'); filled = false; }
-	else $('#name').removeClass('is-invalid');
-	if (!($('#host').val())) { $('#host').addClass('is-invalid'); filled = false; }
-	else $('#host').removeClass('is-invalid');
-	if (!($('#flow_path').val())) { $('#flow_path').addClass('is-invalid'); filled = false; }
-	else $('#flow_path').removeClass('is-invalid');
-	return filled;
-}
 
 function addEditHost(url, host_id){
-	if (validateForm()) {
+	if (validate()) {
 	$('#host_modal').modal('hide');
 	$.ajax({
 		  type: 'post',
@@ -125,17 +107,9 @@ function addEditHost(url, host_id){
 			'description' : $('#description').val(),
 			'flow_path' : $('#flow_path').val(),
 		  },
-			statusCode: { 
-				500 :
-					function(e) {
-						$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-						$('#dynamic-alert-danger').show();
-					},
-				200 : 
-					function(e) {
+		  success: function(data){
 						location.reload();
-					}
-			},
+				},
 		  async: true
 	})
 	}
@@ -163,16 +137,8 @@ $('.trash').click(function(){
 			  data: {
 				'host_id' : host_id
 			  },
-				statusCode: { 
-					500 :
-						function(e) {
-							$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-							$('#dynamic-alert-danger').show();
-						},
-					200 : 
-						function(e) {
-							location.reload();
-						}
+			  success: function(data){
+						location.reload();
 				},
 			async: true
 		})

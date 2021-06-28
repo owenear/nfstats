@@ -26,14 +26,6 @@
 chartOptions = { 'width': 1000, 'height': 500 }
 google.charts.load('current', {'packages':['corechart', 'sankey']});
 
-$(function(e){
-	$('body').click(function(e){
-		if ($('#dynamic-alert-danger').css('display') == 'block') $('#dynamic-alert-danger').hide(100); 
-	})
-});
-
-
-
 
 function getChartsData() {
 	if (validate()) {

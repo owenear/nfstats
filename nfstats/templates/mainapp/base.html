@@ -94,6 +94,20 @@
 			})
 			return valid;
 		}
+
+		$(function(e){
+			$('body').click(function(e){
+			if ($('#dynamic-alert-danger').css('display') == 'block') { $('#dynamic-alert-danger').hide(100); $('#dynamic-alert-danger').html(''); }
+			if ($('#dynamic-alert-success').css('display') == 'block') { $('#dynamic-alert-success').hide(100); $('#dynamic-alert-success').html(''); }
+			else {
+				var x = e.clientX + 50 + 'px';
+				var y = e.clientY - 80 + 'px';
+				$('#dynamic-alert-success').css('top', y);
+				$('#dynamic-alert-success').css('left', x);
+			}
+			});
+		});
+
     </script>
 </html>
 

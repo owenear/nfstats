@@ -77,13 +77,13 @@
  				<div class="input-group-prepend">
     			<span class="input-group-text">Name</span>
   				</div>
-  				<input id="name" type="text" class="form-control" value="">
+  				<input id="name" type="text" class="form-control need-validate" value="">
 		  </div>
 		  <div class="input-group mb-3">
  				<div class="input-group-prepend">
     			<span class="input-group-text">SNMPid</span>
   				</div>
-  				<input  id="snmpid" type="text" class="form-control" value="">
+  				<input  id="snmpid" type="text" class="form-control need-validate validate-numeric" value="">
 		  </div>
 		  <div class="input-group mb-3">
  				<div class="input-group-prepend">
@@ -152,18 +152,8 @@ $('.sampling_checkbox').change(function(){
 })
 
 
-function validateForm() {
-	var filled = true;
-	if (!($('#name').val())) { $('#name').addClass('is-invalid'); filled = false; }
-	else $('#name').removeClass('is-invalid');
-	if (!($('#snmpid').val())) { $('#snmpid').addClass('is-invalid'); filled = false; }
-	else $('#snmpid').removeClass('is-invalid');
-	return filled;
-}
-
-
 function editInterface(interface_id) {
-	if (validateForm()) {
+	if (validate()) {
 		$('#interface_add_manual_modal').modal('hide');
 		$.ajax({
 				type: 'post',
@@ -175,16 +165,8 @@ function editInterface(interface_id) {
 					'snmpid' : $('#snmpid').val(),
 					'description' : $('#description').val(),
 				},
-				statusCode: { 
-					500 :
-						function(e) {
-							$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-							$('#dynamic-alert-danger').show();
-						},
-					200 : 
-						function(e) {
-							location.reload();
-						}
+				success: function(data){
+						location.reload();
 				},
 				async: true,
 		})
@@ -201,20 +183,16 @@ function editSampling(interface_id, sampling) {
 				'id' : interface_id,
 				'sampling' : sampling,
 			},
-			statusCode: { 
-				500 :
-					function(e) {
-						$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-						$('#dynamic-alert-danger').show();
-					}
-			},
+			success: function(data){
+						location.reload();
+				},
 			async: true,
 	})
 }
 
 
 function addInterface() {
-	if (validateForm()) {
+	if (validate()) {
 		$('#interface_add_manual_modal').modal('hide');
 		$.ajax({
 				type: 'post',
@@ -226,16 +204,8 @@ function addInterface() {
 					'snmpid' : $('#snmpid').val(),
 					'description' : $('#description').val(),
 				},
-				statusCode: { 
-					500 :
-						function(e) {
-							$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-							$('#dynamic-alert-danger').show();
-						},
-					200 : 
-						function(e) {
-							location.reload();
-						}
+				success: function(data){
+						location.reload();
 				},
 				async: true,
 		})
@@ -254,16 +224,8 @@ $('.trash').click(function(){
 					'id' : this.id,
 				},
 				async: true,
-				statusCode: { 
-					500 :
-						function(e) {
-							$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-							$('#dynamic-alert-danger').show();
-						},
-					200 : 
-						function(e) {
-							location.reload();
-						}
+				success: function(data){
+						location.reload();
 				},
 		})
 	}
@@ -297,10 +259,6 @@ function getSNMPInterfaces(){
 			  	    $('#interfaces_snmp_table').html(html_str);
 			  		$('#interface_add_snmp_modal').modal('show');
 			  },
-			  error: function(e) {
-						$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-						$('#dynamic-alert-danger').show();
-			  }
 	})
 }
 
@@ -331,16 +289,8 @@ function addSnmpInterfaces(){
 				interfaces: interfaces,
 			},
 			async: true,
-			statusCode: { 
-					500 :
-						function(e) {
-							$('#dynamic-alert-danger').html(e.responseText.match('(Error:.*)')[0]);
-							$('#dynamic-alert-danger').show();
-						},
-					200 : 
-						function(e) {
-							location.reload();
-						}
+			success: function(data){
+						location.reload();
 				},
 	})
 }

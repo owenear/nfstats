@@ -120,23 +120,6 @@ chartOptions = { tooltip: {trigger: 'none' },
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(getChartsData);
 
-// Всплывающее окошко
-
-
-$(function(e){
-	$('body').click(function(e){
-	if ($('#dynamic-alert-danger').css('display') == 'block') $('#dynamic-alert-danger').hide(100); 
-	if ($('#dynamic-alert-success').css('display') == 'block') $('#dynamic-alert-success').hide(100); 
-	else {
-		var x = e.clientX + 50 + 'px';
-		var y = e.clientY - 80 + 'px';
-		$('#dynamic-alert-success').css('top', y);
-		$('#dynamic-alert-success').css('left', x);
-	}
-	});
-});
-
-
 function getChartsData() {
 	if (validate()) {
 	var host = $('#host-select').val();
