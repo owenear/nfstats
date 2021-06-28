@@ -201,4 +201,6 @@ def update_settings(request):
             setattr(obj, 'value', value)
             obj.save()
     update_globals()
-    return HttpResponse("OK")
+    result = JsonResponse({"result": "Settings updated"})
+    result.status_code = 200
+    return result

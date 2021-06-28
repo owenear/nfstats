@@ -70,6 +70,28 @@
 		$(".key-active").keyup(function(e){ 
 			if(e.key==="Enter") getChartsData();
 		})
+
+		function validate() {
+			var valid = true;
+			$('.need-validate').each(function(){
+				if ($(this).val()) $(this).removeClass('is-invalid');
+				else {
+					$(this).addClass('is-invalid');
+					valid = false;
+				}
+			});
+			$('.validate-numeric').each(function(){
+				if ($(this).val() && !$.isNumeric($(this).val())) {
+					$(this).addClass('is-invalid');
+					setTimeout(function(){
+							$('#dynamic-alert-danger').html("Error: The value must be numeric");
+				  			$('#dynamic-alert-danger').show();	
+						}, 100);
+					valid = false;
+				}	
+			})
+			return valid;
+		}
     </script>
 </html>
 

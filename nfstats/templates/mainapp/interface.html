@@ -5,7 +5,7 @@
 	<div class="input-group-prepend">
 		<label class="input-group-text" for="interface-input">Interface:</label>
 	</div>
-	<input type="text" class="form-control" id="interface-input" name="interface" value="" placeholder="SNMPid" required>
+	<input type="text" class="form-control need-validate validate-numeric" id="interface-input" name="interface" value="" placeholder="SNMPid" required>
 </div>
 <button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
 {% endblock %}
@@ -37,26 +37,28 @@ $(function(e){
 
 
 function getChartsData() {
-	var host = $('#host-select').val();
-	var date = $('#date-select').val();
-	var direction = $('#direction-select').val();
-	var intrf = $('#interface-input').val();
-	$('.charts-title').text(direction + " traffic")
-	$.ajax({
-			  type: 'post',
-			  url: 'get_interface_chart_data',
-			  dataType: "json",
-			  data: {
-				'host' : host,
-				'date' : date,
-				'direction' : direction,
-				'interface' : intrf
-			  },
-			  success: function(data){
-				  drawCharts(data);
-			  },
-			  async: true
-	})
+	if (validate()) {
+		var host = $('#host-select').val();
+		var date = $('#date-select').val();
+		var direction = $('#direction-select').val();
+		var intrf = $('#interface-input').val();
+		$('.charts-title').text(direction + " traffic")
+		$.ajax({
+				type: 'post',
+				url: 'get_interface_chart_data',
+				dataType: "json",
+				data: {
+					'host' : host,
+					'date' : date,
+					'direction' : direction,
+					'interface' : intrf
+				},
+				success: function(data){
+					drawCharts(data);
+				},
+				async: true
+		})
+	}
 }
 
 

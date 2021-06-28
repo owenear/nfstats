@@ -5,13 +5,13 @@
 	<div class="input-group-prepend">
 		<label class="input-group-text" for="srcas-input">Source AS:</label>
 	</div>
-	<input type="text" class="form-control" id="srcas-input" name="src-as" value="" placeholder="AS number" required>
+	<input type="text" class="form-control need-validate validate-numeric" id="srcas-input" name="src-as" value="" placeholder="AS number" required>
 </div>
 <div class="input-group text-input-group ml-2">
 	<div class="input-group-prepend">
 		<label class="input-group-text" for="dstas-input">Destination AS:</label>
 	</div>
-	<input type="text" class="form-control" id="dstas-input" name="dst-as" value="" placeholder="AS number" required>
+	<input type="text" class="form-control need-validate validate-numeric" id="dstas-input" name="dst-as" value="" placeholder="AS number" required>
 </div>
 <button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
 {% endblock %}
@@ -40,12 +40,12 @@ $(function(e){
 });
 
 function getChartsData() {
-	var host = $('#host-select').val();
-	var date = $('#date-select').val();
-	var src_as = $('#srcas-input').val();
-	var dst_as = $('#dstas-input').val();
-	var direction = $('#direction-select').val();
-	if (src_as || dst_as) {
+	if (validate()) {
+		var host = $('#host-select').val();
+		var date = $('#date-select').val();
+		var src_as = $('#srcas-input').val();
+		var dst_as = $('#dstas-input').val();
+		var direction = $('#direction-select').val();
 		chartsData = $.ajax({
 				  type: 'post',
 				  url: 'get_as_chart_data',

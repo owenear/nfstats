@@ -30,31 +30,31 @@
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="interface-input">Interface:</label>
 						</div>
-						<input type="text" class="form-control" id="interface-input" name="interface" value="" placeholder="SNMPid" required>
+						<input type="text" class="form-control validate-numeric" id="interface-input" name="interface" value="" placeholder="SNMPid" required>
 					</div>
 					<div class="input-group ml-2 text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="srcas-input">sAS:</label>
 						</div>
-						<input type="text" class="form-control" id="srcas-input" name="src-as" value="" placeholder="AS number" required>
+						<input type="text" class="form-control validate-numeric" id="srcas-input" name="src-as" value="" placeholder="AS number" required>
 					</div>
 					<div class="input-group ml-2 text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="dstas-input">dAS:</label>
 						</div>
-						<input type="text" class="form-control" id="dstas-input" name="dst-as" value="" placeholder="AS number" required>
+						<input type="text" class="form-control validate-numeric" id="dstas-input" name="dst-as" value="" placeholder="AS number" required>
 					</div>
 					<div class="input-group ml-2 text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="srcport-input">sPort:</label>
 						</div>
-						<input type="text" class="form-control" id="srcport-input" name="sport" value="" placeholder="Port number" required>
+						<input type="text" class="form-control validate-numeric" id="srcport-input" name="sport" value="" placeholder="Port number" required>
 					</div>
 					<div class="input-group ml-2 text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="dstport-input">dPort:</label>
 						</div>
-						<input type="text" class="form-control" id="dstport-input" name="dport" value="" placeholder="Port number" required>
+						<input type="text" class="form-control validate-numeric" id="dstport-input" name="dport" value="" placeholder="Port number" required>
 					</div>
 					<button type="button" class="btn btn-outline-success ml-2 mr-2" onclick="getChartsData()">Show</button>
 				</div>
@@ -140,6 +140,7 @@ $(function(e){
 
 
 function getChartsData() {
+	if (validate()) {
 	var host = $('#host-select').val();
 	var date = $('#date-select').val();
 	var src_as = $('#srcas-input').val();
@@ -172,6 +173,7 @@ function getChartsData() {
 		  },
 		  async: true
 	})
+}
 }
 
 
