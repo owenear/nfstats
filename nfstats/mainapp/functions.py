@@ -57,11 +57,11 @@ def get_shell_data(command, regexp):
 
 
 
-def generate_interface_flows_data(filter_direction, report_direction, date, host, snmpid, as_type):
-    report_file = os.path.join(VARS['flow_filters_dir'], 'report_pie.cfg')
+def generate_interface_flows_data(session_id, filter_direction, report_direction, date, host, snmpid, as_type):
+    report_file = os.path.join(VARS['flow_filters_dir'], f'report_pie_{session_id}.cfg')
     direction_key = 'i' if filter_direction == 'input' else 'I' 
     report_name = f"{snmpid}-if-report"
-    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_interface.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], f'filter_interface_{session_id}.cfg')
     filter_name = 'sum-if-filter'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
     create_flow_filter(report_direction, interfaces, filter_file, filter_name) 
@@ -87,9 +87,9 @@ stat-definition {report_name}
     return result
 
 
-def generate_interface_flows_sum(direction, date, host):
-    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_sum.cfg')
-    report_file = os.path.join(VARS['flow_filters_dir'], 'report_sum.cfg')
+def generate_interface_flows_sum(session_id, direction, date, host):
+    filter_file = os.path.join(VARS['flow_filters_dir'], f'filter_sum_{session_id}.cfg')
+    report_file = os.path.join(VARS['flow_filters_dir'], f'report_sum_{session_id}.cfg')
     filter_name = 'sum-if-filter'
     report_name = 'sum-if-report'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
@@ -115,9 +115,9 @@ stat-definition {report_name}
     return result
 
 
-def generate_as_flows_data(direction, date, host):
-    report_file = os.path.join(VARS['flow_filters_dir'], 'report_as.cfg')
-    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_as.cfg')
+def generate_as_flows_data(session_id, direction, date, host):
+    report_file = os.path.join(VARS['flow_filters_dir'], f'report_as_{session_id}.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], f'filter_as_{session_id}.cfg')
     filter_name = 'sum-if-filter'
     report_name = 'as-if-report'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
@@ -145,11 +145,11 @@ stat-definition {report_name}
     return result
 
 
-def generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type):
-    report_file = os.path.join(VARS['flow_filters_dir'], 'report_ip.cfg')
+def generate_ip_flows_data(session_id, direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type):
+    report_file = os.path.join(VARS['flow_filters_dir'], f'report_ip_{session_id}.cfg')
     report_name = "ip-if-report"  
     
-    filter_file = os.path.join(VARS['flow_filters_dir'], 'filter_ip.cfg')
+    filter_file = os.path.join(VARS['flow_filters_dir'], f'filter_ip_{session_id}.cfg')
     filter_name = 'sum-if-filter'
     interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
     create_flow_filter(direction, interfaces, filter_file, filter_name)   

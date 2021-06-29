@@ -1,17 +1,14 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
-from .models import Settings, Host, Interface, Speed
+from .models import Host, Interface, Speed
 from .settings_sys import SYS_SETTINGS, VARS, logger
 import json
 import os
 from pathlib import Path
-import re
-import subprocess
 from .functions import *
 
-    
+   
 @csrf_exempt
 def get_pie_chart_data(request):
     if request.POST:
@@ -35,7 +32,7 @@ def get_pie_chart_data(request):
             for as_type in ['source', 'destination']:    
                 data[snmpid][as_type] = [[as_type + 'AS', 'Mbps']]
                 try:
-                    flows_data = generate_interface_flows_data(direction, direction, date, host, snmpid, as_type)
+                    flows_data = generate_interface_flows_data(request.session['session_id'], direction, direction, date, host, snmpid, as_type)
                 except Exception as e:
                     data[snmpid]['error'] = str(e)
                     continue
@@ -60,7 +57,7 @@ def get_interface_chart_data(request):
     report_direction = 'output' if filter_direction == 'input' else 'input'
     data = [[{'label':'Point 1', 'type' : 'string'},{'label':'Point 2', 'type' : 'string'},{'label':'Mbps', 'type' : 'number'}]]
     try:
-        flows_sum = generate_interface_flows_sum(report_direction, date, host)
+        flows_sum = generate_interface_flows_sum(request.session['session_id'],report_direction, date, host)
     except Exception as e:
         result = JsonResponse({"error": str(e)})
         result.status_code = 500
@@ -79,7 +76,7 @@ def get_interface_chart_data(request):
         speed_factor[intrf] = factor
     for as_type in [ 'source', 'destination' ]:
         try:
-            flows_data = generate_interface_flows_data(filter_direction, report_direction, date, host, snmpid, as_type)
+            flows_data = generate_interface_flows_data(request.session['session_id'], filter_direction, report_direction, date, host, snmpid, as_type)
         except Exception as e:
             result = JsonResponse({"error": str(e)})
             result.status_code = 500
@@ -101,13 +98,13 @@ def get_as_chart_data(request):
         dst_as = request.POST['dst-as']
         direction = request.POST['direction']  
         try:
-            flows_data = generate_as_flows_data(direction, date, host)
+            flows_data = generate_as_flows_data(request.session['session_id'], direction, date, host)
         except Exception as e:
             result = JsonResponse({"error": str(e)})
             result.status_code = 500
             return result
         try:
-            flows_sum = generate_interface_flows_sum(direction, date, host)
+            flows_sum = generate_interface_flows_sum(request.session['session_id'], direction, date, host)
         except Exception as e:
             result = JsonResponse({"error": str(e)})
             result.status_code = 500
@@ -164,13 +161,13 @@ def get_ip_chart_data(request):
     data = [[{'label':'IP', 'type' : 'string'},{'label':'Mbps', 'type' : 'number'}]]
     data_agr = {}
     try:
-        flows_sum = generate_interface_flows_sum(direction, date, host)
+        flows_sum = generate_interface_flows_sum(request.session['session_id'], direction, date, host)
     except Exception as e:
         result = JsonResponse({"error": str(e)})
         result.status_code = 500
         return result
     try:
-        flows_data = generate_ip_flows_data(direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type)
+        flows_data = generate_ip_flows_data(request.session['session_id'], direction, date, host, snmpid, src_as, dst_as, src_port, dst_port, ip_type)
     except Exception as e:
         result = JsonResponse({"error": str(e)})
         result.status_code = 500
@@ -205,7 +202,7 @@ def get_ip_traffic_data(request):
     date_db = date_tranform_db(request.POST['date'])
     ip_type = request.POST['ip_type']
     ip_addr = request.POST['ip_addr'] 
-    filter_file = os.path.join(FLOW_FILTERS_DIR, 'filter_ip_traffic.cfg')
+    filter_file = os.path.join(FLOW_FILTERS_DIR, f"filter_ip_traffic_{request.session['session_id']}.cfg")
     filter_name = 'ip-filter'
     flow_path = Host.objects.get(host = host).flow_path
     with open(filter_file, 'w', encoding='utf8') as f:

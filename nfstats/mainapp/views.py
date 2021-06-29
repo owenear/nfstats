@@ -1,14 +1,17 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Settings, Host, Interface, Speed
+from .models import Host, Interface
 from datetime import datetime
 from datetime import timedelta
 from django.views.decorators.csrf import csrf_exempt
 from .settings_sys import SYS_SETTINGS
+from pprint import pprint
+from random import getrandbits
 
 
 @csrf_exempt
 def common(request):
+    if not request.session.get('session_id'):
+        request.session['session_id'] = getrandbits(16)
     hosts = Host.objects.all()
     if hosts:
         host_selected = Host.objects.filter(host=request.GET['host']).first() if request.GET.get('host') else hosts[0]
