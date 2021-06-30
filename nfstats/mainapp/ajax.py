@@ -6,7 +6,8 @@ from .settings_sys import SYS_SETTINGS, VARS, logger
 import json
 import os
 from pathlib import Path
-from .functions import *
+from .functions import generate_ip_flows_data, generate_as_flows_data, generate_interface_flows_sum, generate_interface_flows_data
+from .functions import get_shell_data, date_tranform, date_tranform_db, put_interface_names
 
    
 @csrf_exempt
@@ -202,7 +203,7 @@ def get_ip_traffic_data(request):
     date_db = date_tranform_db(request.POST['date'])
     ip_type = request.POST['ip_type']
     ip_addr = request.POST['ip_addr'] 
-    filter_file = os.path.join(FLOW_FILTERS_DIR, f"filter_ip_traffic_{request.session['session_id']}.cfg")
+    filter_file = os.path.join(VARS['flow_filters_dir'], f"filter_ip_traffic_{request.session['session_id']}.cfg")
     filter_name = 'ip-filter'
     flow_path = Host.objects.get(host = host).flow_path
     with open(filter_file, 'w', encoding='utf8') as f:

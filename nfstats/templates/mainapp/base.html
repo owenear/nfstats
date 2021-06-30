@@ -71,15 +71,22 @@
 			if(e.key==="Enter") getChartsData();
 		})
 
-		function validate() {
+		function validate(group = false) {
 			var valid = true;
+			$('.need-validate').removeClass('is-invalid');
+			var element_count = $('.need-validate').length;
 			$('.need-validate').each(function(){
-				if ($(this).val()) $(this).removeClass('is-invalid');
-				else {
-					$(this).addClass('is-invalid');
-					valid = false;
+				if (!$(this).val()) {
+					if (!group) {  
+						$(this).addClass('is-invalid');
+						valid = false;
+					} else element_count -= 1;
 				}
 			});
+			if ( group && element_count == 0 ) {
+				valid = false;
+				$('.need-validate').addClass('is-invalid');
+			} 
 			$('.validate-numeric').each(function(){
 				if ($(this).val() && !$.isNumeric($(this).val())) {
 					$(this).addClass('is-invalid');

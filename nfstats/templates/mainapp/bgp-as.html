@@ -39,7 +39,7 @@ $(function(e){
 });
 
 function getChartsData() {
-	if (validate()) {
+	if (validate(true)) {
 		var host = $('#host-select').val();
 		var date = $('#date-select').val();
 		var src_as = $('#srcas-input').val();

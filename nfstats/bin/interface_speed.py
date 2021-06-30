@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 def main():
     cur_time = int(time.time())
-    Speed.objects.filter(date__lte = (datetime.now() - timedelta(days=SYS_SETTINGS['history_days'])).strftime('%Y-%m-%d %H:%M')).delete()
+    Speed.objects.filter(date__lte = (datetime.now() - timedelta(days=int(SYS_SETTINGS['history_days']))).strftime('%Y-%m-%d %H:%M')).delete()
     hosts = Host.objects.all()
     for host in hosts:
         interfaces = Interface.objects.filter(host = host, sampling = True).all()
