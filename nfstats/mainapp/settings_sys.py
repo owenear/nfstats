@@ -1,9 +1,9 @@
 from .models import Settings
-import os, logging
+import logging
 from logging.handlers import WatchedFileHandler
 from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 SYS_SETTINGS = { 
     'log_dir' :  '/var/log',
@@ -20,16 +20,16 @@ VARS = { }
 def set_vars():
     global VARS, BASE_DIR
     VARS.update({
-        'octets_files_dir' : os.path.join(BASE_DIR, 'speed'),
-        'flow_filters_dir' : os.path.join(BASE_DIR, 'flow-tools/'),
-        'log_file' : os.path.join(SYS_SETTINGS['log_dir'], 'nfstats.log'),
-        'snmp_get' : os.path.join(SYS_SETTINGS['snmp_bin'], 'snmpget'),
-        'snmp_walk' : os.path.join(SYS_SETTINGS['snmp_bin'], 'snmpwalk'),
-        'flow_cat' : os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-cat'),
-        'flow_nfilter' : os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-nfilter'),
-        'flow_filter' : os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-filter'),
-        'flow_report' : os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-report'),
-        'flow_print' : os.path.join(SYS_SETTINGS['flowtools_bin'], 'flow-print'),
+        'octets_files_dir' : BASE_DIR.joinpath('speed'),
+        'flow_filters_dir' : BASE_DIR.joinpath('flow-tools'),
+        'log_file' : Path(SYS_SETTINGS['log_dir']).joinpath('nfstats.log'),
+        'snmp_get' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpget'),
+        'snmp_walk' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpwalk'),
+        'flow_cat' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-cat'),
+        'flow_nfilter' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-nfilter'),
+        'flow_filter' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-filter'),
+        'flow_report' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-report'),
+        'flow_print' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-print'),
     })
     Path(VARS['octets_files_dir']).mkdir(parents=True, exist_ok=True)
     Path(VARS['flow_filters_dir']).mkdir(parents=True, exist_ok=True)

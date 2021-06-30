@@ -6,8 +6,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Settings, Host, Interface, Speed
 from .settings_sys import SYS_SETTINGS, VARS, update_globals, logger
 import json
-import os
-from pathlib import Path
 import re
 import subprocess
 
