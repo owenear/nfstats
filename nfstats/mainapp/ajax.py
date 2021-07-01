@@ -7,8 +7,9 @@ import json
 from pathlib import Path
 from .functions import generate_ip_flows_data, generate_as_flows_data, generate_interface_flows_sum, generate_interface_flows_data
 from .functions import get_shell_data, date_tranform, date_tranform_db, put_interface_names
+import csv
 
-   
+
 @csrf_exempt
 def get_pie_chart_data(request):
     if request.POST:
@@ -226,4 +227,23 @@ filter-definition {filter_name}
                f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
                f"{VARS['flow_print']} -f5")
     result = get_shell_data(command, r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)')
-    return HttpResponse(json.dumps(result))   
+    header = ['Start', 'End', 'Source Interface ID', 'Source IP' , 'Source Port', 
+    'Destination Interface ID', 'Destination IP' , 'Destination Port', 
+    'Protocols', 'Flows', 'Packets', 'Octets']
+    with open(Path(VARS['flow_filters_dir']).joinpath(f"ip_traffic_data_{request.session['session_id']}.csv").resolve(), 'w', encoding='utf8') as f:
+        writer = csv.DictWriter(f, fieldnames = header)
+        writer.writeheader()
+        writer = csv.writer(f)
+        writer.writerows(result)
+    return HttpResponse(json.dumps(result))
+
+
+@csrf_exempt
+def download_ip_traffic_data(request):
+    date = date_tranform(request.GET['date'])
+    ip = request.GET['ip']
+    file_path = Path(VARS['flow_filters_dir']).joinpath(f"ip_traffic_data_{request.session['session_id']}.csv")
+    with open(file_path, 'rb') as f:
+        response = HttpResponse(f.read(), content_type="text/csv")
+        response['Content-Disposition'] = 'attachment; filename=' + ip + '_' + date + '.csv'
+        return response

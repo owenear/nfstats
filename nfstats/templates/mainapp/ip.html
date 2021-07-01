@@ -68,11 +68,11 @@
 		</div>
 </div>
 
-<div class="modal fade" id="ip_traffic_modal" tabindex="-1" role="dialog" aria-labelledby="ip_traffic_modal_label" aria-hidden="true">
+<div class="modal fade" id="ip_traffic_modal" tabindex="-1" role="dialog" aria-labelledby="ip-traffic-modal-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="ip_traffic_modal_label">Sampling Traffic Flows</h5>
+        <h5 class="modal-title" id="ip-traffic-modal-label">Sampling Traffic Flows</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -95,12 +95,13 @@
 					  <th scope="col">Octets</th>
 					</tr>
 				  </thead>
-				  <tbody id="ip_traffic_modal_content">
+				  <tbody id="ip-traffic-modal-content">
 				
 				  </tbody>
 				</table>
       </div>
       <div class="modal-footer">
+		<button type="button" id="ip-traffic-export-btn" class="btn btn-success">Export</button>
         <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
       </div>
      </div>
@@ -162,6 +163,7 @@ function showIpTraffic(ip){
 	var host = $('#host-select').val();
 	var date = $('#date-select').val();
 	var ip_type = $('#ip-type-select').val();
+	$('#ip-traffic-export-btn').attr('onClick', 'downloadIpTraffic(\''+ ip +'\')' );
 	$.ajax({
 		  type: 'post',
 		  url: 'get_ip_traffic_data',
@@ -174,16 +176,21 @@ function showIpTraffic(ip){
 		  },
 		  async: true,
 		  success: function(data) {
-				$('#ip_traffic_modal_content').html("");
+				$('#ip-traffic-modal-content').html("");
 				data.forEach(row => {
-					$('#ip_traffic_modal_content').append('<tr>')
-					row.forEach(element => $('#ip_traffic_modal_content').append('<td>' + element + '</td>'))
-					$('#ip_traffic_modal_content').append('</tr>')
+					$('#ip-traffic-modal-content').append('<tr>')
+					row.forEach(element => $('#ip-traffic-modal-content').append('<td>' + element + '</td>'))
+					$('#ip-traffic-modal-content').append('</tr>')
 				})
 				$('#ip_traffic_modal').modal('show');
 		  },
 	})
 	$('#ip_traffic_modal').modal('show');
+}
+
+
+function downloadIpTraffic(ip){
+	window.open('download_ip_traffic_data?date=' + $('#date-select').val() + '&ip=' + ip, target = '_self');
 }
 
 

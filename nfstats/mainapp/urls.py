@@ -18,6 +18,8 @@ urlpatterns = [
     path('get_as_chart_data', ajax.get_as_chart_data),
     path('get_ip_chart_data', ajax.get_ip_chart_data),
     path('get_ip_traffic_data', ajax.get_ip_traffic_data),
+    path('download_ip_traffic_data', ajax.download_ip_traffic_data),
+
 
     path('get_snmp_interfaces', ajax_db.get_snmp_interfaces),
     path('add_snmp_interfaces', ajax_db.add_snmp_interfaces),
