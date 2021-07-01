@@ -15,3 +15,6 @@ venv/
 # Project Temp
 nfstats/flow-tools
 nfstats/speed
+
+#Project settings
+nfstats/nfstats/settings.py
