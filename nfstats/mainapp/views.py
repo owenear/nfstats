@@ -28,7 +28,7 @@ def common(request):
 def interface(request):
     hosts = Host.objects.all()
     host_selected = Host.objects.filter(host=request.GET['host']).first() if request.GET.get('host') else hosts[0]
-    interfaces = Interface.objects.filter(host=host_selected, sampling=False).order_by('snmpid')
+    interfaces = Interface.objects.filter(host=host_selected, sampling=False).order_by('name')
     direction = request.GET['direction'] if request.GET.get('direction') else 'input'
     date = (datetime.now() - timedelta(minutes=2)).strftime("%d.%m.%Y %H:%M")
     return render(request, "mainapp/interface.html", {'date' : date, 'hosts' : hosts, 'host_selected' : host_selected,
