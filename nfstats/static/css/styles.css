@@ -81,10 +81,6 @@ color: blue!important;
 
 .trash, .edit, .settings {
 cursor: pointer;
--moz-user-select: none; /* Mozilla Firefox */
--ms-user-select: none; /* Internet Explorer (не поддерживается) */
--o-user-select: none; /* Opera Presto (не поддерживается) */
--webkit-user-select: none; /* Google Chrome, Opera Next, Safari */
 }
 
 .trash {
