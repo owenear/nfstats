@@ -14,6 +14,18 @@
 						</div>
 					</div>
 					<div class="row mt-2">
+						<div class="col">Logging Level:</div>
+						<div class="col">
+							<select class="custom-select" id="logging_level">
+								<option value="DEBUG" {% if  settings.logging_level == 'DEBUG' %} selected {% endif %}>DEBUG</option>
+								<option value="INFO" {% if  settings.logging_level == 'INFO' %} selected {% endif %}>INFO</option>
+								<option value="WARNING" {% if  settings.logging_level == 'WARNING' %} selected {% endif %}>WARNING</option>
+								<option value="ERROR" {% if  settings.logging_level == 'ERROR' %} selected {% endif %}>ERROR</option>
+								<option value="CRITICAL" {% if  settings.logging_level == 'CRITICAL' %} selected {% endif %}>CRITICAL</option>
+							</select>
+						</div>
+					</div>
+					<div class="row mt-2">
 						<div class="col">Flow Tools Bin Dir:</div>
 						<div class="col"><input  id="flowtools_bin" type="text" class="form-control need-validate" 
 							value="{{ settings.flowtools_bin }}">
@@ -60,6 +72,7 @@ function updateSettingsVar() {
 				dataType: "json",
 				data: {
 					'log_dir' : $('#log_dir').val(),
+					'logging_level' : $('#logging_level').val(),
 					'flowtools_bin' : $('#flowtools_bin').val(),
 					'snmp_bin' : $('#snmp_bin').val(),
 					'snmp_com' : $('#snmp_com').val(),

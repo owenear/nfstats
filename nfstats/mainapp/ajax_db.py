@@ -199,6 +199,7 @@ def delete_host(request):
 def update_settings(request):
     vars = { 
         'log_dir' :  request.POST['log_dir'], 
+        'logging_level' :  request.POST['logging_level'], 
         'flowtools_bin' : request.POST['flowtools_bin'],
         'snmp_bin' : request.POST['snmp_bin'],
         'snmp_com' : request.POST['snmp_com'],

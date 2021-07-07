@@ -8,12 +8,13 @@ from mainapp.settings_sys import SYS_SETTINGS, VARS, logger
 import subprocess
 import re
 import time
+from django.utils import timezone
 from datetime import datetime, timedelta
 
 
 def main():
     cur_time = int(time.time())
-    Speed.objects.filter(date__lte = (datetime.now() - timedelta(days=int(SYS_SETTINGS['history_days']))).strftime('%Y-%m-%d %H:%M')).delete()
+    Speed.objects.filter(date__lte = (timezone.now() - timedelta(days=int(SYS_SETTINGS['history_days'])))).delete()
     hosts = Host.objects.all()
     for host in hosts:
         interfaces = Interface.objects.filter(host = host, sampling = True).all()
@@ -38,11 +39,11 @@ def main():
                 if os.path.exists(OCTETS_OLD_FILE):
                     os.remove(OCTETS_OLD_FILE)
                     logger.error(f"Host: {host}; Interface: {interface}; SNMP Error")
-                obj = Speed(in_bps = 0, out_bps = 0, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
+                obj = Speed(in_bps = 0, out_bps = 0, date = timezone.make_aware(datetime.fromtimestamp(cur_time).replace(second = 0)), interface = interface)
                 obj.save()
             else:
                 if not os.path.exists(OCTETS_OLD_FILE):
-                    obj = Speed(in_bps = 0, out_bps = 0, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
+                    obj = Speed(in_bps = 0, out_bps = 0, date = timezone.make_aware(datetime.fromtimestamp(cur_time).replace(second = 0)), interface = interface)
                     obj.save()
                     with open(OCTETS_OLD_FILE, "w") as file:
                         file.write(f"{cur_time}:{in_octets}:{out_octets}")
@@ -56,7 +57,7 @@ def main():
                         if (int(in_octets) >= int(old_in_octets) and int(out_octets) >= int(old_out_octets) and int(cur_time) - int(old_time) < 1000):         
                             in_bps = round((int(in_octets) - int(old_in_octets))*8/(int(cur_time) - int(old_time)), 0)
                             out_bps = round((int(out_octets) - int(old_out_octets))*8/(int(cur_time) - int(old_time)), 0)
-                            obj = Speed(in_bps = in_bps, out_bps = out_bps, date = datetime.fromtimestamp(cur_time).strftime('%Y-%m-%d %H:%M'), interface = interface)
+                            obj = Speed(in_bps = in_bps, out_bps = out_bps, date = timezone.make_aware(datetime.fromtimestamp(cur_time).replace(second = 0)), interface = interface)
                             obj.save()
                             logger.info(f"Host: {host}; Interface: {interface}; Rec to DB")
                     with open(OCTETS_OLD_FILE, "w") as file:

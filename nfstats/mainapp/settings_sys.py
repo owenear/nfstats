@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SYS_SETTINGS = { 
     'log_dir' :  '/var/log',
+    'logging_level' : 'DEBUG',
     'log_size' : 50000,
     'flowtools_bin' : '/usr/local/flow-tools/bin',
     'snmp_bin' : '/usr/bin',
@@ -15,7 +16,33 @@ SYS_SETTINGS = {
     'history_days' : 10,
 }
 
-VARS = { }
+VARS = {}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(levelname)s: %(message)s',
+            'datefmt' : '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': SYS_SETTINGS['logging_level'],
+            'class': 'logging.FileHandler',
+            'filename':  Path(SYS_SETTINGS['log_dir']).joinpath('nfstats.log'),
+            'formatter' : 'simple'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': SYS_SETTINGS['logging_level'],
+            'propagate': True,
+        },
+    },
+}
 
 def set_vars():
     global VARS, BASE_DIR
@@ -33,6 +60,9 @@ def set_vars():
     })
     Path(VARS['octets_files_dir']).mkdir(parents=True, exist_ok=True)
     Path(VARS['flow_filters_dir']).mkdir(parents=True, exist_ok=True)
+    LOGGING['handlers']['file']['filename'] = VARS['log_file']
+    LOGGING['handlers']['file']['level'] = SYS_SETTINGS['logging_level']
+    LOGGING['loggers']['django']['level'] = SYS_SETTINGS['logging_level']
 
 
 def update_sys_settings():
@@ -46,12 +76,15 @@ def update_sys_settings():
 def update_globals():
     update_sys_settings()
     set_vars()
-
+    logging.config.dictConfig(LOGGING)
+    logger = logging.getLogger("django")
 
 # Update global variables
 update_globals()
 
 # Logging configuration
+logger = logging.getLogger("django")
+'''
 logger = logging.getLogger("mainlog")
 logger.setLevel(logging.INFO)
 file_handler = WatchedFileHandler(VARS['log_file'])
@@ -59,3 +92,4 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', datefmt=
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
+'''
