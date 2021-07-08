@@ -79,7 +79,81 @@ flow_capture_flags="-z0 -n1439 -N3 -E10G -e0 -S1"
 Use 'man flow-capture' to read more about it. 
 
 ### Installation
-
-
-
+1. Get the repo
+```
+cd /var/www
+git clone https://github.com/owenear/nfstats.git
+cd nfstats
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+for the Postresql
+```
+pip install psycopg2-binary
+```
+2. Create DB (Postgresql example)
+```
+postgres=# create database nfstats_db;
+postgres=# create user nfstats_dbuser with encrypted password 'nfstatsdbpass';
+postgres=# grant all ON DATABASE nfstats_db to nfstats_dbuser;
+```
+3. Create settings.py file
+ - copy
+```
+cd /var/www/nfstats/nfstats/nfstats
+cp settings.py.sample settings.py
+```
+ - make changes to DB options(Postgresql example)
+```
+DATABASES = {
+    'default': {
+       'ENGINE': 'django.db.backends.postgresql_psycopg2',
+       'NAME': 'nfstats_db',
+       'USER' : 'nfstats_dbuser',
+       'PASSWORD' : 'nfstatsdbpass',
+       'HOST' : 'localhost',
+       'PORT' : '5432',
+    }
+}
+```
+- make changes to Allowed Hosts
+```
+ALLOWED_HOSTS = [ 'nfstats.example.com' ]
+```
+- make changes to TimeZone if you need
+```
+TIME_ZONE = 'UTC'
+```
+4. Start Django migrations and create DB schema
+ ```
+cd /var/www/nfstats/nfstats
+source ../venv/bin/activate
+python manage.py migrate
+  ```
+5. Create urls.py file
+```
+cd /var/www/nfstats/nfstats/nfstats
+cp urls.py.sample urls.py
+```
+6. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.
  
+8. Add NFstats to your Web Server (Apache Example, mod-wsgi-py3 is required)
+```
+<VirtualHost *:80>
+	ServerName nfstats.example.com
+	DocumentRoot /var/www/nfstats
+        Alias /static/ /var/www/nfstats/nfstats/static/
+        WSGIScriptAlias / /var/www/nfstats/nfstats/nfstats/wsgi.py
+        WSGIDaemonProcess nfstats.example.com python-home=/var/www/nfstats/venv python-path=/var/www/nfstats/nfstats
+        WSGIProcessGroup nfstats.example.com
+</VirtualHost>
+```
+```
+service apache2 restart
+```
+9. Go to nfstats.example.com, add hosts, interfaces and enjoy!
+
+## Authors
+
+* **Evgeniy Kolosov** - [owenear](https://github.com/owenear)
