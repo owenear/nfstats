@@ -5,6 +5,7 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 ### Prerequisites
 - FreeBSD or GNU/Linux
 - flow-tools
+- SNMP Tools
 - Python 3.6, Django 3.2 
 - One of the Django supported databases:
   - PostgreSQL 9.6 and higher (psycopg2 2.5.4 or higher is required) 
