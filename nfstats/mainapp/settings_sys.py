@@ -82,6 +82,7 @@ def update_globals():
     logging.config.dictConfig(LOGGING)
     logger = logging.getLogger("django")
 
+
 # Update global variables
 update_globals()
 
