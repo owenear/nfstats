@@ -127,19 +127,30 @@ ALLOWED_HOSTS = [ 'nfstats.example.com' ]
 TIME_ZONE = 'UTC'
 ```
 4. Start Django migrations and create DB schema
+ - comment project urls in nfstats/nfstats/nfstats/urls.py
+```
+urlpatterns = [
+    path('admin/', admin.site.urls),
+#    path('', include('mainapp.urls')),
+]
  ```
-cd /var/www/nfstats/nfstats
+ - initiate db
+ ```
+ cd /var/www/nfstats/nfstats
 source ../venv/bin/activate
 python manage.py migrate
-  ```
-5. Create urls.py file
-```
-cd /var/www/nfstats/nfstats/nfstats
-cp urls.py.sample urls.py
-```
-6. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.
+ ```
+ - uncomment project urls in nfstats/nfstats/nfstats/urls.py
+ ```
+ urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('mainapp.urls')),
+]
+ ```
+5. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.
  
-8. Add NFstats to your Web Server (Apache Example, mod-wsgi-py3 is required)
+6. Add NFstats to your Web Server and restart it
+ Apache config example, mod-wsgi-py3 is required
 ```
 <VirtualHost *:80>
 	ServerName nfstats.example.com
@@ -150,10 +161,7 @@ cp urls.py.sample urls.py
         WSGIProcessGroup nfstats.example.com
 </VirtualHost>
 ```
-```
-service apache2 restart
-```
-9. Go to nfstats.example.com, add hosts, interfaces and enjoy!
+7. Go to nfstats.example.com, add hosts, interfaces and enjoy!
 
 ## Authors
 
