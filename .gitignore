@@ -16,5 +16,6 @@ venv/
 nfstats/flow-tools
 nfstats/speed
 
-#Project settings
+#Project
 nfstats/nfstats/settings.py
+nfstats/mainapp/migrations
