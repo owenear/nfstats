@@ -28,8 +28,8 @@
 						<td class=''>{{ host.host }}</td>
 						<td class=''>{{ host.description }}</td>
 						<td class=''>{{ host.flow_path }}</td>
-						<td class=''><span class='edit'></span></td>
-						<td class=''><span class='trash'></span></td>
+						<td class=''><span class='edit small-icons'><span class='small-icons' data-feather="edit"></span></span></td>
+						<td class=''><span class='trash small-icons'><span class='small-icons' data-feather="trash"></span></span></td>
 					</tr>
 					{% endfor %}
 				  </tbody>
@@ -37,7 +37,7 @@
 				
 				<div class="row mt-3">
 					<div class="col-12 text-right">
-						<button id="add_host_btn" type="button" class="btn btn-outline-dark" ><span class="add" data-feather="plus-circle"></span> Add</button>
+						<button id="add_host_btn" type="button" class="btn btn-outline-dark" ><span class="small-icons" data-feather="plus-circle"></span> Add</button>
 					</div>
 				</div>
 				

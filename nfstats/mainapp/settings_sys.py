@@ -8,6 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SYS_SETTINGS = { 
     'log_dir' :  '/var/log',
+    'log_type' : 'file',
     'logging_level' : 'ERROR',
     'log_size' : 50000,
     'flowtools_bin' : '/usr/local/flow-tools/bin',
@@ -35,10 +36,13 @@ LOGGING = {
             'filename':  Path(SYS_SETTINGS['log_dir']).joinpath('nfstats.log'),
             'formatter' : 'simple'
         },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': [ SYS_SETTINGS['log_type'] ],
             'level': SYS_SETTINGS['logging_level'],
             'propagate': True,
         },

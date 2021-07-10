@@ -42,11 +42,11 @@ li{
 }
 
 .active-white {
-color: #E9EEF2!important;	
+	color: #E9EEF2!important;	
 }
 
 .active-blue {
-color: blue!important;	
+	color: blue!important;	
 }
 
 #content {
@@ -77,54 +77,32 @@ color: blue!important;
 	float:left;
 }
 
-
-
-.trash, .edit, .settings {
-cursor: pointer;
+.small-icons, .settings {
+	cursor: pointer;
 }
 
-.trash {
-padding-left:16px;
-background:url(/static/img/trash.svg) top left;
-background-repeat     : no-repeat;
-background-size       : cover;
-display: inline-block;
-height: 16px;
-width: 16x;
-}
-
-.edit {
-padding-left:16px;
-background:url(/static/img/edit.svg) top left;
-background-repeat     : no-repeat;
-background-size       : cover;
-display: inline-block;
-height: 16px;
-width: 16x;
-}
-
-.add {
-height: 16px;
-width: 16x;
+.small-icons {
+	height: 16px;
+	width: 16x;
 }
 
 .menu-icons {
-height: 16px;
-width: 16x;
-margin-bottom: 3px;
-margin-right: 3px;
+	height: 16px;
+	width: 16x;
+	margin-bottom: 3px;
+	margin-right: 3px;
 }
 
 .settings {
-height: 32px;
-width: 32x;
-color: #8391a2;
+	height: 32px;
+	width: 32x;
+	color: #8391a2;
 }
 
 .pie-chart {
-height: 24px;
-width: 24x;
-color: #8391a2;
+	height: 24px;
+	width: 24x;
+	color: #8391a2;
 }
 
 .text-gray {
