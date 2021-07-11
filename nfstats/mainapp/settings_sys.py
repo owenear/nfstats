@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SYS_SETTINGS = { 
     'log_dir' :  '/var/log',
     'log_type' : 'file',
-    'logging_level' : 'ERROR',
+    'logging_level' : 'DEBUG',
     'log_size' : 50000,
     'flowtools_bin' : '/usr/local/flow-tools/bin',
     'snmp_bin' : '/usr/bin',
@@ -68,8 +68,7 @@ def set_vars():
     LOGGING['handlers']['file']['filename'] = VARS['log_file']
     LOGGING['handlers']['file']['level'] = SYS_SETTINGS['logging_level']
     LOGGING['loggers']['django']['level'] = SYS_SETTINGS['logging_level']
-    if SYS_SETTINGS['logging_level'] == 'DEBUG':
-        django.conf.settings.DEBUG = True
+    django.conf.settings.DEBUG = True if SYS_SETTINGS['logging_level'] == 'DEBUG' else False
 
 
 def update_sys_settings():

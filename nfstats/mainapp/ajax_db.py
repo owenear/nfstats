@@ -16,13 +16,18 @@ def get_snmp_interfaces(request):
     command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.2.2.1.2"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if command_res.stderr:
-        logger.error(f"(SH): {command_res.stderr}")
-        raise Exception(f"Error in shell: {command_res.stderr}")
+        logger.critical(f"(SH): {command_res.stderr}")
+        result = JsonResponse({"error": f"Error (SH): {command_res.stderr}"})
+        result.status_code = 500
+        return result
     if_names = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
     command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.31.1.1.1.18"
     command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if command_res.stderr:
-        raise Exception(f"Error in shell: {command_res.stderr}")
+        logger.critical(f"(SH): {command_res.stderr}")
+        result = JsonResponse({"error": f"Error (SH): {command_res.stderr}"})
+        result.status_code = 500
+        return result
     if_descriptions = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
     result = []
     for if_name_index, if_name in if_names:

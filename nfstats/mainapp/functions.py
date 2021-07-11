@@ -51,7 +51,7 @@ def get_flows_file(host, date):
 def get_shell_data(command, regexp):
     result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if result.stderr:
-        logger.error(f"(SH) Return: {result.stderr} Command: '{command}'")
+        logger.critical(f"(SH) Return: {result.stderr} Command: '{command}'")
         raise Exception(f"Error: (SH) Return: {result.stderr} Command: '{command}'")
     return re.findall(regexp, result.stdout.decode('utf-8'))
 

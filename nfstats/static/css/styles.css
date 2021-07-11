@@ -125,7 +125,13 @@ li{
   left: 40%;
 }
 
-.fixed-height-600 {
-	max-height: 600px;
+.fixed-height-table {
+	max-height: 800px;
 	overflow-y: scroll;	
+}
+
+.fixed-height-table thead th { 
+	position: sticky; 
+	top: 0; 
+	z-index: 1; 
 }
