@@ -5,30 +5,27 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from .models import Settings, Host, Interface, Speed
 from .settings_sys import SYS_SETTINGS, VARS, update_globals, logger
+from .functions import get_shell_data
 import json
-import re
-import subprocess
 
 
 @csrf_exempt
 def get_snmp_interfaces(request):
     host = request.POST['host']
     command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.2.2.1.2"
-    command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    if command_res.stderr:
-        logger.critical(f"(SH): {command_res.stderr}")
-        result = JsonResponse({"error": f"Error (SH): {command_res.stderr}"})
+    try:
+        if_names = get_shell_data(command, r'\w+.(\d+)\s\"?([^\"\n]*)\"?')
+    except Exception as e:
+        result = JsonResponse({"error": str(e)})
         result.status_code = 500
         return result
-    if_names = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
     command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.31.1.1.1.18"
-    command_res = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    if command_res.stderr:
-        logger.critical(f"(SH): {command_res.stderr}")
-        result = JsonResponse({"error": f"Error (SH): {command_res.stderr}"})
+    try:
+        if_descriptions = get_shell_data(command, r'\w+.(\d+)\s\"?([^\"\n]*)\"?')
+    except Exception as e:
+        result = JsonResponse({"error": str(e)})
         result.status_code = 500
         return result
-    if_descriptions = re.findall(r'\w+.(\d+)\s\"?([^\"\n]*)\"?', command_res.stdout.decode('utf-8'))
     result = []
     for if_name_index, if_name in if_names:
         for if_descr_index, if_description in if_descriptions:
@@ -69,12 +66,16 @@ def add_interface(request):
         result = JsonResponse({"result": "Interface added"})
         result.status_code = 200
         return result
-    except Exception as err:
-        logger.error(f"(DB): {err}")
-        raise Exception(f"Error: {err}")
+    except Exception as e:
+        logger.critical(f"(DB): {e}")
+        result = JsonResponse({"error": f"Error: (DB): {e}"})
+        result.status_code = 500
+        return result
     else:
         logger.error(f"(DB): Interface already exist ({host} snmpid: {snmpid})")
-        raise Exception(f"Error: Interface already exist ({host} snmpid: {snmpid})")
+        result = JsonResponse({"error": f"Error: (DB): Interface already exist ({host} snmpid: {snmpid})"})
+        result.status_code = 500
+        return result
                 
 
 @csrf_exempt    
@@ -87,10 +88,14 @@ def update_interface(request):
         obj = Interface.objects.get(id=int(interface_id))
     except Interface.DoesNotExist:
         logger.error(f"(DB): Interface does not exist ({host} snmpid: {snmpid})")
-        raise Exception(f"Error: Interface does not exist ({host} snmpid: {snmpid})")
-    except Exception as err:
-        logger.error(f"(DB): {err}")
-        raise Exception(f"Error: {err}")
+        result = JsonResponse({"error": f"Error: (DB): Interface does not exist ({host} snmpid: {snmpid})"})
+        result.status_code = 500
+        return result
+    except Exception as e:
+        logger.critical(f"(DB): {e}")
+        result = JsonResponse({"error": f"Error: (DB): {e}"})
+        result.status_code = 500
+        return result
     else:
         setattr(obj, 'snmpid', int(snmpid))
         setattr(obj, 'name', name)
@@ -109,7 +114,9 @@ def update_interface_sampling(request):
         obj = Interface.objects.get(id=int(interface_id))
     except Interface.DoesNotExist:
         logger.error(f"(DB): Interface does not exist ({host} snmpid: {snmpid})")
-        raise Exception(f"Error: Interface does not exist ({host} snmpid: {snmpid})")
+        result = JsonResponse({"error": f"Error: (DB): Interface does not exist ({host} snmpid: {snmpid})"})
+        result.status_code = 500
+        return result
     else:
         if sampling == 'true':
             setattr(obj, 'sampling', True)
@@ -124,10 +131,17 @@ def update_interface_sampling(request):
 @csrf_exempt  
 def delete_interface(request):
     interface_id = request.POST['id']
-    Interface.objects.get(id=int(interface_id)).delete()
-    result = JsonResponse({"result": "Interface deleted"})
-    result.status_code = 200
-    return result
+    try:
+        Interface.objects.get(id=int(interface_id)).delete()
+    except Interface.DoesNotExist:
+        logger.error(f"(DB): Interface does not exist ({host} name: {name})")
+        result = JsonResponse({"error": f"Error: (DB): Interface does not exist ({host} name: {name})"})
+        result.status_code = 500
+        return result
+    else:       
+        result = JsonResponse({"result": "Interface deleted"})
+        result.status_code = 200
+        return result
     
     
 @csrf_exempt   
@@ -151,12 +165,16 @@ def add_host(request):
         result = JsonResponse({"result": "Host added"})
         result.status_code = 200
         return result
-    except Exception as err:
-        logger.error(f"(DB): {err}")
-        raise Exception(f"Error: {err}")
+    except Exception as e:
+        logger.critical(f"(DB): {e}")
+        result = JsonResponse({"error": f"Error: (DB): {e}"})
+        result.status_code = 500
+        return result
     else:
         logger.error(f"(DB): Host already exist ({host} name: {name})")
-        raise Exception(f"Error: Host already exist ({host} name: {name})")
+        result = JsonResponse({"error": f"Error: (DB): Host already exist ({host} name: {name})"})
+        result.status_code = 500
+        return result
 
 
 @csrf_exempt  
@@ -170,10 +188,14 @@ def update_host(request):
         obj = Host.objects.get(id = host_id)
     except Host.DoesNotExist:
         logger.error(f"(DB): Host does not exist ({host} name: {name})")
-        raise Exception(f"Error: Host does not exist ({host} name: {name})")
-    except Exception as err:
-        logger.error(f"(DB): {err}")
-        raise Exception(f"Error: {err}")
+        result = JsonResponse({"error": f"Error: (DB): Host does not exist ({host} name: {name})"})
+        result.status_code = 500
+        return result
+    except Exception as e:
+        logger.critical(f"(DB): {e}")
+        result = JsonResponse({"error": f"Error: (DB): {e}"})
+        result.status_code = 500
+        return result
     else:
         setattr(obj, 'host', host)
         setattr(obj, 'name', name)
@@ -193,7 +215,9 @@ def delete_host(request):
         Host.objects.get(id=int(host_id)).delete()
     except Host.DoesNotExist:
         logger.error(f"(DB): Host does not exist ({host} name: {name})")
-        raise Exception(f"Error: Host does not exist ({host} name: {name})")
+        result = JsonResponse({"error": f"Error: (DB): Host does not exist ({host} name: {name})"})
+        result.status_code = 500
+        return result
     else:
         result = JsonResponse({"result": "Host deleted"})
         result.status_code = 200
@@ -216,9 +240,11 @@ def update_settings(request):
         except Settings.DoesNotExist:
             obj = Settings(name = name, value = value)
             obj.save()
-        except Exception as err:
-            logger.error(f"(DB): {err}")
-            raise Exception(f"Error: {err}")
+        except Exception as e:
+            logger.critical(f"(DB): {e}")
+            result = JsonResponse({"error": f"Error: (DB): {e}"})
+            result.status_code = 500
+            return result
         else:
             setattr(obj, 'value', value)
             obj.save()

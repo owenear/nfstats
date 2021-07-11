@@ -226,7 +226,12 @@ filter-definition {filter_name}
     command = (f"{VARS['flow_cat']}  {flows_file}* | " 
                f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
                f"{VARS['flow_print']} -f5")
-    result = get_shell_data(command, r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)')
+    try:
+        result = get_shell_data(command, r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)')
+    except Exception as e:
+        result = JsonResponse({"error": str(e)})
+        result.status_code = 500
+        return result
     header = ['Start', 'End', 'Source Interface ID', 'Source IP' , 'Source Port', 
     'Destination Interface ID', 'Destination IP' , 'Destination Port', 
     'Protocols', 'Flows', 'Packets', 'Octets']
