@@ -2,9 +2,19 @@
 The web-based tool for calculating and displaying network traffic statistics for ISPs.
 It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools package to analyse NetFlow data and google-charts for display graphs.
 
-![common](docs/images/common_stats.png)|![bgp_as](docs/images/bgp_as.png)
+<p><img src="docs/images/common_stats.png" width="400" /><img src="docs/images/bgp_as.png" width="400"/></p>
+<p><img src="docs/images/intrface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
 
-### Prerequisites
+## Table of Contents
+
+* [Prerequisites](#prerequisites)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Authors](#authors)
+* [License](#license)
+
+
+## Prerequisites
 - FreeBSD or GNU/Linux
 - flow-tools
 - SNMP Tools
@@ -81,7 +91,7 @@ flow_capture_flags="-z0 -n1439 -N3 -E10G -e0 -S1"
 ```
 Use 'man flow-capture' to read more about it. 
 
-### Installation
+## Installation
 1. Get the repo
 ```
 cd /var/www
@@ -168,3 +178,7 @@ python manage.py migrate
 ## Authors
 
 * **Evgeniy Kolosov** - [owenear](https://github.com/owenear)
+
+## License
+
+NFStats is licensed under the [GPLv3 License]
