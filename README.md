@@ -3,7 +3,7 @@ The web-based tool for calculating and displaying network traffic statistics for
 It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools package to analyse NetFlow data and google-charts for display graphs.
 
 <p><img src="docs/images/common_stats.png" width="400" /><img src="docs/images/bgp_as.png" width="400"/></p>
-<p><img src="docs/images/intrface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
+<p><img src="docs/images/interface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
 
 ## Table of Contents
 
