@@ -2,7 +2,7 @@
 The web-based tool for calculating and displaying network traffic statistics for ISPs.
 It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools package to analyse NetFlow data and google-charts for display graphs.
 
-![common](docs/images/common_stats.png)![bgp_as](docs/images/bgp_as.png)
+![common](docs/images/common_stats.png)|![bgp_as](docs/images/bgp_as.png)
 
 ### Prerequisites
 - FreeBSD or GNU/Linux
