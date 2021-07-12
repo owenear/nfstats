@@ -181,4 +181,4 @@ python manage.py migrate
 
 ## License
 
-NFStats is licensed under the [GPLv3 License]
+NFStats is licensed under the **GPLv3**
