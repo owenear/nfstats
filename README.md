@@ -173,7 +173,13 @@ python manage.py migrate
         WSGIProcessGroup nfstats.example.com
 </VirtualHost>
 ```
-7. Go to nfstats.example.com, add hosts, interfaces and enjoy!
+7. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute
+```
+*/1 * * * * /var/www/nfstats/venv/bin/python /www/nfstats/nfstats/bin/interface_speed.py
+```
+
+## Usage
+
 
 ## Authors
 
