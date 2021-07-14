@@ -199,8 +199,8 @@ def get_ip_chart_data(request):
 @csrf_exempt
 def get_ip_traffic_data(request):
     host = request.POST['host']   
-    date = date_tranform(request.POST['date'])
-    date_db = date_tranform_db(request.POST['date'])
+    date_db = dateparse.parse_datetime(request.POST['date'])
+    date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
     ip_type = request.POST['ip_type']
     ip_addr = request.POST['ip_addr'] 
     filter_file = Path(VARS['flow_filters_dir']).joinpath(f"filter_ip_traffic_{request.session['session_id']}.cfg")
