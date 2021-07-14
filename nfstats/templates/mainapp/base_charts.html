@@ -36,11 +36,18 @@
 				<div class="input-group-prepend">
 					<label class="input-group-text" for="date-select">Date:</label>
 				</div>
-				<input type="text" class="datepicker-here form-control" id="date-select" name="date" value="{{ date }}"
-				data-position="bottom left"
-				data-timepicker="true"
-				data-startdate="{{ date }}"
-				>
+				<input type="text" class="form-control" id="date-select" name="date">
+				<script>
+					startDate = new Date('{{ date }}');
+					$('#date-select').datepicker({ 
+						timepicker: true,
+						position : "bottom left",
+						dateFormat: "dd.mm.yyyy",
+						timeFormat : "hh:ii",
+						startDate: startDate, 
+					});	
+					$('#date-select').val(startDate.toLocaleDateString('ru-RU') + " " + startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+				</script>
 			</div>
 			{% block page-controls %}
 			
@@ -59,3 +66,4 @@
 
 
 {% endblock %}
+

@@ -124,7 +124,7 @@ google.charts.setOnLoadCallback(getChartsData);
 function getChartsData() {
 	if (validate()) {
 	var host = $('#host-select').val();
-	var date = $('#date-select').val();
+	var date = new Date(dateToISO($('#date-select').val()));
 	var src_as = $('#srcas-input').val();
 	var dst_as = $('#dstas-input').val();
 	var src_port = $('#srcport-input').val();
@@ -140,7 +140,7 @@ function getChartsData() {
 		  dataType: "json",
 		  data: {
 			'host' : host,
-			'date' : date,
+			'date' : date.toISOString(),
 			'direction' : direction,
 			'ip_type' : ip_type,
 			'src_as' : src_as,

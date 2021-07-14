@@ -113,6 +113,14 @@
 			});
 		});
 
+
+		function dateToISO(date){
+			date_time_arr = date.split(" ");
+			date_part_arr = date_time_arr[0].split(".");
+			date_iso = date_part_arr[2] + "-" + date_part_arr[1] + "-" + date_part_arr[0] + "T" + date_time_arr[1];
+			return date_iso;
+		} 
+
     </script>
 </html>
 

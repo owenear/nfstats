@@ -8,14 +8,14 @@ from pathlib import Path
 from .functions import generate_ip_flows_data, generate_as_flows_data, generate_interface_flows_sum, generate_interface_flows_data
 from .functions import get_shell_data, date_tranform, date_tranform_db, put_interface_names
 import csv
-
+from django.utils import dateparse, timezone
 
 @csrf_exempt
 def get_pie_chart_data(request):
     if request.POST:
         host = request.POST['host'] 
-        date = date_tranform(request.POST['date'])
-        date_db = date_tranform_db(request.POST['date'])
+        date_db = dateparse.parse_datetime(request.POST['date'])
+        date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
         direction = request.POST['direction'] 
         interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
         data = {}
@@ -51,8 +51,8 @@ def get_pie_chart_data(request):
 @csrf_exempt
 def get_interface_chart_data(request):
     host = request.POST['host']   
-    date = date_tranform(request.POST['date'])
-    date_db = date_tranform_db(request.POST['date'])
+    date_db = dateparse.parse_datetime(request.POST['date'])
+    date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
     filter_direction = request.POST['direction']
     snmpid = request.POST['interface']
     report_direction = 'output' if filter_direction == 'input' else 'input'
@@ -93,8 +93,8 @@ def get_interface_chart_data(request):
 def get_as_chart_data(request):
     if request.POST:
         host = request.POST['host'] 
-        date = date_tranform(request.POST['date'])
-        date_db = date_tranform_db(request.POST['date'])
+        date_db = dateparse.parse_datetime(request.POST['date'])
+        date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
         src_as = request.POST['src-as'] 
         dst_as = request.POST['dst-as']
         direction = request.POST['direction']  
@@ -149,8 +149,8 @@ def get_as_chart_data(request):
 @csrf_exempt
 def get_ip_chart_data(request):
     host = request.POST['host']   
-    date = date_tranform(request.POST['date'])
-    date_db = date_tranform_db(request.POST['date'])
+    date_db = dateparse.parse_datetime(request.POST['date'])
+    date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
     direction = request.POST['direction']
     src_as = request.POST['src_as'] 
     dst_as = request.POST['dst_as']

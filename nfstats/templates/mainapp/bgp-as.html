@@ -41,7 +41,7 @@ $(function(e){
 function getChartsData() {
 	if (validate(true)) {
 		var host = $('#host-select').val();
-		var date = $('#date-select').val();
+		var date = new Date(dateToISO($('#date-select').val()));
 		var src_as = $('#srcas-input').val();
 		var dst_as = $('#dstas-input').val();
 		var direction = $('#direction-select').val();
@@ -51,7 +51,7 @@ function getChartsData() {
 				  dataType: "json",
 				  data: {
 					'host' : host,
-					'date' : date,
+					'date' : date.toISOString(),
 					'direction' : direction,
 					'src-as' : src_as,
 					'dst-as' : dst_as
