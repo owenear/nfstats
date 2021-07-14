@@ -136,11 +136,38 @@ Apache with mod-wsgi-py3 config example
 </VirtualHost>
 ```
 **8. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
+Script records the interface speed in bps to the DB. This is used for the recalculating the data received from 
+netflow collector. So you can use not 1:1 sample rate (sample each packet) on your network devices, but for example 1:2000 packets, 
+save the device cpu and get the truthful static data.
 ```
 */1 * * * * /var/www/nfstats/venv/bin/python /www/nfstats/nfstats/bin/interface_speed.py
 ```
 
 ## Usage
+
+1. When you first open the nfstats.example.com, you will be redirected to the settings page.
+
+On the "Host" tab add the network devices with the configured netflow v5. 
+Specify the path to the flow-capture files and be sure it's readable by the user that’s running the Django application. 
+<p><img src="docs/images/add_host.png" width="800" /></p>
+
+2. Go to the "System" tab and specify SNMP community for the SNMP v2c protocol and other parameters.
+"History (days)" - how long the speed data will be stored in the DB. 
+It's depends on the flow-capture settings and the amount of data it receives from the devices.
+
+<p><img src="docs/images/system.png" width="800" /></p>
+
+3. Go to the "Interface" tab, click the the "Read SNMP data" and add interface information to the db (Only interfaces with a configured "description" are displayed)
+
+<p><img src="docs/images/add_interf.png" width="800" /></p>
+
+4. Check interfaces with sampling enabled (usually it's uplink interfaces)
+
+<p><img src="docs/images/interf_sampling.png" width="800" /></p>
+
+5. Finally everything is ready! Open nfstats.example.com and check the stats.
+
+<p><img src="docs/images/main_calendar.png" width="800" /></p>
 
 ## Authors
 
