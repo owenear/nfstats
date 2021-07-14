@@ -6,7 +6,7 @@ from .settings_sys import SYS_SETTINGS, VARS, logger
 import json
 from pathlib import Path
 from .functions import generate_ip_flows_data, generate_as_flows_data, generate_interface_flows_sum, generate_interface_flows_data
-from .functions import get_shell_data, date_tranform, date_tranform_db, put_interface_names
+from .functions import get_shell_data, put_interface_names
 import csv
 from django.utils import dateparse, timezone
 

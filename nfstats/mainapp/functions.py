@@ -6,16 +6,6 @@ import re
 import subprocess
 
 
-def date_tranform(date):
-    date_re = re.match(r'(\d+).(\d+).(\d+)\s(\d+):(\d+)', date)
-    return f"{date_re.group(3)}-{date_re.group(2)}-{date_re.group(1)}.{date_re.group(4)}{date_re.group(5)}"
-
-    
-def date_tranform_db(date):
-    date_re = re.match(r'(\d+).(\d+).(\d+)\s(\d+):(\d+)', date)
-    return f"{date_re.group(3)}-{date_re.group(2)}-{date_re.group(1)} {date_re.group(4)}:{date_re.group(5)}"
-
-
 def create_flow_filter(direction, interfaces, filter_file, filter_name):
     filter_str = f'''filter-primitive {filter_name}
   type ifindex
