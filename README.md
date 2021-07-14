@@ -27,7 +27,8 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 See "docs/" in the repo for the help with installation flow-tools.
 
 ## Installation
-**1. Get the repo and prepare virtual enviroment **
+
+**1. Get the repo and prepare virtual enviroment**
 ```
 cd /var/www
 git clone https://github.com/owenear/nfstats.git
@@ -121,7 +122,8 @@ python manage.py migrate
  ```
 **5. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.**
  
-**6. Add NFstats to your Web Server and restart it**
+**6. Add NFstats to your Web Server and restart it** 
+ 
 Apache with mod-wsgi-py3 config example
 ```
 <VirtualHost *:80>
