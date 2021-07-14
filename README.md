@@ -58,7 +58,7 @@ cd /var/www/nfstats
 source venv/bin/activate
 pip install mysqlclient
 ```
-**2. Create DB**
+**3. Create DB**
  - Postgresql
 ```
 postgres=# create database nfstats_db;
@@ -72,7 +72,7 @@ mysql> create user 'nfstats_dbuser'@'localhost' IDENTIFIED BY 'nfstatsdbpass';
 mysql> GRANT ALL PRIVILEGES ON nfstats_db . * TO 'nfstats_dbuser'@'localhost';
 mysql> FLUSH PRIVILEGES;
 ```
-**3. Create settings.py file**
+**4. Create settings.py file**
  - copy
 ```
 cd /var/www/nfstats/nfstats/nfstats
@@ -99,7 +99,7 @@ ALLOWED_HOSTS = [ 'nfstats.example.com' ]
 ```
 TIME_ZONE = 'UTC'
 ```
-**4. Start Django migrations and create DB schema**
+**5. Start Django migrations and create DB schema**
  - comment project urls in nfstats/nfstats/nfstats/urls.py
 ```
 urlpatterns = [
@@ -120,9 +120,9 @@ python manage.py migrate
     path('', include('mainapp.urls')),
 ]
  ```
-**5. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.**
+**6. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.**
  
-**6. Add NFstats to your Web Server and restart it** 
+**7. Add NFstats to your Web Server and restart it** 
  
 Apache with mod-wsgi-py3 config example
 ```
@@ -135,7 +135,7 @@ Apache with mod-wsgi-py3 config example
         WSGIProcessGroup nfstats.example.com
 </VirtualHost>
 ```
-**7. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
+**8. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
 ```
 */1 * * * * /var/www/nfstats/venv/bin/python /www/nfstats/nfstats/bin/interface_speed.py
 ```
