@@ -27,7 +27,7 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 See "docs/" in the repo for the help with installation flow-tools.
 
 ## Installation
-1. Get the repo and prepare virtual enviroment 
+**1. Get the repo and prepare virtual enviroment **
 ```
 cd /var/www
 git clone https://github.com/owenear/nfstats.git
@@ -36,7 +36,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-2. Install DB engine
+**2. Install DB engine**
  - if you use Postresql:
 ```
 cd /var/www/nfstats
@@ -57,7 +57,7 @@ cd /var/www/nfstats
 source venv/bin/activate
 pip install mysqlclient
 ```
-2. Create DB 
+**2. Create DB**
  - Postgresql
 ```
 postgres=# create database nfstats_db;
@@ -71,7 +71,7 @@ mysql> create user 'nfstats_dbuser'@'localhost' IDENTIFIED BY 'nfstatsdbpass';
 mysql> GRANT ALL PRIVILEGES ON nfstats_db . * TO 'nfstats_dbuser'@'localhost';
 mysql> FLUSH PRIVILEGES;
 ```
-3. Create settings.py file
+**3. Create settings.py file**
  - copy
 ```
 cd /var/www/nfstats/nfstats/nfstats
@@ -98,7 +98,7 @@ ALLOWED_HOSTS = [ 'nfstats.example.com' ]
 ```
 TIME_ZONE = 'UTC'
 ```
-4. Start Django migrations and create DB schema
+**4. Start Django migrations and create DB schema**
  - comment project urls in nfstats/nfstats/nfstats/urls.py
 ```
 urlpatterns = [
@@ -119,9 +119,9 @@ python manage.py migrate
     path('', include('mainapp.urls')),
 ]
  ```
-5. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.
+**5. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.**
  
-6. Add NFstats to your Web Server and restart it
+**6. Add NFstats to your Web Server and restart it**
 Apache with mod-wsgi-py3 config example
 ```
 <VirtualHost *:80>
@@ -133,7 +133,7 @@ Apache with mod-wsgi-py3 config example
         WSGIProcessGroup nfstats.example.com
 </VirtualHost>
 ```
-7. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute
+**7. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
 ```
 */1 * * * * /var/www/nfstats/venv/bin/python /www/nfstats/nfstats/bin/interface_speed.py
 ```
