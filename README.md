@@ -20,9 +20,10 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 - SNMP Tools (and configured snmp v2c protocol on network devices)
 - Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
-  - PostgreSQL 9.6 and higher (psycopg2 2.5.4 or higher is required) 
+  - PostgreSQL 9.6 and higher
   - MySQL 5.7 and higher.
   - Oracle Database Server versions 12.2 and higher. Version 6.0 or higher of the cx_Oracle Python driver is required. 
+- Webserver with support Python projects (WSGI)
   
 See "docs/" in the repo for the help with installation flow-tools.
 
@@ -46,8 +47,7 @@ pip install psycopg2-binary
 ```
  - if MySQL and Ubuntu:
 ```
-sudo apt install python3-pip
-sudo pip install mysqlclient
+sudo apt install python-dev default-libmysqlclient-dev
 cd /var/www/nfstats
 source venv/bin/activate
 pip install mysqlclient
