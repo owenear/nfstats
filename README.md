@@ -18,7 +18,7 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 - FreeBSD or GNU/Linux
 - flow-tools (and configured netflow v5 protocol on network devices)
 - SNMP Tools (and configured snmp v2c protocol on network devices)
-- Python 3.6, Django 3.2 
+- Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
   - PostgreSQL 9.6 and higher (psycopg2 2.5.4 or higher is required) 
   - MySQL 5.7 and higher.
@@ -27,7 +27,7 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 See "docs/" in the repo for the help with installation flow-tools.
 
 ## Installation
-1. Get the repo
+1. Get the repo and prepare virtual enviroment 
 ```
 cd /var/www
 git clone https://github.com/owenear/nfstats.git
@@ -36,15 +36,40 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-for the Postresql
+2. Install DB engine
+ - if you use Postresql:
 ```
+cd /var/www/nfstats
+source venv/bin/activate
 pip install psycopg2-binary
 ```
-2. Create DB (Postgresql example)
+ - if MySQL and Ubuntu:
+```
+sudo apt install python3-pip
+sudo pip install mysqlclient
+cd /var/www/nfstats
+source venv/bin/activate
+pip install mysqlclient
+```
+ - if MySQL and FreeBSD:
+```
+cd /var/www/nfstats
+source venv/bin/activate
+pip install mysqlclient
+```
+2. Create DB 
+ - Postgresql
 ```
 postgres=# create database nfstats_db;
 postgres=# create user nfstats_dbuser with encrypted password 'nfstatsdbpass';
 postgres=# grant all ON DATABASE nfstats_db to nfstats_dbuser;
+```
+ - MySQL
+```
+mysql> create database nfstats_db;
+mysql> create user 'nfstats_dbuser'@'localhost' IDENTIFIED BY 'nfstatsdbpass';
+mysql> GRANT ALL PRIVILEGES ON nfstats_db . * TO 'nfstats_dbuser'@'localhost';
+mysql> FLUSH PRIVILEGES;
 ```
 3. Create settings.py file
  - copy
@@ -97,7 +122,7 @@ python manage.py migrate
 5. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.
  
 6. Add NFstats to your Web Server and restart it
- Apache with mod-wsgi-py3 config example
+Apache with mod-wsgi-py3 config example
 ```
 <VirtualHost *:80>
 	ServerName nfstats.example.com
