@@ -169,6 +169,14 @@ It's depends on the flow-capture settings and the amount of data it receives fro
 
 <p><img src="docs/images/main_calendar.png" width="800" /></p>
 
+ - "Common Stats" tab: interactive pie charts with the Source/Destination AS stats for the interfaces with sampling enabled.
+   Change the Input/Output traffic (relative to the interface) with the "Direction" option.
+   You can click on a chart to get the RIPE info about particular AS number. 
+ - "BGP AS" tab: interactive sankey chart for the particular AS (source or/and destination) that shows the distribution of traffic by interfaces.
+ - "Interface" tab: interactive sankey chart for the interfaces (only interface with NOT sampling enabled is accepted!) that shows the distribution of traffic by AS. 
+ - "IP" tab: interactive bar chart with the top IP addresses stats by various parameters. You can click on a chart to get the RIPE info about particular IP address.
+    And also click the "Show traffic" button to view the extended flows data. 
+
 ## Authors
 
 * **Evgeniy Kolosov** - [owenear](https://github.com/owenear)
