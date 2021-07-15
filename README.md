@@ -176,7 +176,7 @@ It's depends on the flow-capture settings and the amount of data it receives fro
  - "BGP AS" tab: interactive sankey chart for the particular AS (source or/and destination) that shows the distribution of traffic by interfaces.
  - "Interface" tab: interactive sankey chart for the interfaces (only interface with NOT sampling enabled is accepted!) that shows the distribution of traffic by AS. 
  - "IP" tab: interactive bar chart with the top IP addresses stats by various parameters. You can click on a chart to get the RIPE info about particular IP address.
-    And also click the "Show traffic" button to view the extended flows data. 
+    Click the "Show traffic" button to view the extended flows data. 
 
 ## Authors
 
