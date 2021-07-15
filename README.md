@@ -82,7 +82,8 @@ cp settings.py.sample settings.py
 ```
 DATABASES = {
     'default': {
-       'ENGINE': 'django.db.backends.postgresql_psycopg2',
+       #'ENGINE': 'django.db.backends.mysql',
+       'ENGINE': 'django.db.backends.postgresql_psycopg2',    
        'NAME': 'nfstats_db',
        'USER' : 'nfstats_dbuser',
        'PASSWORD' : 'nfstatsdbpass',

@@ -80,9 +80,10 @@ WSGI_APPLICATION = 'nfstats.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'nfstatsdb',
-        'USER' : 'nfstats',
-        'PASSWORD' : 'TzdBt6C69f6RKnZc',
+        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'nfstats_db',
+        'USER' : 'nfstats_dbuser',
+        'PASSWORD' : 'nfstatsdbpass',
         'HOST' : 'localhost',
         'PORT' : '3306',
     }
@@ -113,6 +114,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
+#TIME_ZONE = 'Europe/Moscow'
+#TIME_ZONE = 'Europe/Kiev'
 
 USE_I18N = True
 
