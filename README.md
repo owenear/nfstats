@@ -122,8 +122,12 @@ python manage.py migrate
 ]
  ```
 **6. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.**
+
+**7. Check other permissions:**
+  - the "/var/www/nfstats" dir must be writable by the user that’s running the Django application
+  - the "/var/www/nfstats/nfstats/flow-tools" dir must be writable by the flow-tools user.
  
-**7. Add NFstats to your Web Server and restart it** 
+**8. Add NFstats to your Web Server and restart it** 
  
 Apache with mod-wsgi-py3 config example
 ```
@@ -136,7 +140,7 @@ Apache with mod-wsgi-py3 config example
         WSGIProcessGroup nfstats.example.com
 </VirtualHost>
 ```
-**8. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
+**9. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
 Script records the interface speed in bps to the DB. This is used for the recalculating the data received from 
 netflow collector. So you can use not 1:1 sample rate (sample each packet) on your network devices, but for example 1:2000 packets, 
 save the device cpu and get the truthful static data.
