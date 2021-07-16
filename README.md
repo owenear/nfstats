@@ -17,7 +17,7 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 ## Prerequisites
 - FreeBSD or GNU/Linux
 - flow-tools (and configured netflow v5 protocol on network devices)
-- SNMP Tools (and configured snmp v2c protocol on network devices)
+- SNMP client with snmpget snmpwalk tools (and configured snmp v2c protocol on network devices)
 - Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
   - PostgreSQL 9.6 and higher
