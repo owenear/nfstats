@@ -158,7 +158,7 @@ def add_host(request):
     description = request.POST['description']
     flow_path = request.POST['flow_path']
     try:
-        obj = Host.objects.get(Q(name = name)|Q(host = host))
+        obj = Host.objects.get(Q(name = name))
     except Host.DoesNotExist:
         obj = Host(name = name, host = host, description = description, flow_path = flow_path)
         obj.save()
@@ -229,7 +229,8 @@ def update_settings(request):
     vars = { 
         'log_dir' :  request.POST['log_dir'], 
         'logging_level' :  request.POST['logging_level'], 
-        'flowtools_bin' : request.POST['flowtools_bin'],
+        'flow_collector' : request.POST['flow_collector'], 
+        'flow_collector_bin' : request.POST['flow_collector_bin'],
         'snmp_bin' : request.POST['snmp_bin'],
         'snmp_com' : request.POST['snmp_com'],
         'history_days' : request.POST['history_days'],

@@ -161,7 +161,7 @@ function getChartsData() {
 
 function showIpTraffic(ip){
 	var host = $('#host-select').val();
-	var date = $('#date-select').val();
+	var date = new Date(dateToISO($('#date-select').val()));
 	var ip_type = $('#ip-type-select').val();
 	$('#ip-traffic-export-btn').attr('onClick', 'downloadIpTraffic(\''+ ip +'\')' );
 	$.ajax({
@@ -170,7 +170,7 @@ function showIpTraffic(ip){
 		  dataType: "json",
 		  data: {
 			'host' : host,
-			'date' : date,
+			'date' : date.toISOString(),
 			'ip_type' : ip_type,
 			'ip_addr' : ip
 		  },
@@ -190,7 +190,8 @@ function showIpTraffic(ip){
 
 
 function downloadIpTraffic(ip){
-	window.open('download_ip_traffic_data?date=' + $('#date-select').val() + '&ip=' + ip, target = '_self');
+	var date = new Date(dateToISO($('#date-select').val()));
+	window.open('download_ip_traffic_data?date=' + date.toISOString() + '&ip=' + ip, target = '_self');
 }
 
 

@@ -15,7 +15,8 @@ def get_pie_chart_data(request):
     if request.POST:
         host = request.POST['host'] 
         date_db = dateparse.parse_datetime(request.POST['date'])
-        date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
+        date_format_str = "%Y-%m-%d.%H%M" if SYS_SETTINGS['flow_collector'] == 'flow-tools' else "%Y%m%d%H%M"
+        date = timezone.localtime(date_db).strftime(date_format_str)
         direction = request.POST['direction'] 
         interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
         data = {}
@@ -52,7 +53,8 @@ def get_pie_chart_data(request):
 def get_interface_chart_data(request):
     host = request.POST['host']   
     date_db = dateparse.parse_datetime(request.POST['date'])
-    date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
+    date_format_str = "%Y-%m-%d.%H%M" if SYS_SETTINGS['flow_collector'] == 'flow-tools' else "%Y%m%d%H%M"
+    date = timezone.localtime(date_db).strftime(date_format_str)
     filter_direction = request.POST['direction']
     snmpid = request.POST['interface']
     report_direction = 'output' if filter_direction == 'input' else 'input'
@@ -94,7 +96,8 @@ def get_as_chart_data(request):
     if request.POST:
         host = request.POST['host'] 
         date_db = dateparse.parse_datetime(request.POST['date'])
-        date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
+        date_format_str = "%Y-%m-%d.%H%M" if SYS_SETTINGS['flow_collector'] == 'flow-tools' else "%Y%m%d%H%M"
+        date = timezone.localtime(date_db).strftime(date_format_str)
         src_as = request.POST['src-as'] 
         dst_as = request.POST['dst-as']
         direction = request.POST['direction']  
@@ -150,7 +153,8 @@ def get_as_chart_data(request):
 def get_ip_chart_data(request):
     host = request.POST['host']   
     date_db = dateparse.parse_datetime(request.POST['date'])
-    date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
+    date_format_str = "%Y-%m-%d.%H%M" if SYS_SETTINGS['flow_collector'] == 'flow-tools' else "%Y%m%d%H%M"
+    date = timezone.localtime(date_db).strftime(date_format_str)
     direction = request.POST['direction']
     src_as = request.POST['src_as'] 
     dst_as = request.POST['dst_as']
@@ -200,7 +204,8 @@ def get_ip_chart_data(request):
 def get_ip_traffic_data(request):
     host = request.POST['host']   
     date_db = dateparse.parse_datetime(request.POST['date'])
-    date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
+    date_format_str = "%Y-%m-%d.%H%M" if SYS_SETTINGS['flow_collector'] == 'flow-tools' else "%Y%m%d%H%M"
+    date = timezone.localtime(date_db).strftime(date_format_str)
     ip_type = request.POST['ip_type']
     ip_addr = request.POST['ip_addr'] 
     filter_file = Path(VARS['flow_filters_dir']).joinpath(f"filter_ip_traffic_{request.session['session_id']}.cfg")
@@ -223,15 +228,25 @@ filter-definition {filter_name}
         result.status_code = 500
         return result
     
-    command = (f"{VARS['flow_cat']}  {flows_file}* | " 
-               f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
-               f"{VARS['flow_print']} -f5")
-    try:
-        result = get_shell_data(command, r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)')
-    except Exception as e:
-        result = JsonResponse({"error": str(e)})
-        result.status_code = 500
-        return result
+    if SYS_SETTINGS['flow_collector'] == 'flow-tools':
+        command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+                f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
+                f"{VARS['flow_print']} -f5")
+        try:
+            result = get_shell_data(command, r'\d+.(\d+:\d+:\d+).\d+\s\d+.(\d+:\d+:\d+).\d+\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+.\d+.\d+.\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)')
+        except Exception as e:
+            result = JsonResponse({"error": str(e)})
+            result.status_code = 500
+            return result
+    else:
+        ip_type_key = 'src' if ip_type == 'source' else 'dst'
+        command = f"{VARS['nfdump']} -r {flows_file} -N -q -o 'fmt:%ts,%te,%in,%sa,%sp,%out,%da,%dp,%pr,%fl,%pkt,%byt' '{ip_type_key} ip {ip_addr}'"
+        try:
+            result = get_shell_data(command, r'\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+)\s*,\s*(\d+),\s*(\d+),\s*(\d+)')
+        except Exception as e:
+            result = JsonResponse({"error": str(e)})
+            result.status_code = 500
+            return result
     header = ['Start', 'End', 'Source Interface ID', 'Source IP' , 'Source Port', 
     'Destination Interface ID', 'Destination IP' , 'Destination Port', 
     'Protocols', 'Flows', 'Packets', 'Octets']
@@ -245,7 +260,8 @@ filter-definition {filter_name}
 
 @csrf_exempt
 def download_ip_traffic_data(request):
-    date = date_tranform(request.GET['date'])
+    date_db = dateparse.parse_datetime(request.GET['date'])
+    date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
     ip = request.GET['ip']
     file_path = Path(VARS['flow_filters_dir']).joinpath(f"ip_traffic_data_{request.session['session_id']}.csv")
     with open(file_path, 'rb') as f:

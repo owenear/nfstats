@@ -9,9 +9,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SYS_SETTINGS = { 
     'log_dir' :  '/var/log',
     'log_type' : 'file',
+    'flow_collector' : 'flow-tools',
     'logging_level' : 'DEBUG',
     'log_size' : 50000,
-    'flowtools_bin' : '/usr/local/flow-tools/bin',
+    'flow_collector_bin' : '/usr/local/bin/',
     'snmp_bin' : '/usr/bin',
     'snmp_com' : 'public',
     'snmp_ver' : '2c',
@@ -57,11 +58,12 @@ def set_vars():
         'log_file' : Path(SYS_SETTINGS['log_dir']).joinpath('nfstats.log'),
         'snmp_get' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpget'),
         'snmp_walk' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpwalk'),
-        'flow_cat' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-cat'),
-        'flow_nfilter' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-nfilter'),
-        'flow_filter' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-filter'),
-        'flow_report' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-report'),
-        'flow_print' : Path(SYS_SETTINGS['flowtools_bin']).joinpath('flow-print'),
+        'flow_cat' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-cat'),
+        'flow_nfilter' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-nfilter'),
+        'flow_filter' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-filter'),
+        'flow_report' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-report'),
+        'flow_print' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-print'),
+        'nfdump' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('nfdump'),
     })
     Path(VARS['octets_files_dir']).mkdir(parents=True, exist_ok=True)
     Path(VARS['flow_filters_dir']).mkdir(parents=True, exist_ok=True)

@@ -26,9 +26,18 @@
 						</div>
 					</div>
 					<div class="row mt-2">
-						<div class="col">Flow Tools Bin Dir:</div>
-						<div class="col"><input  id="flowtools_bin" type="text" class="form-control need-validate" 
-							value="{{ settings.flowtools_bin }}">
+						<div class="col">NetFlow Collector:</div>
+						<div class="col">
+							<select class="custom-select" id="flow_collector">
+								<option value="flow-tools" {% if  settings.flow_collector == 'flow-tools' %} selected {% endif %}>flow-tools</option>
+								<option value="nfdump" {% if  settings.flow_collector == 'nfdump' %} selected {% endif %}>nfdump</option>
+							</select>
+						</div>
+					</div>
+					<div class="row mt-2">
+						<div class="col">NetFlow Collector Bin Dir:</div>
+						<div class="col"><input  id="flow_collector_bin" type="text" class="form-control need-validate" 
+							value="{{ settings.flow_collector_bin }}">
 						</div>
 					</div>
 					<div class="row mt-2">
@@ -73,7 +82,8 @@ function updateSettingsVar() {
 				data: {
 					'log_dir' : $('#log_dir').val(),
 					'logging_level' : $('#logging_level').val(),
-					'flowtools_bin' : $('#flowtools_bin').val(),
+					'flow_collector_bin' : $('#flow_collector_bin').val(),
+					'flow_collector' : $('#flow_collector').val(),
 					'snmp_bin' : $('#snmp_bin').val(),
 					'snmp_com' : $('#snmp_com').val(),
 					'history_days' : $('#history_days').val(),
