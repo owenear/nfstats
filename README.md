@@ -1,6 +1,6 @@
 # NFStats
 The web-based tool for calculating and displaying network traffic statistics for ISPs.
-It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools package to analyse NetFlow data and google-charts for display graphs.
+It can use flow-tools or nfdump utilities to analyse NetFlow data and google-charts for display graphs.
 
 <p><img src="docs/images/common_stats.png" width="400" /><img src="docs/images/bgp_as.png" width="400"/></p>
 <p><img src="docs/images/interface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
@@ -16,7 +16,7 @@ It uses flow-capture, flow-report, flow-nfilter, flow-print from flow-tools pack
 
 ## Prerequisites
 - FreeBSD or GNU/Linux
-- flow-tools (and configured netflow v5 protocol on network devices)
+- flow-tools or nfdump
 - SNMP client with snmpget snmpwalk tools (and configured snmp v2c protocol on network devices)
 - Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
