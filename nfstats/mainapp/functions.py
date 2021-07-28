@@ -21,11 +21,15 @@ filter-definition {filter_name}
 
 
 def create_nfdump_filter(direction, interfaces):
-    filter_str = "( "
-    for interface in interfaces:
-        filter_str += f"{direction} if {interface.snmpid} or "
-    return filter_str[:-3] + ")"
-
+    if interfaces:
+        filter_str = "( "
+        for interface in interfaces:
+            filter_str += f"{direction} if {interface.snmpid} or "
+        return filter_str[:-3] + ")"
+    else:
+        logger.error(f"Not found 'sampling' interfaces in the DB. Check at least one interface as 'sampling' in the settings!")
+        raise Exception(f"Error: Not found 'sampling' interfaces in the DB. Check at least one interface as 'sampling' in the settings!")
+    
 
 def put_interface_names(host, snmpid):
     interface = Interface.objects.filter(host__host = host, snmpid = int(snmpid)).first()
