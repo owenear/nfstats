@@ -16,7 +16,7 @@ It can use flow-tools or nfdump utilities to analyse NetFlow data and google-cha
 
 ## Prerequisites
 - FreeBSD or GNU/Linux
-- flow-tools or nfdump (configure netflow collectors to rotate files every minute. See examples in docs)
+- flow-tools or nfdump (configure netflow collectors to rotate files every minute. Configure NetFlow (v5/v9/ipfix) on a network device with active timeout 60 sec. See examples in docs)
 - SNMP client with snmpget snmpwalk tools (and configured snmp v2c protocol on network devices)
 - Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
