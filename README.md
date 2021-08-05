@@ -16,7 +16,7 @@ It can use flow-tools or nfdump utilities to analyse NetFlow data and google-cha
 
 ## Prerequisites
 - FreeBSD or GNU/Linux
-- flow-tools or nfdump (configure netflow collectors to rotate files every minute. See examples in docs)
+- flow-tools or nfdump (configure netflow collectors to rotate files every minute. Configure NetFlow (v5/v9/ipfix) on a network device with active timeout 60 sec. See examples in docs)
 - SNMP client with snmpget snmpwalk tools (and configured snmp v2c protocol on network devices)
 - Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
@@ -156,7 +156,7 @@ On the "Host" tab add the network devices with the configured netflow v5.
 Specify the path to the flow-capture files and be sure it's readable by the user that’s running the Django application. 
 <p><img src="docs/images/add_host.png" width="800" /></p>
 
-2. Go to the "System" tab and specify SNMP community for the SNMP v2c protocol and other parameters.
+2. Go to the "System" tab and select you netflow collector (flow-tools or nfdump), specify SNMP community for the SNMP v2c protocol and other parameters.
 "History (days)" - how long the speed data will be stored in the DB. 
 It's depends on the flow-capture settings and the amount of data it receives from the devices.
 
