@@ -6,6 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .settings_sys import SYS_SETTINGS
 from pprint import pprint
 from random import getrandbits
+from collections import namedtuple
+from django.db.models import Q
+import re
 
 
 @csrf_exempt
@@ -16,10 +19,18 @@ def common(request):
     if hosts:
         host_selected = Host.objects.filter(host=request.GET['host']).first() if request.GET.get('host') else hosts[0]
         direction = request.GET['direction'] if request.GET.get('direction') else 'input'
-        interfaces = Interface.objects.filter(host=host_selected, sampling=True).order_by('snmpid')
+        if request.GET.get('aggregate'):
+            Aggregate_interface = namedtuple("Aggregate_interface", "name description snmpid")
+            snmpid_aggregate = re.findall(r'\d+', request.GET.get('aggregate'))
+            name_aggregate = ''
+            for snmpid in snmpid_aggregate:
+                name_aggregate += Interface.objects.get(host=host_selected, sampling=True, snmpid = snmpid).name + ', '
+            interfaces = [ Aggregate_interface(name_aggregate[:-2], "Aggregate Interface", "aggregate") ]
+        else:
+            interfaces = Interface.objects.filter(host=host_selected, sampling=True).order_by('snmpid')
         date = (timezone.now() - timedelta(minutes=2)).isoformat()
         return render(request, "mainapp/common.html", {'date' : date, 'hosts' : hosts, 'host_selected' : host_selected,
-                                                      'interfaces' : interfaces, 'direction' : direction} )
+                                                      'interfaces' : interfaces, 'direction' : direction, 'aggregate' : request.GET.get('aggregate') } )
     else:
         return render(request, "mainapp/settings/settings_hosts.html", {'hosts' : hosts} )    
 

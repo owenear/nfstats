@@ -4,6 +4,7 @@ from .settings_sys import SYS_SETTINGS, VARS, logger
 from pathlib import Path
 import re
 import subprocess
+from collections import namedtuple
 
 
 def create_flow_filter(direction, interfaces, filter_file, filter_name):
@@ -58,17 +59,23 @@ def get_shell_data(command, regexp):
 
 
 
-def generate_interface_flows_data(session_id, filter_direction, report_direction, date, host, snmpid, as_type):
-    interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
+def generate_interface_flows_data(session_id, filter_direction, report_direction, date, host, snmpid, as_type, snmpid_aggregate = None):
+    if snmpid_aggregate:
+        Aggregate_interface = namedtuple("Aggregate_interface", "snmpid")
+        interfaces = [ Aggregate_interface(snmpid) for snmpid in snmpid_aggregate ]
+    else:
+        interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
+    
     flows_file = get_flows_file(host, date)
 
     if SYS_SETTINGS['flow_collector'] == 'flow-tools':
         report_file = os.path.join(VARS['flow_filters_dir'], f'report_pie_{session_id}.cfg')
         direction_key = 'i' if filter_direction == 'input' else 'I' 
-        report_name = f"{snmpid}-if-report"      
+        report_name = f"{snmpid}-if-report"
+        report_type = f"{as_type}-as" if snmpid_aggregate else f"{report_direction}-interface/{as_type}-as"    
         with open(report_file, 'w', encoding='utf8') as f: 
             report = f'''stat-report {report_name}
-  type {report_direction}-interface/{as_type}-as
+  type {report_type}
   output
   format ascii
   options -header,-xheader,-totals,-names
@@ -81,9 +88,16 @@ stat-definition {report_name}
             f.write(report)
         
         if filter_direction == report_direction:
-            command = (f"{VARS['flow_cat']}  {flows_file}* | " 
-                    f"{VARS['flow_filter']} -{direction_key} {snmpid} | "
-                    f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
+            if snmpid_aggregate:
+                filter_file = os.path.join(VARS['flow_filters_dir'], f'filter_aggr_{session_id}.cfg')
+                create_flow_filter(direction_key, interfaces, filter_file, 'aggr-if-filter')
+                command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+                        f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
+                        f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
+            else:
+                command = (f"{VARS['flow_cat']}  {flows_file}* | " 
+                        f"{VARS['flow_filter']} -{direction_key} {snmpid} | "
+                        f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
         else:
             filter_file = os.path.join(VARS['flow_filters_dir'], f'filter_interface_{session_id}.cfg')
             filter_name = 'sum-if-filter'
@@ -98,17 +112,29 @@ stat-definition {report_name}
         as_type_key_filter = 'src' if as_type == 'source' else 'dst'
         as_type_key_report = 's' if as_type == 'source' else 'd'
         if filter_direction == report_direction:
-            command = (f"{VARS['nfdump']} -r {flows_file} -A {as_type_key_filter}as,{direction_key_report}if "
-                    f"-O bytes -N -q -o 'fmt:%{direction_key_report},%{as_type_key_report}as,%byt' "
-                    f"'{direction_key_filter} if {snmpid}'"
-            )
+            if snmpid_aggregate:
+                filter_keys = create_nfdump_filter(direction_key_filter, interfaces)
+                command = (f"{VARS['nfdump']} -r {flows_file} -A {as_type_key_filter}as "
+                        f"-O bytes -N -q -o 'fmt:%{as_type_key_report}as,%byt' "
+                        f"'{filter_keys}'"
+                )
+            else:
+                filter_keys = f"{direction_key_filter} if {snmpid}"           
+                command = (f"{VARS['nfdump']} -r {flows_file} -A {as_type_key_filter}as,{direction_key_report}if "
+                        f"-O bytes -N -q -o 'fmt:%{direction_key_report},%{as_type_key_report}as,%byt' "
+                        f"'{filter_keys}'"
+                )
         else:
             filter_keys = create_nfdump_filter(direction_key_report, interfaces)    
             command = (f"{VARS['nfdump']} -r {flows_file} -A {as_type_key_filter}as,{direction_key_report}if "
                     f"-O bytes -N -q -o 'fmt:%{direction_key_report},%{as_type_key_report}as,%byt' "
                     f"'{filter_keys} and {direction_key_filter} if {snmpid}'"
             )
-    result = get_shell_data(command, r'\s*(\d+),\s*(\d+),\s*(\d+)')
+    if snmpid_aggregate:
+        result_aggr = get_shell_data(command, r'\s*(\d+),\s*(\d+)') 
+        result = [ (bgp_as,bgp_as,octets) for bgp_as,octets in result_aggr ]
+    else:
+        result = get_shell_data(command, r'\s*(\d+),\s*(\d+),\s*(\d+)') 
     return result
 
 

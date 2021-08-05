@@ -9,6 +9,9 @@ from .functions import generate_ip_flows_data, generate_as_flows_data, generate_
 from .functions import get_shell_data, put_interface_names
 import csv
 from django.utils import dateparse, timezone
+from collections import namedtuple
+import re
+
 
 @csrf_exempt
 def get_pie_chart_data(request):
@@ -17,8 +20,17 @@ def get_pie_chart_data(request):
         date_db = dateparse.parse_datetime(request.POST['date'])
         date_format_str = "%Y-%m-%d.%H%M" if SYS_SETTINGS['flow_collector'] == 'flow-tools' else "%Y%m%d%H%M"
         date = timezone.localtime(date_db).strftime(date_format_str)
-        direction = request.POST['direction'] 
-        interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
+        direction = request.POST['direction']
+        snmpid_aggregate = [] 
+        if request.POST['aggregate']:
+            snmpid_aggregate = re.findall(r'\d+', request.POST['aggregate'])
+            Aggregate_interface = namedtuple("Aggregate_interface", "name description snmpid")
+            name_aggregate = ''
+            for snmpid in snmpid_aggregate:
+                name_aggregate += Interface.objects.get(host__host = host, sampling=True, snmpid = snmpid).name + ', '
+            interfaces = [ Aggregate_interface(name=name_aggregate[:-2], description="Aggregate Interface", snmpid = "aggregate") ]
+        else:
+            interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
         data = {}
         for interface in interfaces:
             snmpid = interface.snmpid
@@ -26,7 +38,15 @@ def get_pie_chart_data(request):
             data[snmpid]['name'] = interface.name
             data[snmpid]['description'] = interface.description
             try:
-                speed_data = Speed.objects.get(date = date_db, interface = interface)
+                if snmpid_aggregate:
+                    Aggregate_speed = namedtuple("Aggregate_speed", "in_bps out_bps")
+                    speed_data_aggregate = {'in_bps' : 0, 'out_bps' : 0 }
+                    for snmpid_part in snmpid_aggregate:
+                        speed_data_aggregate['in_bps'] += Speed.objects.get(date = date_db, interface__snmpid = snmpid_part).in_bps
+                        speed_data_aggregate['out_bps'] += Speed.objects.get(date = date_db, interface__snmpid = snmpid_part).out_bps
+                    speed_data = Aggregate_speed(speed_data_aggregate['in_bps'], speed_data_aggregate['out_bps'])
+                else:
+                    speed_data = Speed.objects.get(date = date_db, interface = interface)
             except Speed.DoesNotExist:
                 logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
                 data[snmpid]['error'] = f"Error: Speed data for interface {interface} and date: {date_db} does not exist"
@@ -34,7 +54,7 @@ def get_pie_chart_data(request):
             for as_type in ['source', 'destination']:    
                 data[snmpid][as_type] = [[as_type + 'AS', 'Mbps']]
                 try:
-                    flows_data = generate_interface_flows_data(request.session['session_id'], direction, direction, date, host, snmpid, as_type)
+                    flows_data = generate_interface_flows_data(request.session['session_id'], direction, direction, date, host, snmpid, as_type, snmpid_aggregate)
                 except Exception as e:
                     data[snmpid]['error'] = str(e)
                     continue

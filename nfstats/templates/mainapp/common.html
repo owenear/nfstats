@@ -3,7 +3,7 @@
 
 {% block page-controls %}
 	<button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
-	
+	<button id="aggregate" type="button" class="btn btn-danger ml-2 hide" onclick="agregateCharts()">Aggregate</button>
 {% endblock %}
 
 {% block content %}
@@ -16,7 +16,6 @@
 			<div class="card-body text-center">
 				<h5 class="card-title text-center mb-0">{{ interface.description }}</h5>
 				<small class="charts-title">{{ interface.name }}</small>
-				<!-- <div class="text-muted text-center mt-0">{{ interface.description }}</div> -->
 				<div class="col text-center mt-2" id='{{ interface.snmpid }}_src'>{{ interface.name }}</div>
 			</div>
 			<div class="card-footer text-muted text-center">Source AS</div>
@@ -27,10 +26,14 @@
 			<div class="card-body text-center">
 				<h5 class="card-title text-center mb-0">{{ interface.description }}</h5>
 				<small class="charts-title">{{ interface.name }}</small>
-				<!-- <div class="text-muted text-center mt-0">{{ interface.description }}</div> -->
 				<div class="col text-center mt-2" id='{{ interface.snmpid }}_dst'>{{ interface.name }}</div>
 			</div>
-			<div class="card-footer text-muted text-center">Destination AS</div>
+			<div class="card-footer text-muted">
+				<div class="row">
+					<div class="col-6 pr-0 text-right">Destination AS</div>
+					<div class="col-6 text-right">{% if not aggregate %}<input id="{{ interface.snmpid }}" type="checkbox" class="mt-1 aggr_checkbox">{% endif %}</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -60,6 +63,18 @@ google.charts.load('current', {'packages':['corechart', 'sankey']});
 google.charts.setOnLoadCallback(getChartsData);
 
 
+$('.aggr_checkbox').change(function(){
+	doAggregate = false;
+	$('.aggr_checkbox').each(function(){
+		if ($(this).is(':checked'))
+			doAggregate	= true;
+	})
+	if (doAggregate) $("#aggregate").show(200);
+	else $("#aggregate").hide(200);
+})
+
+
+
 function getChartsData() {
 	var host = $('#host-select').val();
 	var date = new Date(dateToISO($('#date-select').val()));
@@ -72,6 +87,7 @@ function getChartsData() {
 				'host' : host,
 				'date' : date.toISOString(),
 				'direction' : direction,
+				'aggregate' : {% if aggregate %} '{{ aggregate }}' {% else %} '' {% endif %}
 			  },
 			  success: function(data){		
 				  drawCharts(data);
@@ -148,6 +164,21 @@ $('#host-select').change(function(){
 $('#direction-select').change(function(){
 	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
 })
+
+function getAggregateInterfaces() {
+	interfaces = "";
+	$('.aggr_checkbox').each(function(){
+		if ($(this).is(':checked'))
+			interfaces += this.id + ",";
+	})
+	return interfaces;
+}
+
+
+function agregateCharts() {
+	//console.log(getAggregateInterfaces())
+	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&aggregate=" + getAggregateInterfaces();
+}
 
 </script>
 

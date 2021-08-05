@@ -7,7 +7,7 @@ pkg install nfdump
 or from ports (configure it with nfcapd collector)
 ```
 cd /usr/ports/net-mgmt/nfdump
-make configure
+configure
 make install clean
 ```
 2. Unfortunately, the installation of nfdump does not create the service for the "nfcapd" collector.
