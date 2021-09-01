@@ -5,6 +5,23 @@ It can use flow-tools or nfdump utilities to analyse NetFlow data and google-cha
 <p><img src="docs/images/common_stats.png" width="400" /><img src="docs/images/bgp_as.png" width="400"/></p>
 <p><img src="docs/images/interface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
 
+## Change log
+
+### v1.03
+* added "Aggregate" functionality on the "Common stats" page
+* "History (days)" option now affects the collector files on disk 
+* bug fixes
+
+### v1.02
+* added NFDUMP support
+* bug fixes
+
+### v1.01
+* Flow-Tools support
+* support multiple hosts
+* Common, BGP AS, Interface, IP charts
+* Ability to view detailed flow statistics by IP addresses
+
 ## Table of Contents
 
 * [Prerequisites](#prerequisites)
