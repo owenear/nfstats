@@ -16,7 +16,12 @@ from datetime import datetime, timedelta
 def clean_dir(dir_name, oldtime_treshold):
     for file_name in Path(dir_name).glob('**/*'):
         if file_name.is_file() and file_name.stat().st_mtime < oldtime_treshold:
-            file_name.unlink()  
+            file_name.unlink()
+        if file_name.is_dir():
+            try:
+                next(file_name.iterdir())
+            except StopIteration:
+                file_name.rmdir()
 
 
 def main():
