@@ -15,6 +15,13 @@
 	color: #E9EEF2;
 }
 
+.sidebar-fixed {
+	padding: 0px;
+	margin: 0px;
+	position: fixed;
+	min-width: 250px;
+}
+
 .navbar-brand{
 	float: left;
 	padding: 5px;
@@ -26,18 +33,20 @@
 	font-size: 1em;
 }
 
-
 li{
 	cursor: pointer;	
 }
 
-.left-menu > li > a:hover, .left-menu > li > a:visited, .left-menu > li > a:link, .left-menu > li > a:active
+.left-menu > li > a:hover, .left-menu > li > a:visited, .left-menu > li > a:link,
+.bottom, .bottom > div > small > a:visited, .bottom > div > small > a:link
 {
     text-decoration: none;
 	color: #8391a2;
 }
 
-.left-menu > li > a:hover, .left-menu > li > a:active {
+.left-menu > li > a:hover, .left-menu > li > a:active, 
+.bottom > div > small > a:hover, .bottom > div > small > a:active
+{
 	color: #E9EEF2;	
 }
 
@@ -138,4 +147,9 @@ li{
 
 .hide {
 	display: none;
+}
+
+.bottom {
+	position: fixed;
+    bottom: 1em;
 }

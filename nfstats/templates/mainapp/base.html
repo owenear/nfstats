@@ -24,16 +24,24 @@
 	<div class="wrapper">
 		<!-- Sidebar -->
 		<nav id="sidebar">
-			<img alt="nfstat" class="navbar-brand" src="{% static 'img/logo.png' %}" />
-			<a class="nodecorate active-white" href="{% url 'common' %}" target="">
-				<div class="">
-					<h2>Netflow	</h2>
-					<h6>Traffic statistics</h6>
+			<div class="sidebar-fixed">
+				<div>	
+					<img alt="nfstat" class="navbar-brand" src="{% static 'img/logo.png' %}" />
+					<a class="nodecorate active-white" href="{% url 'common' %}" target="">
+						<div>
+							<h2>Netflow	</h2>
+							<h6>Traffic statistics</h6>
+						</div>
+					</a>
 				</div>
-			</a>
-			{% block menu %}
+				{% block menu %}
 
-			{% endblock %}
+				{% endblock %}
+				<div class="bottom">
+					<div><small>NFStats v1.04</small></div>
+					<div><small>by <a href="https://github.com/owenear" target="_blank">@Evgeniy Kolosov</a></small></div>
+				</div>
+			</div>
 		</nav>
 
 		<!-- Page Content -->
