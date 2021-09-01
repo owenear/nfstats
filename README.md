@@ -13,7 +13,7 @@ It can use flow-tools or nfdump utilities to analyse NetFlow data and google-cha
 * bug fixes
 
 ### v1.02
-* added NFDUMP support
+* added [NFDUMP](https://github.com/phaag/nfdump) support
 * bug fixes
 
 ### v1.01
