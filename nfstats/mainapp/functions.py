@@ -13,12 +13,16 @@ def create_flow_filter(direction, interfaces, filter_file, filter_name):
 '''
     for interface in interfaces:
         filter_str += f"  permit {interface.snmpid}\n"
-    with open(filter_file, 'w', encoding='utf8') as f: 
-        filter = f'''{filter_str}
+    try:
+        with open(filter_file, 'w', encoding='utf8') as f: 
+            filter = f'''{filter_str}
 filter-definition {filter_name}
   match {direction}-interface {filter_name}
 '''
-        f.write(filter)
+            f.write(filter)
+    except:
+        logger.error(f"(File R/W): {e}")
+        raise Exception(f"Error: (File R/W): {e}")
 
 
 def create_nfdump_filter(direction, interfaces):
@@ -53,8 +57,8 @@ def get_flows_file(host, date):
 def get_shell_data(command, regexp):
     result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if result.stderr:
-        logger.critical(f"(SH) Return: {result.stderr} Command: '{command}'")
-        raise Exception(f"Error: (SH) Return: {result.stderr} Command: '{command}'")
+        logger.critical(f"(Shell) Return: {result.stderr} Command: '{command}'")
+        raise Exception(f"Error: (Shell) Return: {result.stderr} Command: '{command}'")
     return re.findall(regexp, result.stdout.decode('utf-8'))
 
 
@@ -73,8 +77,9 @@ def generate_interface_flows_data(session_id, filter_direction, report_direction
         direction_key = 'i' if filter_direction == 'input' else 'I' 
         report_name = f"{snmpid}-if-report"
         report_type = f"{as_type}-as" if snmpid_aggregate else f"{report_direction}-interface/{as_type}-as"    
-        with open(report_file, 'w', encoding='utf8') as f: 
-            report = f'''stat-report {report_name}
+        try:
+            with open(report_file, 'w', encoding='utf8') as f: 
+                report = f'''stat-report {report_name}
   type {report_type}
   output
   format ascii
@@ -85,7 +90,10 @@ def generate_interface_flows_data(session_id, filter_direction, report_direction
 stat-definition {report_name}
   report {report_name}
 '''
-            f.write(report)
+                f.write(report)
+        except:
+            logger.error(f"(File R/W): {e}")
+            raise Exception(f"Error: (File R/W): {e}")
         
         if filter_direction == report_direction:
             if snmpid_aggregate:
@@ -147,8 +155,9 @@ def generate_interface_flows_sum(session_id, direction, date, host):
         filter_name = 'sum-if-filter'
         report_name = 'sum-if-report'
         create_flow_filter(direction, interfaces, filter_file, filter_name)
-        with open(report_file, 'w', encoding='utf8') as f: 
-            report = f'''stat-report {report_name}
+        try:
+            with open(report_file, 'w', encoding='utf8') as f: 
+                report = f'''stat-report {report_name}
   type {direction}-interface
   output
   format ascii
@@ -159,7 +168,10 @@ def generate_interface_flows_sum(session_id, direction, date, host):
 stat-definition {report_name}
   report {report_name}
 '''
-            f.write(report)
+                f.write(report)
+        except:
+            logger.error(f"(File R/W): {e}")
+            raise Exception(f"Error: (File R/W): {e}")
         command = (f"{VARS['flow_cat']}  {flows_file}* | "
                 f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "    
                 f"{VARS['flow_report']} -s {report_file} -S {report_name}")
@@ -184,8 +196,9 @@ def generate_as_flows_data(session_id, direction, date, host):
         report_name = 'as-if-report'
         create_flow_filter(direction, interfaces, filter_file, filter_name)
         
-        with open(report_file, 'w', encoding='utf8') as f: 
-            report = f'''stat-report {report_name}
+        try:
+            with open(report_file, 'w', encoding='utf8') as f: 
+                report = f'''stat-report {report_name}
   type input/output-interface/source/destination-as
   output
   format ascii
@@ -196,7 +209,10 @@ def generate_as_flows_data(session_id, direction, date, host):
 stat-definition {report_name}
   report {report_name}
 '''
-            f.write(report)
+                f.write(report)
+        except:
+            logger.error(f"(File R/W): {e}")
+            raise Exception(f"Error: (File R/W): {e}")
         command = (f"{VARS['flow_cat']}  {flows_file}* | "
                 f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "   
                 f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
@@ -237,9 +253,9 @@ def generate_ip_flows_data(session_id, direction, date, host, snmpid, src_as, ds
         if filter_keys:
             filter_com =  f"{VARS['flow_filter']} {filter_keys} | "
     
-
-        with open(report_file, 'w', encoding='utf8') as f: 
-            report = f'''stat-report {report_name}
+        try:
+            with open(report_file, 'w', encoding='utf8') as f: 
+                report = f'''stat-report {report_name}
   type {ip_type}/{direction}-interface
   output
   format ascii
@@ -250,7 +266,10 @@ def generate_ip_flows_data(session_id, direction, date, host, snmpid, src_as, ds
 stat-definition {report_name}
   report {report_name}
 '''
-            f.write(report)        
+                f.write(report)
+        except:
+            logger.error(f"(File R/W): {e}")
+            raise Exception(f"Error: (File R/W): {e}")        
 
         command = (f"{VARS['flow_cat']}  {flows_file}* | " 
                 f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | " 

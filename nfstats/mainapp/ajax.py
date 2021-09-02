@@ -228,18 +228,8 @@ def get_ip_traffic_data(request):
     date = timezone.localtime(date_db).strftime(date_format_str)
     ip_type = request.POST['ip_type']
     ip_addr = request.POST['ip_addr'] 
-    filter_file = Path(VARS['flow_filters_dir']).joinpath(f"filter_ip_traffic_{request.session['session_id']}.cfg")
-    filter_name = 'ip-filter'
     flow_path = Host.objects.get(host = host).flow_path
-    with open(filter_file, 'w', encoding='utf8') as f:
-        filter = f'''filter-primitive {filter_name}
-  type ip-address
-  permit {ip_addr}
-filter-definition {filter_name}
-  match {ip_type} {filter_name}
-'''
-        f.write(filter)
-    
+ 
     try:
         flows_file = next(Path(flow_path).rglob(f'*{date}*'))
     except StopIteration:
@@ -249,6 +239,23 @@ filter-definition {filter_name}
         return result
     
     if SYS_SETTINGS['flow_collector'] == 'flow-tools':
+        filter_file = Path(VARS['flow_filters_dir']).joinpath(f"filter_ip_traffic_{request.session['session_id']}.cfg")
+        filter_name = 'ip-filter'
+        try:
+            with open(filter_file, 'w', encoding='utf8') as f:
+                filter = f'''filter-primitive {filter_name}
+  type ip-address
+  permit {ip_addr}
+filter-definition {filter_name}
+  match {ip_type} {filter_name}
+'''
+                f.write(filter)
+        except Exception as e:
+            logger.error(f"(File R/W): {e}")
+            result = JsonResponse({"error": f"Error: (File R/W): {e}"})
+            result.status_code = 500
+            return result
+
         command = (f"{VARS['flow_cat']}  {flows_file}* | " 
                 f"{VARS['flow_nfilter']} -f {filter_file} -F {filter_name} | "
                 f"{VARS['flow_print']} -f5")
@@ -270,11 +277,17 @@ filter-definition {filter_name}
     header = ['Start', 'End', 'Source Interface ID', 'Source IP' , 'Source Port', 
     'Destination Interface ID', 'Destination IP' , 'Destination Port', 
     'Protocols', 'Flows', 'Packets', 'Octets']
-    with open(Path(VARS['flow_filters_dir']).joinpath(f"ip_traffic_data_{request.session['session_id']}.csv").resolve(), 'w', encoding='utf8') as f:
-        writer = csv.DictWriter(f, fieldnames = header)
-        writer.writeheader()
-        writer = csv.writer(f)
-        writer.writerows(result)
+    try:
+        with open(Path(VARS['flow_filters_dir']).joinpath(f"ip_traffic_data_{request.session['session_id']}.csv").resolve(), 'w', encoding='utf8') as f:
+            writer = csv.DictWriter(f, fieldnames = header)
+            writer.writeheader()
+            writer = csv.writer(f)
+            writer.writerows(result)
+    except Exception as e:
+        logger.error(f"(File R/W): {e}")
+        result = JsonResponse({"error": f"Error: (File R/W): {e}"})
+        result.status_code = 500
+        return result
     return HttpResponse(json.dumps(result))
 
 
@@ -284,7 +297,13 @@ def download_ip_traffic_data(request):
     date = timezone.localtime(date_db).strftime("%Y-%m-%d.%H%M")
     ip = request.GET['ip']
     file_path = Path(VARS['flow_filters_dir']).joinpath(f"ip_traffic_data_{request.session['session_id']}.csv")
-    with open(file_path, 'rb') as f:
-        response = HttpResponse(f.read(), content_type="text/csv")
-        response['Content-Disposition'] = 'attachment; filename=' + ip + '_' + date + '.csv'
-        return response
+    try:
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type="text/csv")
+            response['Content-Disposition'] = 'attachment; filename=' + ip + '_' + date + '.csv'
+            return response
+    except Exception as e:
+        logger.error(f"(File R/W): {e}")
+        result = JsonResponse({"error": f"Error: (File R/W): {e}"})
+        result.status_code = 500
+        return result
