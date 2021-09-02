@@ -62,13 +62,21 @@ def main():
                 if not OCTETS_OLD_FILE.exists():
                     obj = Speed(in_bps = 0, out_bps = 0, date = timezone.make_aware(datetime.fromtimestamp(cur_time).replace(second = 0)), interface = interface)
                     obj.save()
-                    with open(str(OCTETS_OLD_FILE), "w") as file:
-                        file.write(f"{cur_time}:{in_octets}:{out_octets}")
-                        logger.info(f"Host: {host}; Interface: {interface}; Created Octets File")
-                        logger.info(f"Host: {host}; Interface: {interface}; Rec to Octets File")
+                    try:
+                        with open(str(OCTETS_OLD_FILE), "w") as file:
+                            file.write(f"{cur_time}:{in_octets}:{out_octets}")
+                            logger.info(f"Host: {host}; Interface: {interface}; Created Octets File")
+                            logger.info(f"Host: {host}; Interface: {interface}; Rec to Octets File")
+                    except:
+                        logger.error(f"(File R/W): {e}")
+                        raise Exception(f"Error: (File R/W): {e}")
                 else:
-                    with open(str(OCTETS_OLD_FILE), "r") as file:
-                        speed_data = file.read().split(':')
+                    try:
+                        with open(str(OCTETS_OLD_FILE), "r") as file:
+                            speed_data = file.read().split(':')
+                    except:
+                        logger.error(f"(File R/W): {e}")
+                        raise Exception(f"Error: (File R/W): {e}")
                     if len(speed_data) == 3:
                         old_time, old_in_octets, old_out_octets = speed_data
                         if (int(in_octets) >= int(old_in_octets) and int(out_octets) >= int(old_out_octets) and int(cur_time) - int(old_time) < 1000):         
@@ -77,10 +85,13 @@ def main():
                             obj = Speed(in_bps = in_bps, out_bps = out_bps, date = timezone.make_aware(datetime.fromtimestamp(cur_time).replace(second = 0)), interface = interface)
                             obj.save()
                             logger.info(f"Host: {host}; Interface: {interface}; Rec to DB")
-                    with open(str(OCTETS_OLD_FILE), "w") as file:
-                        file.write(f"{cur_time}:{in_octets}:{out_octets}")
-                        logger.info(f"Host: {host}; Interface: {interface}; Rec to Octets File")
-
+                    try:
+                        with open(str(OCTETS_OLD_FILE), "w") as file:
+                            file.write(f"{cur_time}:{in_octets}:{out_octets}")
+                            logger.info(f"Host: {host}; Interface: {interface}; Rec to Octets File")
+                    except:
+                        logger.error(f"(File R/W): {e}")
+                        raise Exception(f"Error: (File R/W): {e}")
 
 if __name__ == "__main__":
     main()
