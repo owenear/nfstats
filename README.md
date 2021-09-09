@@ -11,6 +11,14 @@ It can use flow-tools or nfdump utilities to analyse NetFlow data and google-cha
 * Per Host SNMP community
 * 'Read SNMP' on the Interface settings page now can Update name/description info on existing SNMPid interfaces
 
+**Note:** Database model was changed, so if you update your nfstats repo you have to run django migration
+```
+cd /var/www/nfstats/nfstats
+source ../venv/bin/activate
+python manage.py makemigrations
+python manage.py migrate
+```
+
 ### v1.03
 * added "Aggregate" functionality on the "Common stats" page
 * "History (days)" option now affects the collector files on disk 
