@@ -7,6 +7,10 @@ It can use flow-tools or nfdump utilities to analyse NetFlow data and google-cha
 
 ## Change log
 
+### v1.04
+* Per Host SNMP community
+* 'Read SNMP' on the Interface settings page now can Update name/description info on existing SNMPid interfaces
+
 ### v1.03
 * added "Aggregate" functionality on the "Common stats" page
 * "History (days)" option now affects the collector files on disk 
