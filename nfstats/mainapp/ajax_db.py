@@ -12,14 +12,15 @@ import json
 @csrf_exempt
 def get_snmp_interfaces(request):
     host = request.POST['host']
-    command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.2.2.1.2"
+    host_obj = Host.objects.get(host = host)
+    command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {host_obj.snmp_com} {host} .1.3.6.1.2.1.2.2.1.2"
     try:
         if_names = get_shell_data(command, r'\w+.(\d+)\s\"?([^\"\n]*)\"?')
     except Exception as e:
         result = JsonResponse({"error": str(e)})
         result.status_code = 500
         return result
-    command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {SYS_SETTINGS['snmp_com']} {host} .1.3.6.1.2.1.31.1.1.1.18"
+    command = f"{VARS['snmp_walk']} -v{SYS_SETTINGS['snmp_ver']} -Oseqn -c {host_obj.snmp_com} {host} .1.3.6.1.2.1.31.1.1.1.18"
     try:
         if_descriptions = get_shell_data(command, r'\w+.(\d+)\s\"?([^\"\n]*)\"?')
     except Exception as e:
@@ -45,6 +46,10 @@ def add_snmp_interfaces(request):
                 obj = Interface.objects.get(snmpid = int(snmpid), host = host_obj)
             except Interface.DoesNotExist:
                 obj = Interface(snmpid = int(snmpid), name=name, description=description, host = host_obj)
+                obj.save()
+            else:
+                setattr(obj, 'name', name)
+                setattr(obj, 'description', description)
                 obj.save()
     result = JsonResponse({"result": "Interfaces added"})
     result.status_code = 200
@@ -156,11 +161,12 @@ def add_host(request):
     host = request.POST['host']
     name = request.POST['name']
     description = request.POST['description']
+    snmp_com = request.POST['snmp_com']
     flow_path = request.POST['flow_path']
     try:
         obj = Host.objects.get(Q(name = name))
     except Host.DoesNotExist:
-        obj = Host(name = name, host = host, description = description, flow_path = flow_path)
+        obj = Host(name = name, host = host, description = description, snmp_com = snmp_com, flow_path = flow_path)
         obj.save()
         result = JsonResponse({"result": "Host added"})
         result.status_code = 200
@@ -182,6 +188,7 @@ def update_host(request):
     host = request.POST['host']
     name = request.POST['name']
     description = request.POST['description']
+    snmp_com = request.POST['snmp_com']
     flow_path = request.POST['flow_path']
     host_id = request.POST['host_id']
     try:
@@ -200,6 +207,7 @@ def update_host(request):
         setattr(obj, 'host', host)
         setattr(obj, 'name', name)
         setattr(obj, 'description', description)
+        setattr(obj, 'snmp_com', snmp_com)
         setattr(obj, 'flow_path', flow_path)
         obj.save()
         result = JsonResponse({"result": "Host updated"})
@@ -232,7 +240,6 @@ def update_settings(request):
         'flow_collector' : request.POST['flow_collector'], 
         'flow_collector_bin' : request.POST['flow_collector_bin'],
         'snmp_bin' : request.POST['snmp_bin'],
-        'snmp_com' : request.POST['snmp_com'],
         'history_days' : request.POST['history_days'],
     }
     for name, value in vars.items():

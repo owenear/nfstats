@@ -14,7 +14,6 @@ SYS_SETTINGS = {
     'log_size' : 50000,
     'flow_collector_bin' : '/usr/local/bin/',
     'snmp_bin' : '/usr/bin',
-    'snmp_com' : 'public',
     'snmp_ver' : '2c',
     'history_days' : 10,
 }

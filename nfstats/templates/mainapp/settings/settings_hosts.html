@@ -15,6 +15,7 @@
 					  <th id="" class="" scope="col">Name</th>
 					  <th id="" class="" scope="col">Host</span></th>
 					  <th id="" class="" scope="col">Description</span></th>
+					  <th id="" class="" scope="col">SNMP Community</span></th>
 					  <th id="" class="" scope="col">Path to flow data</span></th>
 					  <th scope="col"></th>
 					  <th scope="col"></th>
@@ -27,6 +28,7 @@
 						<td class=''>{{ host.name }}</td>
 						<td class=''>{{ host.host }}</td>
 						<td class=''>{{ host.description }}</td>
+						<td class=''>{{ host.snmp_com }}</td>
 						<td class=''>{{ host.flow_path }}</td>
 						<td class=''><span class='edit small-icons'><span class='small-icons' data-feather="edit"></span></span></td>
 						<td class=''><span class='trash small-icons'><span class='small-icons' data-feather="trash"></span></span></td>
@@ -75,6 +77,13 @@
   				</div>
   				<input  id="description" type="text" class="form-control" value="">
 		  </div>
+
+		   <div class="input-group mb-3">
+				<div class="input-group-prepend">
+		   		<span class="input-group-text">SNMP Community</span>
+			 	</div>
+			 	<input  id="snmp_com" type="text" class="form-control need-validate" value="">
+	 	   </div>
 		  
 		   <div class="input-group mb-3">
  				<div class="input-group-prepend">
@@ -104,6 +113,7 @@ function addEditHost(url, host_id){
 			'host_id' : host_id,
 			'name' : $('#name').val(),
 			'host' : $('#host').val(),
+			'snmp_com' : $('#snmp_com').val(),
 			'description' : $('#description').val(),
 			'flow_path' : $('#flow_path').val(),
 		  },
@@ -120,7 +130,8 @@ $('.edit').click(function(){
 	$('#name').val(this.parentElement.parentElement.cells[1].innerHTML);
 	$('#host').val(this.parentElement.parentElement.cells[2].innerHTML);
 	$('#description').val(this.parentElement.parentElement.cells[3].innerHTML);	
-	$('#flow_path').val(this.parentElement.parentElement.cells[4].innerHTML);
+	$('#snmp_com').val(this.parentElement.parentElement.cells[4].innerHTML);
+	$('#flow_path').val(this.parentElement.parentElement.cells[5].innerHTML);
 	var host_id = this.parentElement.parentElement.id;
 	$('#modal_add_edit_btn').attr('onclick', "addEditHost('update_host','"+ host_id + "')")
 	$('#host_modal').modal('show');
@@ -148,10 +159,7 @@ $('.trash').click(function(){
 
 $('#add_host_btn').click(function(){
 	$('#modalLabel').html('Add host');
-	$('#name').val("");
-	$('#host').val("");
-	$('#description').val("");	
-	$('#flow_path').val("");
+	$('.form-control').val("");
 	$('#modal_add_edit_btn').attr('onclick', "addEditHost('add_host')")
 	$('#host_modal').modal('show');
 })

@@ -47,12 +47,6 @@
 						</div>
 					</div>
 					<div class="row mt-2">
-						<div class="col">SNMP Community:</div>
-						<div class="col"><input  id="snmp_com" type="text" class="form-control need-validate" 
-							value="{{ settings.snmp_com }}">
-						</div>
-					</div>
-					<div class="row mt-2">
 						<div class="col">History (days):</div>
 						<div class="col"><input  id="history_days" type="text" class="form-control need-validate validate-numeric" 
 							value="{{ settings.history_days }}">
@@ -85,7 +79,6 @@ function updateSettingsVar() {
 					'flow_collector_bin' : $('#flow_collector_bin').val(),
 					'flow_collector' : $('#flow_collector').val(),
 					'snmp_bin' : $('#snmp_bin').val(),
-					'snmp_com' : $('#snmp_com').val(),
 					'history_days' : $('#history_days').val(),
 				},
 				success: function(data){

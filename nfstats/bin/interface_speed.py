@@ -38,14 +38,14 @@ def main():
         for interface in interfaces:
             snmp_err = 0
             OCTETS_OLD_FILE = Path(VARS['octets_files_dir']).joinpath(host.host + "_" + str(interface.snmpid) + ".old")
-            command = f"{VARS['snmp_get']} -v{SYS_SETTINGS['snmp_ver']} -Oseq -c {SYS_SETTINGS['snmp_com']} {host.host} .1.3.6.1.2.1.31.1.1.1.6.{interface.snmpid}"
+            command = f"{VARS['snmp_get']} -v{SYS_SETTINGS['snmp_ver']} -Oseq -c {host.snmp_com} {host.host} .1.3.6.1.2.1.31.1.1.1.6.{interface.snmpid}"
             result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             if result.stderr:
                 logger.error(f"Host: {host}; Interface: {interface}; Return: {result.stderr} Command: '{command}'")
                 snmp_err = 1
             else:
                 in_octets = re.search(r'.* (\d+)', result.stdout.decode('utf-8')).group(1)    
-            command = f"{VARS['snmp_get']} -v{SYS_SETTINGS['snmp_ver']} -Oseq -c {SYS_SETTINGS['snmp_com']} {host.host} .1.3.6.1.2.1.31.1.1.1.10.{interface.snmpid}"
+            command = f"{VARS['snmp_get']} -v{SYS_SETTINGS['snmp_ver']} -Oseq -c {host.snmp_com} {host.host} .1.3.6.1.2.1.31.1.1.1.10.{interface.snmpid}"
             result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             if result.stderr:
                 logger.error(f"Host: {host}; Interface: {interface}; Return: {result.stderr} Command: '{command}'")
