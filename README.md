@@ -142,6 +142,8 @@ urlpatterns = [
  cd /var/www/nfstats/nfstats
 source ../venv/bin/activate
 python manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
  ```
  - uncomment project urls in nfstats/nfstats/nfstats/urls.py
  ```
@@ -181,13 +183,14 @@ save the device cpu and get the truthful static data.
 
 1. When you first open the nfstats.example.com, you will be redirected to the settings page.
 
-On the "Host" tab add the network devices with the configured netflow v5. 
-Specify the path to the flow-capture files and be sure it's readable by the user that’s running the Django application. 
+On the "Host" tab add the network devices with the configured netflow v5/v9/ipfix. 
+Specify the name, host, SNMP community string. 
+Specify the path to the dir with netflow capture files and be sure it's readable by the user that’s running the Django application.
 <p><img src="docs/images/add_host.png" width="800" /></p>
 
-2. Go to the "System" tab and select you netflow collector (flow-tools or nfdump), specify SNMP community for the SNMP v2c protocol and other parameters.
+2. Go to the "System" tab, select you netflow collector (flow-tools or nfdump) and specify other parameters.
 "History (days)" - how long the speed data will be stored in the DB and collectors data on a disk. 
-It's depends on the flow-capture settings and the amount of data it receives from the devices.
+It's depends on the netflow collector settings and the amount of data it receives from the devices.
 
 <p><img src="docs/images/system.png" width="800" /></p>
 
