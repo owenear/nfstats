@@ -266,7 +266,7 @@ filter-definition {filter_name}
             result.status_code = 500
             return result
     else:
-        ip_type_key = 'src' if ip_type == 'source' else 'dst'
+        ip_type_key = 'src' if ip_type == 'ip-source-address' else 'dst'
         command = f"{VARS['nfdump']} -r {flows_file} -N -q -o 'fmt:%ts,%te,%in,%sa,%sp,%out,%da,%dp,%pr,%fl,%pkt,%byt' '{ip_type_key} ip {ip_addr}'"
         try:
             result = get_shell_data(command, r'\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+)\s*,\s*(\d+),\s*(\d+),\s*(\d+)')

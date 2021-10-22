@@ -277,8 +277,8 @@ stat-definition {report_name}
                 f"{VARS['flow_report']} -s {report_file} -S {report_name} ")
     else:
         direction_key = 'in' if direction == 'input' else 'out'
-        ip_type_key_filter = 'src' if ip_type == 'source' else 'dst'
-        ip_type_key_report = 's' if ip_type == 'source' else 'd'
+        ip_type_key_filter = 'src' if ip_type == 'ip-source-address' else 'dst'
+        ip_type_key_report = 's' if ip_type == 'ip-source-address' else 'd'
         if snmpid:
             filter_keys = f"{direction_key} if {snmpid}"
         else:
