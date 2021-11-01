@@ -2,7 +2,7 @@
 
 1. Installing 
 ```
-sudo apt install ndump
+sudo apt install nfdump
 ```
 2. Make changes to /etc/nfdump/default.conf
 ```
