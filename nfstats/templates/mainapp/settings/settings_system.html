@@ -8,9 +8,9 @@
 			<div class="card-body">
 				<h5 class="card-title text-center mb-0">System Settings</h5>
 					<div class="row mt-5">
-						<div class="col ">Log Dir:</div>
-						<div class="col"><input  id="log_dir" type="text" class="form-control need-validate" 
-							value="{{ settings.log_dir }}">
+						<div class="col ">Log File:</div>
+						<div class="col"><input  id="log_file" type="text" class="form-control need-validate" 
+							value="{{ settings.log_file }}">
 						</div>
 					</div>
 					<div class="row mt-2">
@@ -74,7 +74,7 @@ function updateSettingsVar() {
 				url: '/update_settings',
 				dataType: "json",
 				data: {
-					'log_dir' : $('#log_dir').val(),
+					'log_file' : $('#log_file').val(),
 					'logging_level' : $('#logging_level').val(),
 					'flow_collector_bin' : $('#flow_collector_bin').val(),
 					'flow_collector' : $('#flow_collector').val(),

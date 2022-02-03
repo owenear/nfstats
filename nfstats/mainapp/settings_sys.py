@@ -3,11 +3,12 @@ import logging
 from logging.handlers import WatchedFileHandler
 from pathlib import Path
 import django.conf 
+from django.http import JsonResponse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SYS_SETTINGS = { 
-    'log_dir' :  '/var/log',
+    'log_file' :  '/var/log/nfstats.log',
     'log_type' : 'file',
     'flow_collector' : 'flow-tools',
     'logging_level' : 'DEBUG',
@@ -33,7 +34,7 @@ LOGGING = {
         'file': {
             'level': SYS_SETTINGS['logging_level'],
             'class': 'logging.FileHandler',
-            'filename':  Path(SYS_SETTINGS['log_dir']).joinpath('nfstats.log'),
+            'filename':  Path(SYS_SETTINGS['log_file']),
             'formatter' : 'simple'
         },
         'console': {
@@ -49,12 +50,12 @@ LOGGING = {
     },
 }
 
+
 def set_vars():
     global VARS, BASE_DIR
     VARS.update({
         'octets_files_dir' : BASE_DIR.joinpath('speed'),
         'flow_filters_dir' : BASE_DIR.joinpath('flow-tools'),
-        'log_file' : Path(SYS_SETTINGS['log_dir']).joinpath('nfstats.log'),
         'snmp_get' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpget'),
         'snmp_walk' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpwalk'),
         'flow_cat' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-cat'),
@@ -66,10 +67,31 @@ def set_vars():
     })
     Path(VARS['octets_files_dir']).mkdir(parents=True, exist_ok=True)
     Path(VARS['flow_filters_dir']).mkdir(parents=True, exist_ok=True)
-    LOGGING['handlers']['file']['filename'] = VARS['log_file']
+    '''
+    if not Path(SYS_SETTINGS['log_file']).exists():
+        try:
+            Path(SYS_SETTINGS['log_file']).touch()
+        except Exception as e:
+            result = JsonResponse({"error": f"Error: (DB): {e}"})
+            result.status_code = 500
+            return result
+    if Path(SYS_SETTINGS['log_file']).exists():
+        LOGGING['handlers'].update({
+            'file': {
+                'level': SYS_SETTINGS['logging_level'],
+                'class': 'logging.FileHandler',
+                'filename':  SYS_SETTINGS['log_file'],
+                'formatter' : 'simple'
+            },
+        })
+        #LOGGING['handlers']['file']['filename'] = SYS_SETTINGS['log_file']
+        #LOGGING['handlers']['file']['level'] = SYS_SETTINGS['logging_level']
+        LOGGING['loggers']['django']['handlers'] = 'file'
+    '''
+    LOGGING['handlers']['file']['filename'] = SYS_SETTINGS['log_file']
     LOGGING['handlers']['file']['level'] = SYS_SETTINGS['logging_level']
     LOGGING['loggers']['django']['level'] = SYS_SETTINGS['logging_level']
-    django.conf.settings.DEBUG = True if SYS_SETTINGS['logging_level'] == 'DEBUG' else False
+    django.conf.settings.DEBUG = True if SYS_SETTINGS['logging_level'] == 'DEBUG' else True
 
 
 def update_sys_settings():

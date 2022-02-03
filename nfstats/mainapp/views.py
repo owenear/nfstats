@@ -59,10 +59,11 @@ def bgp_as(request):
 def ip(request):
     hosts = Host.objects.all()
     host_selected = Host.objects.filter(host=request.GET['host']).first() if request.GET.get('host') else hosts[0]
+    interfaces = Interface.objects.filter(host=host_selected, sampling=False).order_by('name')
     direction = request.GET['direction'] if request.GET.get('direction') else 'input'
     ip_type = request.GET['ip_type'] if request.GET.get('ip_type') else 'ip-destination-address'
     date = (timezone.now() - timedelta(minutes=2)).isoformat()
-    return render(request, "mainapp/ip.html", {'date' : date, 'hosts' : hosts, 'host_selected' : host_selected, 'direction' : direction, 'ip_type' : ip_type } )
+    return render(request, "mainapp/ip.html", {'date' : date, 'hosts' : hosts, 'host_selected' : host_selected, 'direction' : direction, 'ip_type' : ip_type,  'interfaces' : interfaces } )
 
 
 @csrf_exempt

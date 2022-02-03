@@ -280,7 +280,9 @@ stat-definition {report_name}
         ip_type_key_filter = 'src' if ip_type == 'ip-source-address' else 'dst'
         ip_type_key_report = 's' if ip_type == 'ip-source-address' else 'd'
         if snmpid:
-            filter_keys = f"{direction_key} if {snmpid}"
+            interf_direction_key = 'out' if direction == 'input' else 'in'
+            filter_keys = create_nfdump_filter(direction_key, interfaces)
+            filter_keys += f" and {interf_direction_key} if {snmpid}"
         else:
             filter_keys = create_nfdump_filter(direction_key, interfaces)
         if src_as:

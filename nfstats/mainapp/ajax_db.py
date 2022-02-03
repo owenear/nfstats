@@ -235,7 +235,7 @@ def delete_host(request):
 @csrf_exempt  
 def update_settings(request):
     vars = { 
-        'log_dir' :  request.POST['log_dir'], 
+        'log_file' :  request.POST['log_file'], 
         'logging_level' :  request.POST['logging_level'], 
         'flow_collector' : request.POST['flow_collector'], 
         'flow_collector_bin' : request.POST['flow_collector_bin'],
