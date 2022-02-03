@@ -6,7 +6,7 @@ sudo apt install nfdump
 ```
 2. Make changes to /etc/nfdump/default.conf
 ```
-options='-z -t 60 -w -D -T all -l /var/flows/ -I any -S 1 -P /var/run/nfcapd.allflows.pid -p 9999 -b 10.0.0.10 -e 10G'
+options='-z -t 60 -w -D -T all -l /var/flows/ -I any -S 1 -p 9999 -b 10.0.0.10'
 ```
 
 Use 'man nfcapd' to read more about it. 
