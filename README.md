@@ -6,6 +6,7 @@ It can use flow-tools or nfdump utilities to analyse NetFlow data and google-cha
 <p><img src="docs/images/interface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
 
 ## Change log
+Current version 1.04.2
 
 ### v1.04
 * Per Host SNMP community
