@@ -1,35 +1,54 @@
-{% extends 'mainapp/base_charts.html' %}
+{% extends 'mainapp/base.html' %}
 
 {% block page-controls %}
-<div class="input-group text-input-group ml-2">
+<div class="col input-group text-input-group no-mobile-flex">
 	<div class="input-group-prepend">
 		<label class="input-group-text" for="srcas-input">Source AS:</label>
 	</div>
 	<input type="text" class="form-control need-validate validate-numeric" id="srcas-input" name="src-as" value="" placeholder="AS number" required>
 </div>
-<div class="input-group text-input-group ml-2">
+<div class="col input-group text-input-group no-mobile-flex">
 	<div class="input-group-prepend">
 		<label class="input-group-text" for="dstas-input">Destination AS:</label>
 	</div>
 	<input type="text" class="form-control need-validate validate-numeric" id="dstas-input" name="dst-as" value="" placeholder="AS number" required>
 </div>
-<button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
+<div class="col no-mobile-flex ">
+	<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+</div>
 {% endblock %}
 
+{% block page-controls-mobile %}
+	<div class="col input-group text-input-group mb-2">
+		<div class="input-group-prepend">
+			<label class="input-group-text" for="srcas-input-mobile">Source AS:</label>
+		</div>
+		<input type="text" class="form-control need-validate validate-numeric" id="srcas-input-mobile" name="src-as" value="" placeholder="AS number" required>
+	</div>
+	<div class="col input-group text-input-group mb-2">
+		<div class="input-group-prepend">
+			<label class="input-group-text" for="dstas-input-mobile">Destination AS:</label>
+		</div>
+		<input type="text" class="form-control need-validate validate-numeric" id="dstas-input-mobile" name="dst-as" value="" placeholder="AS number" required>
+	</div>
+	<div class="col text-end">
+		<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+	</div>
+{% endblock %}	
 
 {% block content %}
 
-<div class="container-fluid mb-3">
+<div class="container-fluid g-4">
 <div class="row mt-3 justify-content-center">
-		<div class="card">
+		<div class="card p-0">
 			<div class="card-body text-center">
-				<div class="col text-center mt-2" id='chart'>Type source or/and destination AS and press 'Show' button</div>
+				<div class="col text-center" id='chart'>Type source or/and destination AS and press 'Show' button</div>
 			</div>
 			<div class="card-footer text-muted text-center charts-title">{{ direction }} traffic</div>
 		</div>
 </div>
 <script>
-chartOptions = { 'width': 1000, 'height': 1000 }
+chartOptions = { 'height': 1000 }
 
 google.charts.load('current', {'packages':['corechart', 'sankey']});
 $(function(e){
@@ -40,11 +59,17 @@ $(function(e){
 
 function getChartsData() {
 	if (validate(true)) {
-		var host = $('#host-select').val();
 		var date = new Date(dateToISO($('#date-select').val()));
+		var host = $('#host-select').val();
 		var src_as = $('#srcas-input').val();
 		var dst_as = $('#dstas-input').val();
 		var direction = $('#direction-select').val();
+		if (window.innerWidth < 1366) { 
+			host = $('#host-select-mobile').val();
+			direction = $('#direction-select-mobile').val();
+			src_as = $('#srcas-input-mobile').val();
+			dst_as = $('#dstas-input-mobile').val();
+		}
 		chartsData = $.ajax({
 				  type: 'post',
 				  url: 'get_as_chart_data',
@@ -75,14 +100,6 @@ function drawCharts(chartsData) {
 }
 
 
-
-$('#host-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
-})
-
-$('#direction-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
-})
 </script>
 
 {% endblock %}

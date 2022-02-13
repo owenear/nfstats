@@ -1,62 +1,97 @@
-{% extends 'mainapp/base_charts.html' %}
+{% extends 'mainapp/base.html' %}
 
 {% block page-controls %}
-<div class="input-group ml-2">
+<div class="col input-group no-mobile-flex">
 	<div class="input-group-prepend">
-		<label class="input-group-text" for="direction-select">List</label>
+		<label class="input-group-text">List</label>
 	</div>
-	<select class="custom-select" id="ip-type-select">
+	<select class="form-select" id="ip-type-select">
 		<option value="ip-destination-address" {% if ip_type == 'ip-destination-address' %} selected {% endif %} >Destination IP</input>
 		<option value="ip-source-address" {% if ip_type == 'ip-source-address' %} selected {% endif %} >Source IP</input>
 	</select>
 </div>
-<div class="input-group ml-2 text-input-group">
+<div class="col input-group text-input-group no-mobile-flex">
 	<div class="input-group-prepend">
 		<label class="input-group-text" for="interface-input">Count:</label>
 	</div>
 	<input type="text" class="form-control" id="count-input" name="count" value="15" required>
 </div>
-<button type="button" class="btn btn-outline-success ml-2 mr-2" onclick="getChartsData()">Show</button>
+<div class="col no-mobile-flex">
+	<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+</div>
 {% endblock %}
 
+{% block page-controls-mobile %}
+	<div class="col input-group mb-2">
+		<div class="input-group-prepend">
+			<label class="input-group-text">List</label>
+		</div>
+		<select class="form-select" id="ip-type-select-mobile">
+			<option value="ip-destination-address" {% if ip_type == 'ip-destination-address' %} selected {% endif %} >Destination IP</input>
+			<option value="ip-source-address" {% if ip_type == 'ip-source-address' %} selected {% endif %} >Source IP</input>
+		</select>
+	</div>
+	<div class="col input-group text-input-group mb-2">
+		<div class="input-group-prepend">
+			<label class="input-group-text">Count:</label>
+		</div>
+		<input type="text" class="form-control" id="count-input-mobile" name="count" value="15" required>
+	</div>
+	<div class="col text-end">
+		<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+	</div>
+{% endblock %}
 
 {% block content %}
 
 <div class="container-fluid mb-3">
 <div class="row mt-3 justify-content-center">
-		<div class="card">
-			<div class="card-body text-center">
-				<div class="key-active form-inline">
-					<div class="input-group ml-2 text-input-group">
+		<div class="card p-0">
+			<div class="card-body text-center ip-parameters">
+				<div class="row key-active g-3">
+					<div class="col input-group text-input-group">
 						<div class="input-group-prepend">
-							<label class="input-group-text" for="interface-select">Interface:</label>
+							<label class="input-group-text" for="interface-sampling-select">Interface (sampling):</label>
 						</div>
-						<select class="custom-select" id="interface-select">
+						<select class="form-select" id="interface-sampling-select">
+								<option value="">all</option>
+							{% for interface in interfaces_sampling %}
+								<option value="{{ interface.snmpid }}">{{ interface.name }} ({{ interface.description }})</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col input-group text-input-group">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="interface-select">Interface (not sampling):</label>
+						</div>
+						<select class="form-select" id="interface-select">
 								<option value="">all</option>
 							{% for interface in interfaces %}
 								<option value="{{ interface.snmpid }}">{{ interface.name }} ({{ interface.description }})</option>
 							{% endfor %}
 						</select>
 					</div>
-					<div class="input-group ml-2 text-input-group">
+				</div>
+				<div class="row key-active g-3">
+					<div class="col input-group text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="srcas-input">sAS:</label>
 						</div>
 						<input type="text" class="form-control validate-numeric" id="srcas-input" name="src-as" value="" placeholder="AS number" required>
 					</div>
-					<div class="input-group ml-2 text-input-group">
+					<div class="col input-group text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="dstas-input">dAS:</label>
 						</div>
 						<input type="text" class="form-control validate-numeric" id="dstas-input" name="dst-as" value="" placeholder="AS number" required>
 					</div>
-					<div class="input-group ml-2 text-input-group">
+					<div class="col input-group text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="srcport-input">sPort:</label>
 						</div>
 						<input type="text" class="form-control validate-numeric" id="srcport-input" name="sport" value="" placeholder="Port number" required>
 					</div>
-					<div class="input-group ml-2 text-input-group">
+					<div class="col input-group text-input-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="dstport-input">dPort:</label>
 						</div>
@@ -76,14 +111,12 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="ip-traffic-modal-label">Sampling Traffic Flows</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title" id="ip-traffic-modal-label">Traffic Flows</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body fixed-height-table">
+      <div class="modal-body fixed-height-table mt-3 pt-0">
 			<table class="table">
-				  <thead class="thead-dark">
+				  <thead class="table-dark">
 					<tr>
 					  <th scope="col">Start</th>
 					  <th scope="col">End</th>
@@ -99,14 +132,14 @@
 					  <th scope="col">Octets</th>
 					</tr>
 				  </thead>
-				  <tbody id="ip-traffic-modal-content">
+				  <tbody id="ip-traffic-modal-content" class="">
 				
 				  </tbody>
-				</table>
+			</table>
       </div>
       <div class="modal-footer">
 		<button type="button" id="ip-traffic-export-btn" class="btn btn-success">Export</button>
-        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+		<button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
       </div>
      </div>
   </div>
@@ -136,7 +169,17 @@ function getChartsData() {
 	var direction = $('#direction-select').val();
 	var ip_type = $('#ip-type-select').val();
 	var intrf = $('#interface-select').val();
+	var intrf_smpl = $('#interface-sampling-select').val();
 	var count = $('#count-input').val();
+
+	if (window.innerWidth < 1366) { 
+		host = $('#host-select-mobile').val();
+		direction = $('#direction-select-mobile').val();
+		ip_type = $('#ip-type-select-mobile').val();
+		count = $('#count-input-mobile').val();
+	}	
+
+
 	$('.charts-title').text(direction + " traffic")
 	$.ajax({
 		  type: 'post',
@@ -152,6 +195,7 @@ function getChartsData() {
 			'src_port':src_port,
 			'dst_port':dst_port,
 			'interface' : intrf,
+			'interface_sampling' : intrf_smpl,
 			'count': count
 		  },
 		  success: function(data){
@@ -166,7 +210,14 @@ function getChartsData() {
 function showIpTraffic(ip){
 	var host = $('#host-select').val();
 	var date = new Date(dateToISO($('#date-select').val()));
+	var src_as = $('#srcas-input').val();
+	var dst_as = $('#dstas-input').val();
+	var src_port = $('#srcport-input').val();
+	var dst_port = $('#dstport-input').val();
+	var direction = $('#direction-select').val();
 	var ip_type = $('#ip-type-select').val();
+	var intrf = $('#interface-select').val();
+	var intrf_smpl = $('#interface-sampling-select').val();
 	$('#ip-traffic-export-btn').attr('onClick', 'downloadIpTraffic(\''+ ip +'\')' );
 	$.ajax({
 		  type: 'post',
@@ -176,16 +227,25 @@ function showIpTraffic(ip){
 			'host' : host,
 			'date' : date.toISOString(),
 			'ip_type' : ip_type,
-			'ip_addr' : ip
+			'ip_addr' : ip,
+			'direction' : direction,
+			'ip_type' : ip_type,
+			'src_as' : src_as,
+			'dst_as' : dst_as,
+			'src_port':src_port,
+			'dst_port':dst_port,
+			'interface' : intrf,
+			'interface_sampling' : intrf_smpl,
 		  },
 		  async: true,
 		  success: function(data) {
-				$('#ip-traffic-modal-content').html("");
+				html_str = '';
 				data.forEach(row => {
-					$('#ip-traffic-modal-content').append('<tr>')
-					row.forEach(element => $('#ip-traffic-modal-content').append('<td>' + element + '</td>'))
-					$('#ip-traffic-modal-content').append('</tr>')
+					html_str += '<tr>';
+					row.forEach(element => html_str += '<td>' + element + '</td>');
+					html_str += '</tr>';
 				})
+				$('#ip-traffic-modal-content').html(html_str);
 				$('#ip_traffic_modal').modal('show');
 		  },
 	})
@@ -221,8 +281,9 @@ function drawCharts(chartsData) {
 					data:  {'resource': ip },
 							dataType: "json",
 					success: function(ripeData){
-							   var netname = ripeData.data.records[0][1]['value'] + ' ' + ripeData.data.records[0][2]['value'];
-							   $('#dynamic-alert-success').append('<br>NetName: ' + netname);
+						for(let i = 0; i < 4; i++) {
+							$('#dynamic-alert-success').append('<br>' + ripeData.data.records[0][i]['key'] + ': ' + ripeData.data.records[0][i]['value']);
+						}
 					}
 				});
 			}

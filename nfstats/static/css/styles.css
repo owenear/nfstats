@@ -1,10 +1,16 @@
+body {
+	overflow-y: scroll;
+	overflow-x: auto;
+}
+
 .wrapper {
     display: flex;
     align-items: stretch;
 	padding: 0 0 0 0;
+	height: 100%;	
 }
 
-#sidebar {
+.sidebar {
 	padding-left: 20px;
 	padding-top: 20px;
 	background-color: #313A46;
@@ -28,10 +34,19 @@
     width: 70px;
 }
 
+.sidebar-mobile-button {
+	color: #E9EEF2!important;
+}
+
+.menu-toggler {
+	width: 50px;
+}
+
 .left-menu {
 	margin: 15vh 0 0 0;	
 	font-size: 1em;
 }
+
 
 li{
 	cursor: pointer;	
@@ -61,7 +76,8 @@ li{
 #content {
 	background-color: #E6E8EC;
 	padding: 0 0 0 0;
-	margin: 0 0 0 0;	
+	margin: 0 0 0 0;
+	min-height: 100vh;
 }
 
 .nodecorate .nodecorate:hover, .nodecorate:visited, .nodecorate:link , .nodecorate:active {
@@ -72,14 +88,6 @@ li{
 
 .fixed-width-250{
     width: 250px;
-}
-
-.fixed-width-200{
-    width: 200px;
-}
-
-.fixed-height-54{
-    height: 54px;
 }
 
 .fl{
@@ -118,7 +126,7 @@ li{
 	color: #8391a2;
 }
 
-#loader {
+.loader {
     display: none;
     width: 32px;
     height: 32px;
@@ -134,8 +142,15 @@ li{
   left: 40%;
 }
 
+.toast {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;	
+}
+
+
 .fixed-height-table {
-	max-height: 800px;
+	max-height: 700px;
 	overflow-y: scroll;	
 }
 
@@ -153,3 +168,64 @@ li{
 	position: fixed;
     bottom: 1em;
 }
+
+.row {
+	margin: 0 0 0 0;
+}
+
+@media (max-width: 1365px) {
+	.mobile {
+		display: block!important;
+	}
+	.no-mobile {
+		display: none!important;
+	}
+	.no-mobile-flex {
+		display: none!important;		
+	}
+	.mobile-flex {
+		display: flex!important;		
+	}
+	.nav-main {
+		width: 75%!important;
+	}
+	.nav-settings {
+		height: auto;
+		justify-content: space-between!important;
+	}
+	.no-mobile-table {
+		display: none!important;		
+	}
+	.settings-select-group {
+		width: 75%!important;
+	}
+}
+
+@media (min-width: 1366px) {
+	.mobile {
+		display: none!important;
+	}
+	.no-mobile {
+		display: block!important;
+	}
+	.no-mobile-flex {
+		display: flex!important;		
+	}
+	.mobile-flex {
+		display: none!important;		
+	}
+	.nav-main {
+		width: 90%!important;
+	}
+	.nav-settings {
+		height: 54px;
+		justify-content: flex-end!important;
+	}
+	.no-mobile-table {
+		display: table-cell!important;		
+	}
+	.settings-select-group {
+		width: 25%!important;
+	}
+}
+

@@ -4,30 +4,29 @@
 {% block content %}
 <div class="container">
 	<div class="row mt-3 justify-content-center">
-		<div class="card col-10">
+		<div class="card col">
 			<div class="card-body text-center">
-				<h5 class="card-title text-center">Interfaces List</h5>
-				<div class="row justify-content-center mb-5">
-					<div class="input-group fixed-width-200">
+				<h5 class="card-title text-center">Interfaces</h5>
+				<div class="row justify-content-center text-center mt-4 mb-3">
+					<div class="col-1 input-group settings-select-group">
 						<div class="input-group-prepend">
 							<label class="input-group-text" for="host-select">Host</label>
 						</div>
-						<select class="custom-select" id="host-select">
+						<select class="form-select" id="host-select">
 						{% for host in hosts %}
 							<option value="{{ host.host }}" {% if host == host_selected %} selected {% endif %}>{{ host.name }}</option>
 						{% endfor %}
 						</select>
 					</div>
 				</div>
-				
 				<div class="row fixed-height-table">
 				<table class="table">
-				  <thead class="thead-dark">
+				  <thead class="table-dark">
 					<tr>
 					  <th scope="col">#</th>
 					  <th id="" class="" scope="col">Name</th>
-					  <th id="" class="" scope="col">SNMPid</span></th>
-					  <th id="" class="" scope="col">Description</span></th>
+					  <th id="" class="no-mobile-table" scope="col">SNMPid</span></th>
+					  <th id="" class="no-mobile-table" scope="col">Description</span></th>
 					  <th id="" class="" scope="col">Sampling</span></th>
 					  <th scope="col"></th>
 					  <th scope="col"></th>
@@ -38,8 +37,8 @@
 					<tr id="{{ interface.id }}">
 						<td class=''>{{ forloop.counter }}</td>
 						<td class=''>{{ interface.name }}</td>
-						<td class=''>{{ interface.snmpid }}</td>
-						<td class=''>{{ interface.description }}</td>
+						<td class='no-mobile-table'>{{ interface.snmpid }}</td>
+						<td class='no-mobile-table'>{{ interface.description }}</td>
 						<td class=''>
 								<input type="checkbox" class="sampling_checkbox" {% if interface.sampling %} checked {% endif %}>		
 						</td>
@@ -51,9 +50,9 @@
 				</table>
 				</div>
 				<div class="row mt-3">
-					<div class="col text-right">
+					<div class="col text-end">
 						<button type="button" class="btn btn btn-outline-dark " onclick="getSNMPInterfaces()"><span class="small-icons" data-feather="plus-circle"></span> Read SNMP </button>
-						<button type="button" class="btn btn btn-outline-dark " data-toggle="modal" data-target="#interface_add_manual_modal" ><span class="small-icons" data-feather="plus-circle"></span> Add </button>
+						<button type="button" class="btn btn btn-outline-dark " data-bs-toggle="modal" data-bs-target="#interface_add_manual_modal" ><span class="small-icons" data-feather="plus-circle"></span> Manual Add </button>
 					</div>
 				</div>
 			</div>
@@ -62,15 +61,12 @@
 
 </div>
 
-
 <div class="modal fade" id="interface_add_manual_modal" tabindex="-1" role="dialog" aria-labelledby="interface_add_manual_modal_label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="interface_add_manual_modal_label">Add interface</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
 		  <div class="input-group mb-3">
@@ -94,7 +90,7 @@
       </div>
       <div class="modal-footer">
         <button id="modal_add_edit_btn" type="button" class="btn btn-success" onclick="addInterface()">OK</button>
-        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
       </div>
      </div>
   </div>
@@ -105,13 +101,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="add_snmp_modal_label">Add interfaces</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body fixed-height-table">
+      <div class="modal-body fixed-height-table pt-0 mt-3">
 			<table class="table">
-				  <thead class="thead-dark">
+				  <thead class="table-dark">
 					<tr>
 					  <th scope="col">#</th>
 					  <th id="" class="" scope="col">Name</th>
@@ -124,11 +118,10 @@
 
 				  </tbody>
 				</table>
-
       </div>
       <div class="modal-footer">
         <button id="" type="button" class="btn btn-success" onclick="addSnmpInterfaces()">Add/Update</button>
-        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+		<button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
       </div>
      </div>
   </div>
@@ -246,7 +239,7 @@ function getSNMPInterfaces(){
 			  },
 			  async: true,
 			  success: function(data) {
-			  		html_str = '<tr>'
+			  		html_str = ''
 			  		index = 0;
 			  		data.forEach(interface => {
 			  			index ++;

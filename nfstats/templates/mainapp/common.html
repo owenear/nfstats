@@ -1,27 +1,39 @@
-{% extends 'mainapp/base_charts.html' %}
+{% extends 'mainapp/base.html' %}
 
 
 {% block page-controls %}
-	<button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
-	<button id="aggregate" type="button" class="btn btn-danger ml-2 hide" onclick="agregateCharts()">Aggregate</button>
+	<div class="col no-mobile-flex">
+		<button id="show" type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+		<button id="aggregate" type="button" class="btn btn-danger ml-2 hide" onclick="agregateCharts()">Aggregate</button>
+	</div>
+
 {% endblock %}
+
+{% block page-controls-mobile %}
+	<div class="col text-end">
+		<button id="show-mobile" type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+		<button id="aggregate-mobile" type="button" class="btn btn-danger ml-2 hide" onclick="agregateCharts()">Aggregate</button>
+	</div>
+{% endblock %}	
 
 {% block content %}
 
 <div class="container-fluid mb-3">
+
+	
 {% for interface in interfaces %}
-<div class="row mt-3 justify-content-center">
-	<div class="mr-2 ml-2">
+<div class="row mt-3 justify-content-center g-3">
+	<div class="col">
 		<div class="card">
 			<div class="card-body text-center">
 				<h5 class="card-title text-center mb-0">{{ interface.description }}</h5>
 				<small class="charts-title">{{ interface.name }}</small>
 				<div class="col text-center mt-2" id='{{ interface.snmpid }}_src'>{{ interface.name }}</div>
 			</div>
-			<div class="card-footer text-muted text-center">Source AS</div>
+			<div class="card-footer text-muted ">Source AS</div>
 		</div>
 	</div>
-	<div class="ml-2 mr-2">
+	<div class="col">
 		<div class="card">
 			<div class="card-body text-center">
 				<h5 class="card-title text-center mb-0">{{ interface.description }}</h5>
@@ -30,29 +42,35 @@
 			</div>
 			<div class="card-footer text-muted">
 				<div class="row">
-					<div class="col-6 pr-0 text-right">Destination AS</div>
-					<div class="col-6 text-right">{% if not aggregate %}<input id="{{ interface.snmpid }}" type="checkbox" class="mt-1 aggr_checkbox">{% endif %}</div>
+					<div class="col ps-0">Destination AS</div>
+					<div class="col ps-0 text-end">{% if not aggregate %}<input id="{{ interface.snmpid }}" type="checkbox" class="aggr_checkbox">{% endif %}</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 {% endfor %}
+
 </div>
 <script>
+if (window.innerWidth > 1820) chart_width = 720;
+else if (window.innerWidth < 1820 && window.innerWidth > 1365 ) chart_width = window.innerWidth/2.8;
+else if (window.innerWidth < 1366 && window.innerWidth > 600 ) chart_width = window.innerWidth/2.5;
+else chart_width = window.innerWidth/1.25;
+
 pieChartOptionsSource = {	tooltip: {trigger: 'none'},
-						'width': 590,
+						'width': chart_width,
 						'colors' : ['#5f937d'],
-						'height': 350,
+						'height': 420,
 						chartArea: { height: '200%', top: '0%', left:'10%', width: '200%'},
 						'sliceVisibilityThreshold': 0.005,
 						'legendColor' : ['222']
 						}
 
-pieChartOptionsSourceDest = { tooltip: {trigger: 'none'},
-							'width': 590,
+pieChartOptionsDest = { tooltip: {trigger: 'none'},
+							'width': chart_width,
 							'colors' : ['#5f89a9'],
-							'height': 350,
+							'height': 420,
 							chartArea: { height: '200%', top: '0%', left:'10%', width: '200%'},
 							'sliceVisibilityThreshold': 0.005,
 							'legendColor' : ['222']
@@ -69,16 +87,32 @@ $('.aggr_checkbox').change(function(){
 		if ($(this).is(':checked'))
 			doAggregate	= true;
 	})
-	if (doAggregate) $("#aggregate").show(200);
-	else $("#aggregate").hide(200);
+	if (doAggregate) { 
+		$("#aggregate").show(200);
+		if (window.innerWidth < 1366) { 
+			$("#aggregate-mobile").show(200);
+			$("#show-mobile").hide(200);
+		}
+	}
+	else { 
+		$("#aggregate").hide(200);
+		if (window.innerWidth < 1366) { 
+			$("#show-mobile").show(200); 
+			$("#aggregate-mobile").show(200);
+		}
+	}
 })
 
 
 
 function getChartsData() {
-	var host = $('#host-select').val();
 	var date = new Date(dateToISO($('#date-select').val()));
+	var host = $('#host-select').val();
 	var direction = $('#direction-select').val();
+	if (window.innerWidth < 1366) { 
+		host = $('#host-select-mobile').val();
+		direction = $('#direction-select-mobile').val();
+	}
 	$.ajax({
 			  type: 'post',
 			  url: 'get_pie_chart_data',
@@ -103,8 +137,9 @@ function addRipeData(as) {
 		data:  {'resource': as },
 				dataType: "json",
 		success: function(ripeData){
-				   var netname = ripeData.data.records[0][1]['value'] + ' ' + ripeData.data.records[0][2]['value'];
-				   $('#dynamic-alert-success').append('<br>ASName: ' + netname);
+			for(let i = 1; i < 3; i++) {
+				$('#dynamic-alert-success').append('<br>' + ripeData.data.records[0][i]['key'] + ': ' + ripeData.data.records[0][i]['value']);
+			}
 	}});
 };
 
@@ -130,7 +165,7 @@ function chart{{interface.snmpid}}Source(chartsData){
 function chart{{interface.snmpid}}Dest(chartsData){
 	var data = google.visualization.arrayToDataTable(chartsData['{{interface.snmpid}}']['destination']);
 	var chart = new google.visualization.PieChart(document.getElementById('{{ interface.snmpid }}_dst'));
-	chart.draw(data, pieChartOptionsSourceDest);
+	chart.draw(data, pieChartOptionsDest);
 	google.visualization.events.addListener(chart, 'select', selectaction);
 	function selectaction(e) { 
 		if (chart.getSelection()[0]) {
@@ -157,14 +192,6 @@ function drawCharts(chartsData) {
 	{% endfor %}
 }
 
-$('#host-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
-})
-
-$('#direction-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
-})
-
 function getAggregateInterfaces() {
 	interfaces = "";
 	$('.aggr_checkbox').each(function(){
@@ -176,8 +203,8 @@ function getAggregateInterfaces() {
 
 
 function agregateCharts() {
-	//console.log(getAggregateInterfaces())
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&aggregate=" + getAggregateInterfaces();
+	if (window.innerWidth < 1366) document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&aggregate=" + getAggregateInterfaces();
+	else document.location.href = "?host=" + $('#host-select-mobile').val() + "&direction=" + $('#direction-select-mobile').val() + "&aggregate=" + getAggregateInterfaces();
 }
 
 </script>

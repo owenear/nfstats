@@ -237,8 +237,7 @@ def update_settings(request):
     vars = { 
         'log_file' :  request.POST['log_file'], 
         'logging_level' :  request.POST['logging_level'], 
-        'flow_collector' : request.POST['flow_collector'], 
-        'flow_collector_bin' : request.POST['flow_collector_bin'],
+        'nfdump_bin' : request.POST['nfdump_bin'],
         'snmp_bin' : request.POST['snmp_bin'],
         'history_days' : request.POST['history_days'],
     }

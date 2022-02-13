@@ -1,12 +1,20 @@
 # NFStats
 The web-based tool for calculating and displaying network traffic statistics for ISPs.
-It can use flow-tools or nfdump utilities to analyse NetFlow data and google-charts for display graphs.
+It uses nfdump utilities to analyse NetFlow data and google-charts for display graphs.
 
 <p><img src="docs/images/common_stats.png" width="400" /><img src="docs/images/bgp_as.png" width="400"/></p>
 <p><img src="docs/images/interface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
 
 ## Change log
-Current version 1.04.2
+Current version 1.05.0
+
+### v1.05
+* Added interface filters on the 'IP address' page
+* Discontinued support for Flow-tools!
+* Added mobile version
+* Moved to bootstrap v5
+* Minor changes to the interface
+* bug fixes
 
 ### v1.04
 * Per Host SNMP community
@@ -46,7 +54,7 @@ python manage.py migrate
 
 ## Prerequisites
 - FreeBSD or GNU/Linux
-- flow-tools or nfdump (configure netflow collectors to rotate files every minute. Configure NetFlow (v5/v9/ipfix) on a network device with active timeout 60 sec. See examples in docs)
+- Nfdump (configure netflow collectors to rotate files every minute. Configure NetFlow (v5/v9/ipfix) on a network device with active timeout 60 sec. See examples in docs)
 - SNMP client with snmpget snmpwalk tools (and configured snmp v2c protocol on network devices)
 - Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
@@ -189,7 +197,7 @@ Specify the name, host, SNMP community string.
 Specify the path to the dir with netflow capture files and be sure it's readable by the user that’s running the Django application.
 <p><img src="docs/images/add_host.png" width="800" /></p>
 
-2. Go to the "System" tab, select you netflow collector (flow-tools or nfdump) and specify other parameters.
+2. Go to the "System" tab and specify the parameters.
 "History (days)" - how long the speed data will be stored in the DB and collectors data on a disk. 
 It's depends on the netflow collector settings and the amount of data it receives from the devices.
 

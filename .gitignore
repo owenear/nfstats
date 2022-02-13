@@ -13,8 +13,7 @@ media
 venv/ 
 
 # Project Temp
-nfstats/flow-tools
-nfstats/speed
+nfstats/data
 
 #Project
 nfstats/nfstats/settings.py

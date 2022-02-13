@@ -25,19 +25,16 @@ def clean_dir(dir_name, oldtime_treshold):
 
 
 def main():
-    cur_time = int(time.time())
-    
+    cur_time = int(time.time())  
     oldtime_treshold = timezone.now() - timedelta(days=int(SYS_SETTINGS['history_days']))
     Speed.objects.filter(date__lte = oldtime_treshold).delete()
-    clean_dir(VARS['flow_filters_dir'], oldtime_treshold.timestamp())
-    
     hosts = Host.objects.all()
     for host in hosts:
         clean_dir(host.flow_path, oldtime_treshold.timestamp())
         interfaces = Interface.objects.filter(host = host, sampling = True).all()
         for interface in interfaces:
             snmp_err = 0
-            OCTETS_OLD_FILE = Path(VARS['octets_files_dir']).joinpath(host.host + "_" + str(interface.snmpid) + ".old")
+            OCTETS_OLD_FILE = Path(VARS['data_dir']).joinpath(host.host + "_" + str(interface.snmpid) + ".old")
             command = f"{VARS['snmp_get']} -v{SYS_SETTINGS['snmp_ver']} -Oseq -c {host.snmp_com} {host.host} .1.3.6.1.2.1.31.1.1.1.6.{interface.snmpid}"
             result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             if result.stderr:

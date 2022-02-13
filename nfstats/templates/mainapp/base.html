@@ -2,29 +2,28 @@
 {% load static %}
 <html lang="en">
   <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 
-    <!-- Bootstrap CSS -->
+	<link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+
 	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" >
 	<link rel="stylesheet" href="{% static 'css/styles.css' %}" >
 	<link rel="stylesheet" href="{% static 'css/datepicker.min.css' %}" >
 
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-	<script src="{% static 'js/bootstrap.min.js' %}"></script>
-	<script src="{% static 'js/popper.min.js' %}"></script>
+	<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+	<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 	<script src="{% static 'js/datepicker.min.js' %}"></script>
 	<script src="{% static 'js/i18n/datepicker.en.js' %}"></script>
 
-    <title>NFStats</title>
+	<title>NFStats</title>
   </head>
   <body>
-	<div class="wrapper">
-		<!-- Sidebar -->
-		<nav id="sidebar">
-			<div class="sidebar-fixed">
+	
+	<div class="wrapper p-0 m-0">
+		<nav class="sidebar no-mobile">
+			<div class="sidebar-fixed no-mobile">
 				<div>	
 					<img alt="nfstat" class="navbar-brand" src="{% static 'img/logo.png' %}" />
 					<a class="nodecorate active-white" href="{% url 'common' %}" target="">
@@ -35,40 +34,189 @@
 					</a>
 				</div>
 				{% block menu %}
-
+				<ul class="left-menu list-unstyled">
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'common' %}active-white{% endif %}" href="{% url 'common' %}"><span class="menu-icons" data-feather="pie-chart"></span>Common stats</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'bgp-as' %}active-white{% endif %}" href="{% url 'bgp-as' %}" href="#"><span class="menu-icons" data-feather="globe"></span>BGP AS</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'interface' %}active-white{% endif %}" href="{% url 'interface' %}"><span class="menu-icons" data-feather="link-2"></span>Interface</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'ip' %}active-white{% endif %}" href="{% url 'ip' %}"><span class="menu-icons" data-feather="bar-chart-2"></span>IP address</a></li>
+				</ul>
 				{% endblock %}
 				<div class="bottom">
-					<div><small>NFStats v1.04.2</small></div>
+					<div><small>NFStats v1.05.0</small></div>
 					<div><small>by <a href="https://github.com/owenear" target="_blank">@Evgeniy Kolosov</a></small></div>
 				</div>
 			</div>
 		</nav>
-
+	
+		<nav class="offcanvas offcanvas-start sidebar" tabindex="-1" id="sidebar-mobile">
+			<div class="offcanvas-header">
+				<div>	
+					<a class="nodecorate active-white" href="{% url 'common' %}" target="">
+						<div>
+							<h2>Netflow	</h2>
+							<h6>Traffic statistics</h6>
+						</div>
+					</a>
+				</div>
+				<button type="button" class="navbar-toggler menu-toggler sidebar-mobile-button" data-bs-dismiss="offcanvas" aria-label="Close">
+					<span class="mobile-icons" data-feather="x"></span>
+				</button>
+			</div>
+			<div class="offcanvas-body">
+				{% block menu-mobile %}
+				<ul class="left-menu list-unstyled">
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'common' %}active-white{% endif %}" href="{% url 'common' %}"><span class="menu-icons" data-feather="pie-chart"></span>Common stats</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'bgp-as' %}active-white{% endif %}" href="{% url 'bgp-as' %}" href="#"><span class="menu-icons" data-feather="globe"></span>BGP AS</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'interface' %}active-white{% endif %}" href="{% url 'interface' %}"><span class="menu-icons" data-feather="link-2"></span>Interface</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'ip' %}active-white{% endif %}" href="{% url 'ip' %}"><span class="menu-icons" data-feather="bar-chart-2"></span>IP address</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'ip' %}active-white{% endif %} mt-2" href="{% url 'settings_hosts' %}"><span class="menu-icons" data-feather="settings"></span>Settings</a></li>
+				</ul>
+				{% endblock %}
+			</div>
+		</nav>
 		<!-- Page Content -->
-		<div id="content" class="container-fluid">
-			{% block navbar %}
-
-			{% endblock %}
+		<div id="content" class="container-fluid m-0 p-0">
 			
+			{% block navbar %}
+			<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top justify-content-between">
+				<div class="row key-active g-2 ms-2 mb-2 nav-main">
+					<button class="navbar-toggler menu-toggler col-1 mobile" data-bs-toggle="offcanvas" href="#sidebar-mobile">
+						<span class="mobile-icons" data-feather="chevrons-left"></span>
+					</button>
+					<div class="col input-group host-input-group no-mobile-flex">
+					  <div class="input-group-prepend">
+						<label class="input-group-text" for="host-select">Host</label>
+					  </div>
+					  <select class="form-select" id="host-select">
+						{% for host in hosts %}
+							<option value="{{ host.host }}" {% if host == host_selected %} selected {% endif %}>{{ host.name }}</option>
+						{% endfor %}
+					  </select>
+					</div>
+					<div class="col input-group no-mobile-flex">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="direction-select">Direction:</label>
+						</div>
+						<select class="form-select" id="direction-select">
+							<option value="input" {% if direction == 'input' %} selected {% endif %}>Input</input>
+							<option value="output" {% if direction == 'output' %} selected {% endif %}>Output</input>
+						</select>
+					</div>			
+					<div class="col input-group date-input-group">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="date-select">Date:</label>
+						</div>
+						<input type="text" class="form-control" id="date-select" name="date">
+						<script>
+							startDate = new Date('{{ date }}');
+							$('#date-select').datepicker({ 
+								timepicker: true,
+								position : "bottom left",
+								dateFormat: "dd.mm.yyyy",
+								timeFormat : "hh:ii",
+								startDate: startDate, 
+								language: 'en',
+							});	
+							$('#date-select').val(startDate.toLocaleDateString('ru-RU') + " " + startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+						</script>
+					</div>
+					{% block page-controls %}
+					
+					
+					{% endblock %}
+					
+				</div>
+				<div class="row g-2 no-mobile-flex">
+				  <div id="loader" class="loader col me-2"></div>
+				  <a class="col me-2 nodecorate mb-1" href="{% url 'settings_hosts' %}" target="_blank"><span class="settings" data-feather="settings"></span></a>
+				</div>
+				<div class="row g-2 mobile-flex">
+					<button class="navbar-toggler menu-toggler col mobile me-2 mb-2" type="button" data-bs-toggle="modal" data-bs-target="#navbar-mobile" >
+						<span class="mobile-icons" data-feather="menu"></span>
+					</button>	
+				</div>
+			</nav>
+
+				
+			{% endblock %}
+
 			{% block content %}
 			
 			{% endblock %}
 		</div>
 
 	</div>
+
+	<div class="modal fade" id="navbar-mobile"  tabindex="-1" role="dialog"  aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Update Parameters</h5>
+					<div id="loader-mobile" class="loader ms-3 me-2"></div>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>	
+				<div class="modal-body gx-3">
+						<div class="col input-group host-input-group mb-2">
+							<div class="input-group-prepend">
+								<label class="input-group-text" for="host-select">Host</label>
+							</div>
+							<select class="form-select" id="host-select-mobile">
+								{% for host in hosts %}
+									<option value="{{ host.host }}" {% if host == host_selected %} selected {% endif %}>{{ host.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col input-group mb-2">
+							<div class="input-group-prepend">
+								<label class="input-group-text" for="direction-select-mobile">Direction:</label>
+							</div>
+							<select class="form-select" id="direction-select-mobile">
+								<option value="input" {% if direction == 'input' %} selected {% endif %}>Input</input>
+								<option value="output" {% if direction == 'output' %} selected {% endif %}>Output</input>
+							</select>
+						</div>
+					{% block page-controls-mobile %}
+						
+						
+					{% endblock %}
+				</div>	
+			</div>
+		</div>
+	</div>
+
+
 	<div id="dynamic-alert-success" class="alert alert-success mt-2" role="alert"></div>
 	<div id="dynamic-alert-danger" class="alert alert-danger mt-2" role="alert"></div>
+
+	<div class="toast" id="toast">
+		<div class="toast-header">
+			<strong class="me-auto"><i class="bi-gift-fill"></i> You've changed parameters</strong>
+			<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+		</div>
+		<div class="toast-body">
+			Press 'Show' button to take effect!
+		</div>
+	</div>
+	
   </body>
 
 	<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
     <script>
       feather.replace()
+	  navbarMobile = new bootstrap.Modal(document.getElementById('navbar-mobile'));
 	  jQuery.ajaxSetup({
 		  beforeSend: function() {
-			 $('#loader').show();
+			if (window.innerWidth < 1366) { 
+				$('#loader-mobile').show();
+			}
+			else $('#loader').show();
 		  },
 		  complete: function(){
-			 $('#loader').hide();
+			if (window.innerWidth < 1366) { 
+				$('#loader-mobile').hide();
+				navbarMobile.hide();
+			}
+			else $('#loader').hide();
 		  },
 		  success: function() {},
 		  error: function(e) {
@@ -129,6 +277,16 @@
 			date_iso = date_part_arr[2] + "-" + date_part_arr[1] + "-" + date_part_arr[0] + "T" + date_time_arr[1];
 			return date_iso;
 		} 
+
+		$('.form-select').change(function(){
+			if (window.innerWidth < 1366) navbarMobile.show();
+			else $("#toast").toast("show");
+		})
+
+		$('input').change(function(){
+			if (window.innerWidth < 1366) navbarMobile.show();
+			else $("#toast").toast("show");
+		})
 
     </script>
 </html>

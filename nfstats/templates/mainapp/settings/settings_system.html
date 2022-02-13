@@ -4,9 +4,9 @@
 {% block content %}
 <div class="container">
 <div class="row mt-3 justify-content-center">
-		<div class="card col-10">
+		<div class="card col">
 			<div class="card-body">
-				<h5 class="card-title text-center mb-0">System Settings</h5>
+				<h5 class="card-title text-center">System Settings</h5>
 					<div class="row mt-5">
 						<div class="col ">Log File:</div>
 						<div class="col"><input  id="log_file" type="text" class="form-control need-validate" 
@@ -16,7 +16,7 @@
 					<div class="row mt-2">
 						<div class="col">Logging Level:</div>
 						<div class="col">
-							<select class="custom-select" id="logging_level">
+							<select class="form-select" id="logging_level">
 								<option value="DEBUG" {% if  settings.logging_level == 'DEBUG' %} selected {% endif %}>DEBUG</option>
 								<option value="INFO" {% if  settings.logging_level == 'INFO' %} selected {% endif %}>INFO</option>
 								<option value="WARNING" {% if  settings.logging_level == 'WARNING' %} selected {% endif %}>WARNING</option>
@@ -26,18 +26,9 @@
 						</div>
 					</div>
 					<div class="row mt-2">
-						<div class="col">NetFlow Collector:</div>
-						<div class="col">
-							<select class="custom-select" id="flow_collector">
-								<option value="flow-tools" {% if  settings.flow_collector == 'flow-tools' %} selected {% endif %}>flow-tools</option>
-								<option value="nfdump" {% if  settings.flow_collector == 'nfdump' %} selected {% endif %}>nfdump</option>
-							</select>
-						</div>
-					</div>
-					<div class="row mt-2">
-						<div class="col">NetFlow Collector Bin Dir:</div>
-						<div class="col"><input  id="flow_collector_bin" type="text" class="form-control need-validate" 
-							value="{{ settings.flow_collector_bin }}">
+						<div class="col">NFDUMP Tools Bin Dir:</div>
+						<div class="col"><input  id="nfdump_bin" type="text" class="form-control need-validate" 
+							value="{{ settings.nfdump_bin }}">
 						</div>
 					</div>
 					<div class="row mt-2">
@@ -53,7 +44,7 @@
 						</div>
 					</div>
 					<div class="row mt-4">
-						<div class="col-12 text-right">
+						<div class="col text-end">
 							<button type="button" class="btn btn btn-outline-success " onclick="updateSettingsVar()">Apply</button>
 						</div>
 					</div>
@@ -76,8 +67,7 @@ function updateSettingsVar() {
 				data: {
 					'log_file' : $('#log_file').val(),
 					'logging_level' : $('#logging_level').val(),
-					'flow_collector_bin' : $('#flow_collector_bin').val(),
-					'flow_collector' : $('#flow_collector').val(),
+					'nfdump_bin' : $('#nfdump_bin').val(),
 					'snmp_bin' : $('#snmp_bin').val(),
 					'history_days' : $('#history_days').val(),
 				},

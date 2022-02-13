@@ -1,35 +1,51 @@
-{% extends 'mainapp/base_charts.html' %}
+{% extends 'mainapp/base.html' %}
 
 {% block page-controls %}
-<div class="input-group text-input-group ml-2">
+<div class="col input-group text-input-group no-mobile-flex">
 	<div class="input-group-prepend">
 		<label class="input-group-text" for="interface-select">Interface:</label>
 	</div>
-	<select class="custom-select" id="interface-select">
+	<select class="form-select" id="interface-select">
 		{% for interface in interfaces %}
 			<option value="{{ interface.snmpid }}">{{ interface.name }} ({{ interface.description }})</option>
 		{% endfor %}
-			<option value="other">other...</option>
 	</select>
-	<input type="text" class="form-control validate-numeric" id="interface-input" name="interface" value="" placeholder="SNMPid" hidden="true">
 </div>
-<button type="button" class="btn btn-outline-success ml-2" onclick="getChartsData()">Show</button>
+<div class="col no-mobile-flex">
+	<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+</div>
 {% endblock %}
+
+{% block page-controls-mobile %}
+	<div class="col input-group text-input-group mb-2">
+		<div class="input-group-prepend">
+			<label class="input-group-text" for="interface-select-mobile">Interface:</label>
+		</div>
+		<select class="form-select" id="interface-select-mobile">
+			{% for interface in interfaces %}
+				<option value="{{ interface.snmpid }}">{{ interface.name }} ({{ interface.description }})</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="col text-end">
+		<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+	</div>
+{% endblock %}	
 
 
 {% block content %}
 
-<div class="container-fluid mb-3">
+<div class="container-fluid g-4">
 <div class="row mt-3 justify-content-center">
-		<div class="card">
+		<div class="card p-0">
 			<div class="card-body text-center">
-				<div class="col text-center mt-2" id='chart'>Type not sampling interface SNMP ID and press 'Show' button</div>
+				<div class="col text-center" id='chart'>Select not sampling interface and press 'Show' button</div>
 			</div>
 			<div class="card-footer text-muted text-center charts-title">{{ direction }} traffic</div>
 		</div>
 </div>
 <script>
-chartOptions = { 'width': 1000, 'height': 500 }
+chartOptions = { 'height': 500 }
 google.charts.load('current', {'packages':['corechart', 'sankey']});
 
 
@@ -39,7 +55,11 @@ function getChartsData() {
 		var date = new Date(dateToISO($('#date-select').val()));
 		var direction = $('#direction-select').val();
 		var intrf = $('#interface-select').val();
-		if (intrf == 'other') intrf = $('#interface-input').val();
+		if (window.innerWidth < 1366) { 
+			host = $('#host-select-mobile').val();
+			direction = $('#direction-select-mobile').val();
+			intrf = $('#interface-select-mobile').val();
+		}
 		$('.charts-title').text(direction + " traffic")
 		$.ajax({
 				type: 'post',
@@ -68,25 +88,6 @@ function drawCharts(chartsData) {
 	if (chartOptions.height < 500) chartOptions.height = 500;
 	chart.draw(data, chartOptions);
 }
-
-
-$('#host-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
-})
-
-$('#direction-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
-})
-
-$('#interface-select').change(function(){
-	if ($('#interface-select').val() == "other") {
-		$('#interface-input').removeAttr('hidden');
-		$('#interface-input').addClass('need-validate');
-	} else {
-		$('#interface-input').attr('hidden', 'true');
-		$('#interface-input').removeClass('need-validate');
-	}
-})
 
 
 </script>

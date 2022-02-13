@@ -8,12 +8,10 @@ from django.http import JsonResponse
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SYS_SETTINGS = { 
-    'log_file' :  '/var/log/nfstats.log',
+    'log_file' :  'nfstats.log',
     'log_type' : 'file',
-    'flow_collector' : 'flow-tools',
     'logging_level' : 'DEBUG',
-    'log_size' : 50000,
-    'flow_collector_bin' : '/usr/local/bin/',
+    'nfdump_bin' : '/usr/bin/',
     'snmp_bin' : '/usr/bin',
     'snmp_ver' : '2c',
     'history_days' : 10,
@@ -54,19 +52,12 @@ LOGGING = {
 def set_vars():
     global VARS, BASE_DIR
     VARS.update({
-        'octets_files_dir' : BASE_DIR.joinpath('speed'),
-        'flow_filters_dir' : BASE_DIR.joinpath('flow-tools'),
+        'data_dir' : BASE_DIR.joinpath('data'),
         'snmp_get' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpget'),
         'snmp_walk' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpwalk'),
-        'flow_cat' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-cat'),
-        'flow_nfilter' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-nfilter'),
-        'flow_filter' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-filter'),
-        'flow_report' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-report'),
-        'flow_print' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('flow-print'),
-        'nfdump' : Path(SYS_SETTINGS['flow_collector_bin']).joinpath('nfdump'),
+        'nfdump' : Path(SYS_SETTINGS['nfdump_bin']).joinpath('nfdump'),
     })
-    Path(VARS['octets_files_dir']).mkdir(parents=True, exist_ok=True)
-    Path(VARS['flow_filters_dir']).mkdir(parents=True, exist_ok=True)
+    Path(VARS['data_dir']).mkdir(parents=True, exist_ok=True)
     '''
     if not Path(SYS_SETTINGS['log_file']).exists():
         try:

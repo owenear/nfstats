@@ -6,17 +6,17 @@
 <div class="row mt-3 justify-content-center">
 		<div class="card col-10">
 			<div class="card-body text-center">
-				<h5 class="card-title text-center mb-0">Hosts List</h5>
+				<h5 class="card-title text-center mb-0">Hosts</h5>
 				
 				<table class="table mt-4">
-				  <thead class="thead-dark">
+				  <thead class="table-dark">
 					<tr>
 					  <th id="" class="" scope="col">#</th>
 					  <th id="" class="" scope="col">Name</th>
-					  <th id="" class="" scope="col">Host</span></th>
-					  <th id="" class="" scope="col">Description</span></th>
-					  <th id="" class="" scope="col">SNMP Community</span></th>
-					  <th id="" class="" scope="col">Path to flow data</span></th>
+					  <th id="" class="no-mobile-table" scope="col">Host</span></th>
+					  <th id="" class="no-mobile-table" scope="col">Description</span></th>
+					  <th id="" class="no-mobile-table" scope="col">SNMP Community</span></th>
+					  <th id="" class="no-mobile-table" scope="col">Path to flow data</span></th>
 					  <th scope="col"></th>
 					  <th scope="col"></th>
 					</tr>
@@ -26,10 +26,10 @@
 					<tr id="{{ host.id }}">
 					    <td class=''>{{ forloop.counter }}</td> 
 						<td class=''>{{ host.name }}</td>
-						<td class=''>{{ host.host }}</td>
-						<td class=''>{{ host.description }}</td>
-						<td class=''>{{ host.snmp_com }}</td>
-						<td class=''>{{ host.flow_path }}</td>
+						<td class='no-mobile-table'>{{ host.host }}</td>
+						<td class='no-mobile-table'>{{ host.description }}</td>
+						<td class='no-mobile-table'>{{ host.snmp_com }}</td>
+						<td class='no-mobile-table'>{{ host.flow_path }}</td>
 						<td class=''><span class='edit small-icons'><span class='small-icons' data-feather="edit"></span></span></td>
 						<td class=''><span class='trash small-icons'><span class='small-icons' data-feather="trash"></span></span></td>
 					</tr>
@@ -38,7 +38,7 @@
 				</table>
 				
 				<div class="row mt-3">
-					<div class="col-12 text-right">
+					<div class="col text-end">
 						<button id="add_host_btn" type="button" class="btn btn-outline-dark" ><span class="small-icons" data-feather="plus-circle"></span> Add</button>
 					</div>
 				</div>
@@ -52,9 +52,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalLabel"></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
 		  <div class="input-group mb-3">
@@ -63,7 +61,6 @@
   				</div>
   				<input id="name" type="text" class="form-control need-validate" value="" >
 		  </div>
-		  
 		  <div class="input-group mb-3">
  				<div class="input-group-prepend">
     			<span class="input-group-text">Host</span>
@@ -95,7 +92,7 @@
       </div>
       <div class="modal-footer">
         <button id="modal_add_edit_btn" type="button" class="btn btn-success">OK</button>
-        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
       </div>
      </div>
   </div>
