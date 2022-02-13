@@ -290,18 +290,6 @@ function drawCharts(chartsData) {
 	};
 }
 
-$('#host-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&ip_type=" + $('#ip-type-select').val();
-})
-
-$('#direction-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&ip_type=" + $('#ip-type-select').val();
-})
-
-$('#ip-type-select').change(function(){
-	document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val() + "&ip_type=" + $('#ip-type-select').val();
-})
-
 </script>
 
 {% endblock %}
