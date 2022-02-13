@@ -71,7 +71,7 @@ def generate_interface_flows_data(filter_direction, report_direction, date, host
     if filter_direction == report_direction:
         if snmpid_aggregate:
             filter_keys = create_nfdump_filter(interfaces, direction_key_filter)
-            command = (f"{VARS['nfdump']} -r {flows_file} -t {date} -A {as_type_key_filter}as "
+            command = (f"{VARS['nfdump']} -r {flows_file} -A {as_type_key_filter}as "
                     f"-O bytes -N -q -o 'fmt:%{as_type_key_report}as,%byt' "
                     f"'{filter_keys}'" )
         else:
