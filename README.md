@@ -9,7 +9,7 @@ It uses nfdump utilities to analyse NetFlow data and google-charts for display g
 Current version 1.05.0
 
 ### v1.05
-* Added interface filters on the 'IP address' page
+* Added interface filters to the 'IP address' page
 * Discontinued support for Flow-tools!
 * Added mobile version
 * Moved to bootstrap v5
