@@ -235,6 +235,7 @@ def delete_host(request):
 @csrf_exempt  
 def update_settings(request):
     vars = { 
+        'log_type' : request.POST['log_type'],
         'log_file' :  request.POST['log_file'], 
         'logging_level' :  request.POST['logging_level'], 
         'nfdump_bin' : request.POST['nfdump_bin'],
@@ -255,7 +256,13 @@ def update_settings(request):
         else:
             setattr(obj, 'value', value)
             obj.save()
-    update_globals()
+    try:
+        update_globals()
+    except Exception as e:
+        logger.critical(f"(Settings): {e}")
+        result = JsonResponse({"error": f"Error: (Settings): {e}"})
+        result.status_code = 500
+        return result
     result = JsonResponse({"result": "Settings updated"})
     result.status_code = 200
     return result

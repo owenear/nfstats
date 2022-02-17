@@ -144,10 +144,10 @@ li{
 
 .toast {
 	position: fixed;
-	bottom: 20px;
-	right: 20px;	
+	top: 90%;
+	right: 20px;
+	z-index: 1000;	
 }
-
 
 .fixed-height-table {
 	max-height: 700px;
@@ -173,7 +173,7 @@ li{
 	margin: 0 0 0 0;
 }
 
-@media (max-width: 1365px) {
+@media (max-width: 1399px) {
 	.mobile {
 		display: block!important;
 	}
@@ -199,9 +199,10 @@ li{
 	.settings-select-group {
 		width: 75%!important;
 	}
+
 }
 
-@media (min-width: 1366px) {
+@media (min-width: 1400px) {
 	.mobile {
 		display: none!important;
 	}
@@ -227,5 +228,10 @@ li{
 	.settings-select-group {
 		width: 25%!important;
 	}
+	.navbar-expand-xxl .navbar-collapse {
+		display: none!important;
+		flex-basis: auto;
+	}
+
 }
 

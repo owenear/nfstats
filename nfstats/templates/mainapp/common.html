@@ -10,9 +10,10 @@
 {% endblock %}
 
 {% block page-controls-mobile %}
-	<div class="col text-end">
-		<button id="show-mobile" type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
-		<button id="aggregate-mobile" type="button" class="btn btn-danger ms-2 hide" onclick="agregateCharts()">Aggregate</button>
+	<div class="row justify-content-end">
+		<div id="loader-mobile" class="col loader ms-2 mt-1 w-75"></div>
+		<button id="show-mobile" type="button" class="col-3 btn btn-outline-success" onclick="getChartsData()">Show</button>
+		<button id="aggregate-mobile" type="button" class="col-4 btn btn-danger ms-2 hide" onclick="agregateCharts()">Aggregate</button>
 	</div>
 {% endblock %}	
 
@@ -54,8 +55,8 @@
 </div>
 <script>
 if (window.innerWidth > 1820) chart_width = 720;
-else if (window.innerWidth < 1820 && window.innerWidth > 1365 ) chart_width = window.innerWidth/2.8;
-else if (window.innerWidth < 1366 && window.innerWidth > 600 ) chart_width = window.innerWidth/2.5;
+else if (window.innerWidth < 1820 && window.innerWidth > 1399 ) chart_width = window.innerWidth/2.8;
+else if (window.innerWidth < 1400 && window.innerWidth > 600 ) chart_width = window.innerWidth/2.5;
 else chart_width = window.innerWidth/1.25;
 
 pieChartOptionsSource = {	tooltip: {trigger: 'none'},
@@ -186,8 +187,9 @@ function drawCharts(chartsData) {
 			chart{{interface.snmpid}}Source(chartsData)
 			chart{{interface.snmpid}}Dest(chartsData)
 		} else {
-			$('#dynamic-alert-danger').append(chartsData['{{interface.snmpid}}']['error'] + "<br>");
-			$('#dynamic-alert-danger').show();
+			toastShow("Error", chartsData['{{interface.snmpid}}']['error'], true);
+			//$('#dynamic-alert-danger').append(chartsData['{{interface.snmpid}}']['error'] + "<br>");
+			//$('#dynamic-alert-danger').show();
 		}
 	{% endfor %}
 }

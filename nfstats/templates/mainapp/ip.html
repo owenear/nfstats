@@ -12,9 +12,9 @@
 </div>
 <div class="col input-group text-input-group no-mobile-flex">
 	<div class="input-group-prepend">
-		<label class="input-group-text" for="interface-input">Count:</label>
+		<label class="input-group-text" for="count-input">Count:</label>
 	</div>
-	<input type="text" class="form-control" id="count-input" name="count" value="15" required>
+	<input type="text" class="form-control validate-numeric" id="count-input" name="count" value="15" required>
 </div>
 <div class="col no-mobile-flex">
 	<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
@@ -37,8 +37,9 @@
 		</div>
 		<input type="text" class="form-control" id="count-input-mobile" name="count" value="15" required>
 	</div>
-	<div class="col text-end">
-		<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+	<div class="row justify-content-end">
+		<div id="loader-mobile" class="col loader ms-2 mt-1 w-75"></div>
+		<button type="button" class="col-3 btn btn-outline-success" onclick="getChartsData()">Show</button>
 	</div>
 {% endblock %}
 

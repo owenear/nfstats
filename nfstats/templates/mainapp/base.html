@@ -42,7 +42,7 @@
 				</ul>
 				{% endblock %}
 				<div class="bottom">
-					<div><small>NFStats v1.05.0</small></div>
+					<div><small>NFStats v1.05.1</small></div>
 					<div><small>by <a href="https://github.com/owenear" target="_blank">@Evgeniy Kolosov</a></small></div>
 				</div>
 			</div>
@@ -69,7 +69,7 @@
 					<li><a class="nav-link {% if request.resolver_match.url_name == 'bgp-as' %}active-white{% endif %}" href="{% url 'bgp-as' %}" href="#"><span class="menu-icons" data-feather="globe"></span>BGP AS</a></li>
 					<li><a class="nav-link {% if request.resolver_match.url_name == 'interface' %}active-white{% endif %}" href="{% url 'interface' %}"><span class="menu-icons" data-feather="link-2"></span>Interface</a></li>
 					<li><a class="nav-link {% if request.resolver_match.url_name == 'ip' %}active-white{% endif %}" href="{% url 'ip' %}"><span class="menu-icons" data-feather="bar-chart-2"></span>IP address</a></li>
-					<li><a class="nav-link {% if request.resolver_match.url_name == 'ip' %}active-white{% endif %} mt-2" href="{% url 'settings_hosts' %}"><span class="menu-icons" data-feather="settings"></span>Settings</a></li>
+					<li><a class="nav-link {% if request.resolver_match.url_name == 'settings_hosts' %}active-white{% endif %} mt-2" href="{% url 'settings_hosts' %}"><span class="menu-icons" data-feather="settings"></span>Settings</a></li>
 				</ul>
 				{% endblock %}
 			</div>
@@ -78,7 +78,7 @@
 		<div id="content" class="container-fluid m-0 p-0">
 			
 			{% block navbar %}
-			<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top justify-content-between">
+			<nav class="navbar navbar-expand-xxl navbar-light bg-light sticky-top justify-content-between">
 				<div class="row key-active g-2 ms-2 mb-2 nav-main">
 					<button class="navbar-toggler menu-toggler col-1 mobile" data-bs-toggle="offcanvas" href="#sidebar-mobile">
 						<span class="mobile-icons" data-feather="chevrons-left"></span>
@@ -124,38 +124,20 @@
 					
 					
 					{% endblock %}
-					
+
 				</div>
 				<div class="row g-2 no-mobile-flex">
 				  <div id="loader" class="loader col me-2"></div>
 				  <a class="col me-2 nodecorate mb-1" href="{% url 'settings_hosts' %}" target="_blank"><span class="settings" data-feather="settings"></span></a>
 				</div>
 				<div class="row g-2 mobile-flex">
-					<button class="navbar-toggler menu-toggler col mobile me-2 mb-2" type="button" data-bs-toggle="modal" data-bs-target="#navbar-mobile" >
+					<button class="navbar-toggler menu-toggler col mobile me-2 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-mobile" >
 						<span class="mobile-icons" data-feather="menu"></span>
 					</button>	
 				</div>
-			</nav>
-
 				
-			{% endblock %}
-
-			{% block content %}
-			
-			{% endblock %}
-		</div>
-
-	</div>
-
-	<div class="modal fade" id="navbar-mobile"  tabindex="-1" role="dialog"  aria-labelledby="exampleModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">Update Parameters</h5>
-					<div id="loader-mobile" class="loader ms-3 me-2"></div>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				  </div>	
-				<div class="modal-body gx-3">
+				<div class="collapse navbar-collapse" id="navbar-mobile"  tabindex="-1" aria-hidden="true">
+					<div class="gx-3 ms-2 me-2">
 						<div class="col input-group host-input-group mb-2">
 							<div class="input-group-prepend">
 								<label class="input-group-text" for="host-select">Host</label>
@@ -175,35 +157,74 @@
 								<option value="output" {% if direction == 'output' %} selected {% endif %}>Output</input>
 							</select>
 						</div>
-					{% block page-controls-mobile %}
-						
-						
-					{% endblock %}
-				</div>	
+						{% block page-controls-mobile %}
+							
+							
+						{% endblock %}
+					</div>	
+				</div>
+
+			</nav>
+
+				
+			{% endblock %}
+
+			{% block content %}
+			
+			{% endblock %}
+		</div>
+
+	</div>
+	<div id="dynamic-alert-success" class="alert alert-success mt-2" role="alert"></div>
+
+	<div class="toast-box">
+		<div class="toast" id="toast_0">
+			<div class="toast-header text-white justify-content-between">
+				<strong class="toast-header-text">You've changed parameters</strong>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+			</div>
+			<div class="toast-body">
+				Press 'Show' button to take effect!
 			</div>
 		</div>
 	</div>
-
-
-	<div id="dynamic-alert-success" class="alert alert-success mt-2" role="alert"></div>
-	<div id="dynamic-alert-danger" class="alert alert-danger mt-2" role="alert"></div>
-
-	<div class="toast" id="toast">
-		<div class="toast-header">
-			<strong class="me-auto"><i class="bi-gift-fill"></i> You've changed parameters</strong>
-			<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-		</div>
-		<div class="toast-body">
-			Press 'Show' button to take effect!
-		</div>
-	</div>
-	
   </body>
 
 	<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
     <script>
       feather.replace()
-	  navbarMobile = new bootstrap.Modal(document.getElementById('navbar-mobile'));
+	  if (document.getElementById("navbar-mobile")) navbarMobile = new bootstrap.Collapse(document.getElementById('navbar-mobile'));
+
+	  function toastShow(header, text, error){
+			$('div[id^="toast_"]').each(function(){
+				if ($(this).hasClass("hide") && $(this).prop('id') != 'toast_0') 
+					$(this).remove();				
+			})
+			$toast = $('div[id^="toast_"]:last');		
+			if ($toast.hasClass("show")) { 
+				let top = $toast.offset().top; 
+				num = parseInt($toast.prop("id").split('_')[1]) + 1;
+				$toast = $toast.clone().appendTo('.toast-box');
+				$toast.prop("id", "toast_" + num);
+				$toast.children('.toast-header').children('.toast-header-text').html(header);
+				$toast.children('.toast-body').html(text);
+				console.log(top, $toast.height());
+				top = top - $toast.height() - 10;
+				$toast.css("top", top + "px");
+			} else {
+				$toast.children('.toast-header').children('.toast-header-text').html(header);
+				$toast.children('.toast-body').html(text);
+			}
+			if (error) { 
+				$toast.children('.toast-header').removeClass("bg-success"); 
+				$toast.children('.toast-header').addClass("bg-danger");  
+			} else {
+				$toast.children('.toast-header').removeClass("bg-danger"); 
+				$toast.children('.toast-header').addClass("bg-success");  
+			}
+			$toast.toast("show");
+		}
+
 	  jQuery.ajaxSetup({
 		  beforeSend: function() {
 			if (window.innerWidth < 1366) { 
@@ -220,10 +241,10 @@
 		  },
 		  success: function() {},
 		  error: function(e) {
-				  $('#dynamic-alert-danger').html(e.responseJSON.error);
-				  $('#dynamic-alert-danger').show();
+				  toastShow("Error!", e.responseJSON.error, true)	
 			}
 		});
+		
 		$(".key-active").keyup(function(e){ 
 			if(e.key==="Enter") getChartsData();
 		})
@@ -248,8 +269,7 @@
 				if ($(this).val() && !$.isNumeric($(this).val())) {
 					$(this).addClass('is-invalid');
 					setTimeout(function(){
-							$('#dynamic-alert-danger').html("Error: The value must be numeric");
-				  			$('#dynamic-alert-danger').show();	
+							toastShow("Error!", "The value must be numeric!", true)		
 						}, 100);
 					valid = false;
 				}	
@@ -270,23 +290,12 @@
 			});
 		});
 
-
 		function dateToISO(date){
 			date_time_arr = date.split(" ");
 			date_part_arr = date_time_arr[0].split(".");
 			date_iso = date_part_arr[2] + "-" + date_part_arr[1] + "-" + date_part_arr[0] + "T" + date_time_arr[1];
 			return date_iso;
 		} 
-
-		$('.form-select').change(function(){
-			if (window.innerWidth < 1366) navbarMobile.show();
-			else $("#toast").toast("show");
-		})
-
-		$('input').change(function(){
-			if (window.innerWidth < 1366) navbarMobile.show();
-			else $("#toast").toast("show");
-		})
 
     </script>
 </html>

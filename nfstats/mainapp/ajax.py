@@ -48,8 +48,8 @@ def get_pie_chart_data(request):
                 else:
                     speed_data = Speed.objects.get(date = date_db, interface = interface)
             except Speed.DoesNotExist:
-                logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
-                data[snmpid]['error'] = f"Error: Speed data for interface {interface} and date: {date_db} does not exist"
+                logger.error(f"Speed data for the interface {interface} and date: {date_db} does not exist")
+                data[snmpid]['error'] = f"Speed data for the interface {interface} and date: {date_db} does not exist"
                 continue
             for as_type in ['source', 'destination']:    
                 data[snmpid][as_type] = [[as_type + 'AS', 'Mbps']]
@@ -91,8 +91,8 @@ def get_interface_chart_data(request):
         try:
             speed_data = Speed.objects.get(date = date_db, interface = interface)
         except Speed.DoesNotExist:
-            logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
-            result = JsonResponse({"error": f"Error: Speed data for interface {interface} and date: {date_db} does not exist"})
+            logger.error(f"Speed data for the interface {interface} and date: {date_db} does not exist")
+            result = JsonResponse({"error": f"Speed data for the interface {interface} and date: {date_db} does not exist"})
             result.status_code = 500
             return result
         factor = speed_data.in_bps/(int(octets)*1000000) if filter_direction == 'output' else  speed_data.out_bps/(int(octets)*1000000)
@@ -139,8 +139,8 @@ def get_as_chart_data(request):
             try:
                 speed_data = Speed.objects.get(date = date_db, interface = interface)
             except Speed.DoesNotExist:
-                logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
-                result = JsonResponse({"error": f"Error: Speed data for interface {interface} and date: {date_db} does not exist"})
+                logger.error(f"Speed data for the interface {interface} and date: {date_db} does not exist")
+                result = JsonResponse({"error": f"Speed data for the interface {interface} and date: {date_db} does not exist"})
                 result.status_code = 500
                 return result
             factor = speed_data.in_bps/(int(octets)*1000000) if direction == 'input' else  speed_data.out_bps/(int(octets)*1000000)
@@ -204,8 +204,8 @@ def get_ip_chart_data(request):
         try:
             speed_data = Speed.objects.get(date = date_db, interface = interface)
         except Speed.DoesNotExist:
-            logger.error(f"Speed data for interface {interface} and date: {date_db} does not exist")
-            result = JsonResponse({"error": f"Error: Speed data for interface {interface} and date: {date_db} does not exist"})
+            logger.error(f"Speed data for the interface {interface} and date: {date_db} does not exist")
+            result = JsonResponse({"error": f"Speed data for the interface {interface} and date: {date_db} does not exist"})
             result.status_code = 500
             return result
         factor = speed_data.in_bps/(int(octets)*1000000) if direction == 'input' else  speed_data.out_bps/(int(octets)*1000000)
@@ -236,25 +236,6 @@ def get_ip_traffic_data(request):
     dst_port = request.POST['dst_port']
     snmpid_smpl = request.POST['interface_sampling']
     snmpid_nsmpl = request.POST['interface']
-
-    ''' 
-    try:
-        flows_file = next(Path(flow_path).rglob(f'*{date}*'))
-    except StopIteration:
-        logger.error(f"Flow files for the date: {date} not found!")
-        result = JsonResponse({"error": f"Error: Flow files for the date: {date} not found!"})
-        result.status_code = 500
-        return result
-    
-    ip_type_key = 'src' if ip_type == 'ip-source-address' else 'dst'
-    command = f"{VARS['nfdump']} -r {flows_file} -N -q -o 'fmt:%ts,%te,%in,%sa,%sp,%out,%da,%dp,%pr,%fl,%pkt,%byt' '{ip_type_key} ip {ip_addr}'"
-    try:
-        result = get_shell_data(command, r'\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+)\s*,\s*(\d+),\s*(\d+),\s*(\d+)')
-    except Exception as e:
-        result = JsonResponse({"error": str(e)})
-        result.status_code = 500
-        return result
-    '''
     try:
         flows_data = generate_ip_traffic_data(direction, date, host, snmpid_smpl, snmpid_nsmpl, src_as, dst_as, src_port, dst_port, ip_type, ip_addr)
     except Exception as e:

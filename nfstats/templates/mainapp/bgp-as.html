@@ -31,8 +31,9 @@
 		</div>
 		<input type="text" class="form-control need-validate validate-numeric" id="dstas-input-mobile" name="dst-as" value="" placeholder="AS number" required>
 	</div>
-	<div class="col text-end">
-		<button type="button" class="btn btn-outline-success" onclick="getChartsData()">Show</button>
+	<div class="row justify-content-end">
+		<div id="loader-mobile" class="col loader ms-2 mt-1 w-75"></div>
+		<button type="button" class="col-3 btn btn-outline-success" onclick="getChartsData()">Show</button>
 	</div>
 {% endblock %}	
 

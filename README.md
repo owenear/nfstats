@@ -54,7 +54,7 @@ python manage.py migrate
 
 ## Prerequisites
 - FreeBSD or GNU/Linux
-- Nfdump (configure netflow collectors to rotate files every minute. Configure NetFlow (v5/v9/ipfix) on a network device with active timeout 60 sec. See examples in docs)
+- Nfdump tools (configure 'nfcapd' netflow collector to rotate files every minute. Configure NetFlow (v5/v9/ipfix) on a network device with active timeout 60 sec. See examples in docs)
 - SNMP client with snmpget snmpwalk tools (and configured snmp v2c protocol on network devices)
 - Python 3.6 and higher (if Ubuntu also python3.6-venv and higher for the virtual enviroment)
 - One of the Django supported databases:
@@ -161,13 +161,12 @@ python manage.py migrate
     path('', include('mainapp.urls')),
 ]
  ```
-**6. Create the log file "/var/log/nfstats.log" and be sure it's writable by the user that’s running the Django application.**
 
-**7. Check other permissions:**
+**6. Check the file permissions:**
   - the "/var/www/nfstats" dir must be writable by the user that’s running the Django application
-  - the "/var/www/nfstats/nfstats/flow-tools" dir must be writable by the flow-tools user.
+  - the "/var/www/nfstats/nfstats/data" dir must be writable by the nfcapd user.
  
-**8. Add NFstats to your Web Server and restart it** 
+**7. Add NFstats to your Web Server and restart it** 
  
 Apache with mod-wsgi-py3 config example
 ```
@@ -180,7 +179,7 @@ Apache with mod-wsgi-py3 config example
         WSGIProcessGroup nfstats.example.com
 </VirtualHost>
 ```
-**9. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
+**8. Put "nfstats/bin/interface_speed.py" script to a cron to execute it every minute**
 Script records the interface speed in bps to the DB. This is used for the recalculating the data received from 
 netflow collector. So you can use not 1:1 sample rate (sample each packet) on your network devices, but for example 1:2000 packets, 
 save the device cpu and get the truthful static data.
@@ -198,9 +197,9 @@ Specify the path to the dir with netflow capture files and be sure it's readable
 <p><img src="docs/images/add_host.png" width="800" /></p>
 
 2. Go to the "System" tab and specify the parameters.
-"History (days)" - how long the speed data will be stored in the DB and collectors data on a disk. 
-It's depends on the netflow collector settings and the amount of data it receives from the devices.
-
+ - "History (days)" - how long the speed data will be stored in the DB and collectors data on a disk. 
+    It's depends on the netflow collector settings and the amount of data it receives from the devices.
+ - "Logging Output" - select 'console' to logging to a web server standart output (by default), select 'file' to logging to a particular file. 
 <p><img src="docs/images/system.png" width="800" /></p>
 
 3. Go to the "Interface" tab, click the the "Read SNMP data" and add interface information to the db (Only interfaces with a configured "description" are displayed)

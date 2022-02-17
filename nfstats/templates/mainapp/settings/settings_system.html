@@ -8,6 +8,15 @@
 			<div class="card-body">
 				<h5 class="card-title text-center">System Settings</h5>
 					<div class="row mt-5">
+						<div class="col">Logging Output:</div>
+						<div class="col">
+							<select class="form-select" id="log_type">
+								<option value="console" {% if  settings.log_type == 'console' %} selected {% endif %}>console</option>
+								<option value="file" {% if  settings.log_type == 'file' %} selected {% endif %}>file</option>
+							</select>
+						</div>
+					</div>
+					<div class="row mt-2">
 						<div class="col ">Log File:</div>
 						<div class="col"><input  id="log_file" type="text" class="form-control need-validate" 
 							value="{{ settings.log_file }}">
@@ -55,6 +64,16 @@
 
 <script>
 
+function changeLoggingType() {
+	if($('#log_type').val() == 'console') $('#log_file').prop('disabled', true);
+	else $('#log_file').prop('disabled', false);
+}
+
+changeLoggingType()
+
+$('#log_type').change(function(e){ 
+	changeLoggingType()
+})
 
 function updateSettingsVar() {
 
@@ -70,9 +89,10 @@ function updateSettingsVar() {
 					'nfdump_bin' : $('#nfdump_bin').val(),
 					'snmp_bin' : $('#snmp_bin').val(),
 					'history_days' : $('#history_days').val(),
+					'log_type' : $('#log_type').val(),
 				},
 				success: function(data){
-						location.reload();
+					 toastShow("You've changed settings","System settings successfully changed", false);
 				},
 				async: true,
 		})

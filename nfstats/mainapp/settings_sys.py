@@ -8,8 +8,8 @@ from django.http import JsonResponse
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SYS_SETTINGS = { 
-    'log_file' :  'nfstats.log',
-    'log_type' : 'file',
+    'log_file' :  '/var/log/nfstats.log',
+    'log_type' : 'console',
     'logging_level' : 'DEBUG',
     'nfdump_bin' : '/usr/bin/',
     'snmp_bin' : '/usr/bin',
@@ -18,6 +18,7 @@ SYS_SETTINGS = {
 }
 
 VARS = {}
+
 
 LOGGING = {
     'version': 1,
@@ -29,12 +30,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': SYS_SETTINGS['logging_level'],
-            'class': 'logging.FileHandler',
-            'filename':  Path(SYS_SETTINGS['log_file']),
-            'formatter' : 'simple'
-        },
         'console': {
             'class': 'logging.StreamHandler',
         },
@@ -49,8 +44,14 @@ LOGGING = {
 }
 
 
-def set_vars():
-    global VARS, BASE_DIR
+def update_globals():
+    global SYS_SETTINGS, VARS, BASE_DIR, LOGGING
+    
+    settings_db = { item['name']:item for item in Settings.objects.values() }
+    for name, value in SYS_SETTINGS.items():
+        if settings_db.get(name):
+            SYS_SETTINGS[name] = settings_db[name]['value']
+
     VARS.update({
         'data_dir' : BASE_DIR.joinpath('data'),
         'snmp_get' : Path(SYS_SETTINGS['snmp_bin']).joinpath('snmpget'),
@@ -58,46 +59,24 @@ def set_vars():
         'nfdump' : Path(SYS_SETTINGS['nfdump_bin']).joinpath('nfdump'),
     })
     Path(VARS['data_dir']).mkdir(parents=True, exist_ok=True)
-    '''
-    if not Path(SYS_SETTINGS['log_file']).exists():
-        try:
-            Path(SYS_SETTINGS['log_file']).touch()
-        except Exception as e:
-            result = JsonResponse({"error": f"Error: (DB): {e}"})
-            result.status_code = 500
-            return result
-    if Path(SYS_SETTINGS['log_file']).exists():
+    LOGGING['loggers']['django']['level'] = SYS_SETTINGS['logging_level']
+    django.conf.settings.DEBUG = True if SYS_SETTINGS['logging_level'] == 'DEBUG' else True
+    if SYS_SETTINGS['log_type'] == 'file':
         LOGGING['handlers'].update({
             'file': {
                 'level': SYS_SETTINGS['logging_level'],
                 'class': 'logging.FileHandler',
-                'filename':  SYS_SETTINGS['log_file'],
+                'filename':  Path(SYS_SETTINGS['log_file']),
                 'formatter' : 'simple'
             },
         })
-        #LOGGING['handlers']['file']['filename'] = SYS_SETTINGS['log_file']
-        #LOGGING['handlers']['file']['level'] = SYS_SETTINGS['logging_level']
-        LOGGING['loggers']['django']['handlers'] = 'file'
-    '''
-    LOGGING['handlers']['file']['filename'] = SYS_SETTINGS['log_file']
-    LOGGING['handlers']['file']['level'] = SYS_SETTINGS['logging_level']
-    LOGGING['loggers']['django']['level'] = SYS_SETTINGS['logging_level']
-    django.conf.settings.DEBUG = True if SYS_SETTINGS['logging_level'] == 'DEBUG' else True
-
-
-def update_sys_settings():
-    global SYS_SETTINGS
-    settings_db = { item['name']:item for item in Settings.objects.values() }
-    for name, value in SYS_SETTINGS.items():
-        if settings_db.get(name):
-            SYS_SETTINGS[name] = settings_db[name]['value']
-
-
-def update_globals():
-    update_sys_settings()
-    set_vars()
+        try:
+            logging.config.dictConfig(LOGGING)
+        except ValueError as e:
+            LOGGING['handlers'].pop('file')
+            LOGGING['loggers']['django']['handlers'] = [ 'console' ]
+            raise
     logging.config.dictConfig(LOGGING)
-    logger = logging.getLogger("django")
 
 
 # Update global variables
