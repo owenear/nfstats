@@ -6,7 +6,7 @@ It uses nfdump utilities to analyse NetFlow data and google-charts for display g
 <p><img src="docs/images/interface.png" width="400" /><img src="docs/images/ip.png" width="400"/></p>
 
 ## Change log
-Current version 1.05.0
+Current version 1.05.1
 
 ### v1.05
 * Added interface filters to the 'IP address' page
