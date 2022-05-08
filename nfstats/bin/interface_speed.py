@@ -27,6 +27,7 @@ def clean_dir(dir_name, oldtime_treshold):
 def main():
     cur_time = int(time.time())  
     oldtime_treshold = timezone.now() - timedelta(days=int(SYS_SETTINGS['history_days']))
+    clean_dir(VARS['data_dir'], oldtime_treshold.timestamp())
     Speed.objects.filter(date__lte = oldtime_treshold).delete()
     hosts = Host.objects.all()
     for host in hosts:

@@ -42,7 +42,7 @@
 				</ul>
 				{% endblock %}
 				<div class="bottom">
-					<div><small>NFStats v1.05.1</small></div>
+					<div><small>NFStats v1.05.2</small></div>
 					<div><small>by <a href="https://github.com/owenear" target="_blank">@Evgeniy Kolosov</a></small></div>
 				</div>
 			</div>
@@ -208,12 +208,13 @@
 				$toast.prop("id", "toast_" + num);
 				$toast.children('.toast-header').children('.toast-header-text').html(header);
 				$toast.children('.toast-body').html(text);
-				console.log(top, $toast.height());
 				top = top - $toast.height() - 10;
 				$toast.css("top", top + "px");
 			} else {
 				$toast.children('.toast-header').children('.toast-header-text').html(header);
 				$toast.children('.toast-body').html(text);
+				top = document.documentElement.clientHeight - $toast.height() - 10;
+				$toast.css("top", top + "px");
 			}
 			if (error) { 
 				$toast.children('.toast-header').removeClass("bg-success"); 
@@ -296,6 +297,14 @@
 			date_iso = date_part_arr[2] + "-" + date_part_arr[1] + "-" + date_part_arr[0] + "T" + date_time_arr[1];
 			return date_iso;
 		} 
+
+		$('#host-select').change(function(){
+			document.location.href = "?host=" + $('#host-select').val() + "&direction=" + $('#direction-select').val();
+		})
+
+		$('#host-select-mobile').change(function(){
+			document.location.href = "?host=" + $('#host-select-mobile').val() + "&direction=" + $('#direction-select-mobile').val();
+		})
 
     </script>
 </html>

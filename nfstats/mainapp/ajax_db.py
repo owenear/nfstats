@@ -164,7 +164,7 @@ def add_host(request):
     snmp_com = request.POST['snmp_com']
     flow_path = request.POST['flow_path']
     try:
-        obj = Host.objects.get(Q(name = name))
+        obj = Host.objects.get(Q(name = name)|Q(host = host))
     except Host.DoesNotExist:
         obj = Host(name = name, host = host, description = description, snmp_com = snmp_com, flow_path = flow_path)
         obj.save()
@@ -192,18 +192,9 @@ def update_host(request):
     flow_path = request.POST['flow_path']
     host_id = request.POST['host_id']
     try:
-        obj = Host.objects.get(id = host_id)
+        obj = Host.objects.get(host = host)
     except Host.DoesNotExist:
-        logger.error(f"(DB): Host does not exist ({host} name: {name})")
-        result = JsonResponse({"error": f"Error: (DB): Host does not exist ({host} name: {name})"})
-        result.status_code = 500
-        return result
-    except Exception as e:
-        logger.critical(f"(DB): {e}")
-        result = JsonResponse({"error": f"Error: (DB): {e}"})
-        result.status_code = 500
-        return result
-    else:
+        obj = Host.objects.get(id = host_id)
         setattr(obj, 'host', host)
         setattr(obj, 'name', name)
         setattr(obj, 'description', description)
@@ -213,7 +204,22 @@ def update_host(request):
         result = JsonResponse({"result": "Host updated"})
         result.status_code = 200
         return result
-
+    except Host.MultipleObjectsReturned:
+        logger.error(f"(DB): Host already exist ({host} name: {name})")
+        result = JsonResponse({"error": f"Error: (DB): Host already exist ({host} name: {name})"})
+        result.status_code = 500
+        return result
+    except Exception as e:
+        logger.critical(f"(DB): {e}")
+        result = JsonResponse({"error": f"Error: (DB): {e}"})
+        result.status_code = 500
+        return result
+    else:
+        logger.error(f"(DB): Host already exist ({host} name: {name})")
+        result = JsonResponse({"error": f"Error: (DB): Host already exist ({host} name: {name})"})
+        result.status_code = 500
+        return result
+        
 
            
 @csrf_exempt  
