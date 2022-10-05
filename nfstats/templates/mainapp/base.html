@@ -117,7 +117,7 @@
 								startDate: startDate, 
 								language: 'en',
 							});	
-							$('#date-select').val(startDate.toLocaleDateString('ru-RU') + " " + startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+							$('#date-select').val(startDate.toLocaleDateString('ru-RU') + " " + startDate.toLocaleTimeString([], {  hour12: false, hour: '2-digit', minute: '2-digit' }));
 						</script>
 					</div>
 					{% block page-controls %}

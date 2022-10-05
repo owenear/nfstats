@@ -194,6 +194,16 @@ def update_host(request):
     try:
         obj = Host.objects.get(host = host)
     except Host.DoesNotExist:
+        logger.error(f"(DB): Host does not exist ({host} name: {name})")
+        result = JsonResponse({"error": f"Error: (DB): Host does not exist ({host} name: {name})"})
+        result.status_code = 500
+        return result
+    except Exception as e:
+        logger.critical(f"(DB): {e}")
+        result = JsonResponse({"error": f"Error: (DB): {e}"})
+        result.status_code = 500
+        return result
+    else:
         obj = Host.objects.get(id = host_id)
         setattr(obj, 'host', host)
         setattr(obj, 'name', name)
@@ -204,22 +214,6 @@ def update_host(request):
         result = JsonResponse({"result": "Host updated"})
         result.status_code = 200
         return result
-    except Host.MultipleObjectsReturned:
-        logger.error(f"(DB): Host already exist ({host} name: {name})")
-        result = JsonResponse({"error": f"Error: (DB): Host already exist ({host} name: {name})"})
-        result.status_code = 500
-        return result
-    except Exception as e:
-        logger.critical(f"(DB): {e}")
-        result = JsonResponse({"error": f"Error: (DB): {e}"})
-        result.status_code = 500
-        return result
-    else:
-        logger.error(f"(DB): Host already exist ({host} name: {name})")
-        result = JsonResponse({"error": f"Error: (DB): Host already exist ({host} name: {name})"})
-        result.status_code = 500
-        return result
-        
 
            
 @csrf_exempt  
