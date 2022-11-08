@@ -70,6 +70,9 @@ def update_globals():
                 'formatter' : 'simple'
             },
         })
+        LOGGING['loggers']['django'].update({
+            'handlers': [SYS_SETTINGS['log_type']],
+        })
         try:
             logging.config.dictConfig(LOGGING)
         except ValueError as e:
