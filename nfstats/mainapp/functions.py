@@ -123,15 +123,25 @@ def generate_ip_flows_data(direction, date, host, snmpid_smpl, snmpid_nsmpl, src
     else:
         interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
     flows_file = get_flows_file(host, date)
+    
     direction_key = 'in' if direction == 'input' else 'out'
     direction_key_nsmpl = 'out' if direction == 'input' else 'in'
     ip_type_key = 'src' if ip_type == 'ip-source-address' else 'dst'
-    filter_keys = create_nfdump_filter(interfaces, direction_key, snmpid_nsmpl, direction_key_nsmpl, src_as, dst_as, src_port, dst_port)
-    command = (f"{VARS['nfdump']} -r {flows_file} -A {ip_type_key}ip,{direction_key}if "
-            f"-O bytes -N -q -o 'fmt:%{ip_type_key[:-2]}a,%{direction_key},%byt' "
-            f"'{filter_keys}'")
-    result = get_shell_data(command, r'\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+)')
-    return result
+
+    # nfdump 1.7.1 cannot filter by AS without a geoDB, so AS is filtered in Python below    
+    use_as = bool(src_as or dst_as)
+    filter_keys = create_nfdump_filter(interfaces, direction_key, snmpid_nsmpl, direction_key_nsmpl, None, None, src_port, dst_port)
+    aggr = f"{ip_type_key}ip,{direction_key}if" + (",srcas,dstas" if use_as else "")
+    fmt  = f"%{ip_type_key[:-2]}a,%{direction_key},%byt" + (",%sas,%das" if use_as else "")
+    command = (f"{VARS['nfdump']} -r {flows_file} -A {aggr} "
+               f"-O bytes -N -q -o 'fmt:{fmt}' '{filter_keys}'")
+    if not use_as:
+        return get_shell_data(command, r'\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+)')
+    
+    rows = get_shell_data(command, r'\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)')
+    sa, da = str(src_as).strip(), str(dst_as).strip()
+    return [(ip, intf, byt) for ip, intf, byt, sas, das in rows
+            if (not sa or sas == sa) and (not da or das == da)]
 
 
 def generate_ip_traffic_data(direction, date, host, snmpid_smpl, snmpid_nsmpl, src_as, dst_as, src_port, dst_port, ip_type, ip_addr):
@@ -140,13 +150,25 @@ def generate_ip_traffic_data(direction, date, host, snmpid_smpl, snmpid_nsmpl, s
     else:
         interfaces = Interface.objects.filter(host__host = host, sampling = True).all()
     flows_file = get_flows_file(host, date)
-    
+
     direction_key = 'in' if direction == 'input' else 'out'
     direction_key_nsmpl = 'out' if direction == 'input' else 'in'
     ip_type_key = 'src' if ip_type == 'ip-source-address' else 'dst'
-    filter_keys = create_nfdump_filter(interfaces, direction_key, snmpid_nsmpl, direction_key_nsmpl, src_as, dst_as, src_port, dst_port)
+
+    # nfdump 1.7.1 cannot filter by AS without a geoDB, so AS is filtered in Python below
+    use_as = bool(src_as or dst_as)
+    filter_keys = create_nfdump_filter(interfaces, direction_key, snmpid_nsmpl, direction_key_nsmpl, None, None, src_port, dst_port)
     filter_keys += f" and {ip_type_key} ip {ip_addr}"
-    
-    command = f"{VARS['nfdump']} -r {flows_file} -N -q -o 'fmt:%ts,%te,%in,%sa,%sp,%out,%da,%dp,%pr,%fl,%pkt,%byt' '{filter_keys}'"
-    result = get_shell_data(command, r'\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+)\s*,\s*(\d+),\s*(\d+),\s*(\d+)')
-    return result
+
+    fmt = '%ts,%te,%in,%sa,%sp,%out,%da,%dp,%pr,%fl,%pkt,%byt' + (',%sas,%das' if use_as else '')
+    command = f"{VARS['nfdump']} -r {flows_file} -N -q -o 'fmt:{fmt}' '{filter_keys}'"
+
+    regexp = (r'\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*\d+\-\d+\-\d+\s+(\d+:\d+:\d+).\d+,\s*(\d+),\s*(\d+.\d+.\d+.\d+),'
+              r'\s*(\d+),\s*(\d+),\s*(\d+.\d+.\d+.\d+),\s*(\d+),\s*(\d+)\s*,\s*(\d+),\s*(\d+),\s*(\d+)')
+    if not use_as:
+        return get_shell_data(command, regexp)
+
+    rows = get_shell_data(command, regexp + r',\s*(\d+),\s*(\d+)')
+    sa, da = str(src_as).strip(), str(dst_as).strip()
+    return [row[:12] for row in rows
+            if (not sa or row[12] == sa) and (not da or row[13] == da)]
